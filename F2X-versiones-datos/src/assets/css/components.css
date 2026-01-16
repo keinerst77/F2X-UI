@@ -1,0 +1,448 @@
+/* ==========================================
+   ESTILOS ANTERIORES SE MANTIENEN
+   AGREGAR ESTOS NUEVOS ESTILOS
+   ========================================== */
+
+/* ==========================================
+   NUEVA ESTRUCTURA DE INFO EN TABLA
+   ========================================== */
+
+.file-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 5px 0;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    align-items: start;
+    padding: 4px 0;
+    border-bottom: 1px solid #333;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-size: 11px;
+    color: #888;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.info-value {
+    font-size: 12px;
+    color: #ccc;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Estilos específicos por tipo de valor */
+.app-name {
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.app-path {
+    color: #3b9dff;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    word-break: break-all;
+}
+
+.app-version {
+    color: #4caf50;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.app-size {
+    color: #ff9800;
+    font-weight: 600;
+}
+
+.app-date {
+    color: #9c27b0;
+    font-size: 11px;
+}
+
+/* Celda vacía (archivo no encontrado) */
+.empty-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    min-height: 150px;
+}
+
+.missing-text {
+    font-size: 14px;
+    color: #f44336;
+    font-weight: 600;
+}
+
+/* Filas con diferencias */
+.row-highlight {
+    background-color: #2a3a1a !important;
+}
+
+.row-highlight:hover td {
+    background-color: #3a4a2a !important;
+}
+
+/* Filas con archivos faltantes */
+.row-missing {
+    background-color: #3a1a1a !important;
+}
+
+.row-missing:hover td {
+    background-color: #4a2a2a !important;
+}
+
+/* Ajuste de padding en celdas */
+td .cell-content {
+    padding: 10px 5px;
+}
+
+/* ==========================================
+   AJUSTES DE TABLA PARA MÁS INFORMACIÓN
+   ========================================== */
+
+.table-wrapper {
+    max-height: 700px; /* Aumentado para más contenido */
+}
+
+th, td {
+    padding: 12px;
+}
+
+/* ==========================================
+   RESPONSIVE PARA NUEVA ESTRUCTURA
+   ========================================== */
+
+@media (max-width: 1200px) {
+    .info-row {
+        grid-template-columns: 100px 1fr;
+        gap: 8px;
+    }
+    
+    .info-label {
+        font-size: 10px;
+    }
+    
+    .info-value {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 768px) {
+    .info-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+    
+    .info-label {
+        font-size: 10px;
+        margin-bottom: 2px;
+    }
+    
+    .info-value {
+        font-size: 10px;
+        padding-left: 15px;
+    }
+    
+    .file-info-grid {
+        gap: 6px;
+    }
+    
+    .empty-cell {
+        padding: 20px 10px;
+        min-height: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .info-label {
+        font-size: 9px;
+    }
+    
+    .info-value {
+        font-size: 9px;
+    }
+    
+    .app-path {
+        font-size: 9px;
+    }
+}
+
+/* ==========================================
+   MANTENER TODOS LOS ESTILOS ANTERIORES
+   ========================================== */
+
+/* Sección de inputs de archivos */
+.file-inputs {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 30px;
+    gap: 40px;
+    padding: 0 20px;
+}
+
+.input-group {
+    flex: 0 1 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.input-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #3b9dff;
+    margin-bottom: 8px;
+    display: block;
+    text-align: center;
+}
+
+.path-input-wrapper {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.path-input {
+    flex: 1;
+    background-color: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 6px;
+    padding: 12px 15px;
+    color: #ccc;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    transition: border-color 0.3s ease;
+}
+
+.path-input:focus {
+    outline: none;
+    border-color: #3b9dff;
+}
+
+.path-input::placeholder {
+    color: #666;
+}
+
+.btn-icon {
+    background-color: #2a2a2a;
+    border: 2px solid #444;
+    border-radius: 6px;
+    padding: 8px 15px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background-color: #3b9dff;
+    border-color: #3b9dff;
+    transform: scale(1.05);
+}
+
+.file-count {
+    font-size: 12px;
+    color: #3b9dff;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.info-message {
+    background-color: #2a5298;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+}
+
+.success-message {
+    background-color: #2d7a2d;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+}
+
+.table-header-info {
+    background-color: #2a2a2a;
+    padding: 15px 20px;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 0;
+}
+
+.table-header-info h3 {
+    color: #3b9dff;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.table-header-info p {
+    color: #aaa;
+    font-size: 14px;
+    margin: 0;
+}
+
+.btn {
+    padding: 12px 40px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-buscar {
+    background-color: #3b9dff;
+    color: white;
+    box-shadow: 0 4px 6px rgba(59, 157, 255, 0.3);
+}
+
+.btn-buscar:hover:not(:disabled) {
+    background-color: #2a8ae6;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(59, 157, 255, 0.4);
+}
+
+.btn-buscar:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-generar {
+    background-color: #3b9dff;
+    color: white;
+    padding: 14px 60px;
+    font-size: 18px;
+    box-shadow: 0 4px 6px rgba(59, 157, 255, 0.3);
+    max-width: 350px;
+}
+
+.btn-generar:hover:not(:disabled) {
+    background-color: #2a8ae6;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(59, 157, 255, 0.4);
+}
+
+.btn-generar:disabled {
+    background-color: #555;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+.generate-section {
+    text-align: center;
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: center;
+}
+
+.table-container {
+    background-color: #2a2a2a;
+    border-radius: 0 0 8px 8px;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1a1a1a;
+    table-layout: fixed;
+}
+
+th {
+    background-color: #000;
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    padding: 16px 12px;
+    border: 1px solid #444;
+}
+
+td {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    vertical-align: top;
+    width: 50%;
+}
+
+tr:hover td {
+    background-color: #333;
+    transition: background-color 0.2s ease;
+}
+
+tbody tr:nth-child(even) td {
+    background-color: #252525;
+}
+
+tbody tr:nth-child(even):hover td {
+    background-color: #333;
+}
+
+.no-data {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-style: italic;
+    font-size: 16px;
+}
+
+.table-wrapper::-webkit-scrollbar {
+    width: 12px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #3b9dff;
+    border-radius: 6px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #2a8ae6;
+}
