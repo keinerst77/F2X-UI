@@ -1,193 +1,287 @@
 /* ==========================================
-   ESTILOS ANTERIORES SE MANTIENEN
-   AGREGAR ESTOS NUEVOS ESTILOS
+   TABLA FORMATO MATRIZ
    ========================================== */
 
-/* ==========================================
-   NUEVA ESTRUCTURA DE INFO EN TABLA
-   ========================================== */
-
-.file-info-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 5px 0;
+.matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #1a1a1a;
+    table-layout: auto;
 }
 
-.info-row {
-    display: grid;
-    grid-template-columns: 110px 1fr;
-    gap: 10px;
-    align-items: start;
-    padding: 4px 0;
-    border-bottom: 1px solid #333;
+/* Anchos de columnas específicos */
+.col-nombre {
+    width: 20%;
+    min-width: 180px;
 }
 
-.info-row:last-child {
-    border-bottom: none;
+.col-version-actual,
+.col-version-futura {
+    width: 10%;
+    min-width: 80px;
 }
 
-.info-label {
-    font-size: 11px;
-    color: #888;
-    font-weight: 600;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
+.col-peso-actual,
+.col-peso-futuro {
+    width: 8%;
+    min-width: 70px;
 }
 
-.info-value {
-    font-size: 12px;
-    color: #ccc;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+.col-ruta {
+    width: 34%;
+    min-width: 250px;
 }
 
-/* Estilos específicos por tipo de valor */
-.app-name {
+/* Headers */
+.matrix-table thead th {
+    background-color: #000;
     color: #fff;
     font-weight: 600;
     font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 14px 10px;
+    border: 1px solid #444;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.app-path {
+/* Celdas */
+.matrix-table tbody td {
+    padding: 10px;
+    border: 1px solid #444;
+    background-color: #2a2a2a;
+    vertical-align: middle;
+}
+
+/* Celda de Nombre */
+.cell-nombre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.file-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.file-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    word-break: break-word;
+}
+
+/* Versiones */
+.version-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: 'Courier New', monospace;
+}
+
+.version-actual {
+    background-color: #2a4a7c;
+    color: #88c0ff;
+}
+
+.version-futura {
+    background-color: #2a5a3c;
+    color: #88ff88;
+}
+
+.version-highlight {
+    background-color: #4caf50 !important;
+    color: #fff !important;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 15px rgba(76, 175, 80, 0.8);
+    }
+}
+
+/* Pesos */
+.peso-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: #ff9800;
+    font-family: 'Courier New', monospace;
+}
+
+.peso-highlight {
+    color: #ff5722;
+    font-weight: 700;
+}
+
+/* Rutas */
+.ruta-container {
+    display: flex;
+    align-items: center;
+}
+
+.ruta-path {
     color: #3b9dff;
     font-family: 'Courier New', monospace;
     font-size: 11px;
     word-break: break-all;
+    line-height: 1.4;
 }
 
-.app-version {
-    color: #4caf50;
-    font-weight: 600;
-    font-size: 12px;
+/* Alineación de texto */
+.text-center {
+    text-align: center;
 }
 
-.app-size {
-    color: #ff9800;
-    font-weight: 600;
+/* Estados de filas */
+.version-changed {
+    background-color: #2a3a2a !important;
 }
 
-.app-date {
-    color: #9c27b0;
-    font-size: 11px;
+.version-changed td {
+    background-color: #2a3a2a !important;
 }
 
-/* Celda vacía (archivo no encontrado) */
-.empty-cell {
+.size-changed {
+    background-color: #3a2a1a !important;
+}
+
+.size-changed td {
+    background-color: #3a2a1a !important;
+}
+
+.no-changes td {
+    background-color: #2a2a2a;
+}
+
+/* Hover en filas */
+.matrix-table tbody tr:hover td {
+    background-color: #333 !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Zebra striping */
+.matrix-table tbody tr:nth-child(even) td {
+    opacity: 0.95;
+}
+
+/* ESTADÍSTICAS */
+
+.statistics {
     display: flex;
+    justify-content: space-around;
     align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-    min-height: 150px;
+    padding: 20px;
+    background-color: #1a1a1a;
+    border-top: 2px solid #444;
+    margin-top: 0;
 }
 
-.missing-text {
-    font-size: 14px;
-    color: #f44336;
-    font-weight: 600;
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
 
-/* Filas con diferencias */
-.row-highlight {
-    background-color: #2a3a1a !important;
+.stat-label {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.row-highlight:hover td {
-    background-color: #3a4a2a !important;
+.stat-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: #3b9dff;
 }
 
-/* Filas con archivos faltantes */
-.row-missing {
-    background-color: #3a1a1a !important;
+.stat-changed {
+    color: #4caf50;
 }
 
-.row-missing:hover td {
-    background-color: #4a2a2a !important;
+.stat-unchanged {
+    color: #888;
 }
 
-/* Ajuste de padding en celdas */
-td .cell-content {
-    padding: 10px 5px;
-}
-
-/* ==========================================
-   AJUSTES DE TABLA PARA MÁS INFORMACIÓN
-   ========================================== */
+/* TABLA WRAPPER */
 
 .table-wrapper {
-    max-height: 700px; /* Aumentado para más contenido */
+    max-height: 700px;
+    overflow-y: auto;
+    overflow-x: auto;
+    margin-top: 20px;
 }
 
-th, td {
-    padding: 12px;
+.table-container {
+    background-color: #2a2a2a;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* ==========================================
-   RESPONSIVE PARA NUEVA ESTRUCTURA
-   ========================================== */
+/* RESPONSIVE */
+
+@media (max-width: 1400px) {
+    .col-nombre {
+        width: 18%;
+        min-width: 150px;
+    }
+    
+    .col-ruta {
+        width: 30%;
+    }
+}
 
 @media (max-width: 1200px) {
-    .info-row {
-        grid-template-columns: 100px 1fr;
-        gap: 8px;
-    }
-    
-    .info-label {
-        font-size: 10px;
-    }
-    
-    .info-value {
+    .matrix-table thead th {
         font-size: 11px;
+        padding: 10px 8px;
+    }
+    
+    .file-name {
+        font-size: 12px;
+    }
+    
+    .version-badge {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+    
+    .peso-value {
+        font-size: 11px;
+    }
+    
+    .ruta-item {
+        font-size: 10px;
     }
 }
 
 @media (max-width: 768px) {
-    .info-row {
-        grid-template-columns: 1fr;
-        gap: 4px;
+    .statistics {
+        flex-wrap: wrap;
+        gap: 15px;
     }
     
-    .info-label {
-        font-size: 10px;
-        margin-bottom: 2px;
+    .stat-item {
+        flex: 1 1 40%;
     }
     
-    .info-value {
-        font-size: 10px;
-        padding-left: 15px;
-    }
-    
-    .file-info-grid {
-        gap: 6px;
-    }
-    
-    .empty-cell {
-        padding: 20px 10px;
-        min-height: 100px;
+    .table-wrapper {
+        max-height: 500px;
     }
 }
 
-@media (max-width: 480px) {
-    .info-label {
-        font-size: 9px;
-    }
-    
-    .info-value {
-        font-size: 9px;
-    }
-    
-    .app-path {
-        font-size: 9px;
-    }
-}
 
-/* ==========================================
-   MANTENER TODOS LOS ESTILOS ANTERIORES
-   ========================================== */
-
-/* Sección de inputs de archivos */
 .file-inputs {
     display: flex;
     justify-content: center;
@@ -294,6 +388,17 @@ th, td {
     animation: slideDown 0.3s ease;
 }
 
+.error-message {
+    background-color: #ff4444;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    margin: 20px 0;
+    text-align: center;
+    font-weight: 500;
+    animation: slideDown 0.3s ease;
+}
+
 .table-header-info {
     background-color: #2a2a2a;
     padding: 15px 20px;
@@ -373,54 +478,6 @@ th, td {
     justify-content: center;
 }
 
-.table-container {
-    background-color: #2a2a2a;
-    border-radius: 0 0 8px 8px;
-    padding: 0;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: #1a1a1a;
-    table-layout: fixed;
-}
-
-th {
-    background-color: #000;
-    color: #fff;
-    font-weight: 600;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    padding: 16px 12px;
-    border: 1px solid #444;
-}
-
-td {
-    background-color: #2a2a2a;
-    border: 1px solid #444;
-    vertical-align: top;
-    width: 50%;
-}
-
-tr:hover td {
-    background-color: #333;
-    transition: background-color 0.2s ease;
-}
-
-tbody tr:nth-child(even) td {
-    background-color: #252525;
-}
-
-tbody tr:nth-child(even):hover td {
-    background-color: #333;
-}
-
 .no-data {
     text-align: center;
     padding: 40px;
@@ -429,8 +486,10 @@ tbody tr:nth-child(even):hover td {
     font-size: 16px;
 }
 
+/* Scrollbar personalizado */
 .table-wrapper::-webkit-scrollbar {
     width: 12px;
+    height: 12px;
 }
 
 .table-wrapper::-webkit-scrollbar-track {
@@ -445,4 +504,20 @@ tbody tr:nth-child(even):hover td {
 
 .table-wrapper::-webkit-scrollbar-thumb:hover {
     background: #2a8ae6;
+}
+
+.table-wrapper::-webkit-scrollbar-corner {
+    background: #1a1a1a;
+}
+
+/* Animación slideDown */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

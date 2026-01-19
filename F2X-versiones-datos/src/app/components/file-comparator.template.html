@@ -5,14 +5,14 @@
     </div>
 
     <div class="file-inputs">
-        <!-- Directorio 1: Instalación Actual -->
+        <!-- Directorio 1: Versión Actual -->
         <div class="input-group">
-            <label class="input-label">Instalación Actual</label>
+            <label class="input-label">Versión Actual</label>
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
                        ng-model="directory1"
-                       placeholder="C:\Program Files\MiApp\actual"
+                       placeholder="Ejemplo: C:\Users\"
                        title="{{directory1}}">
                 <button class="btn-icon" ng-click="openFolderDialog(1)" title="Seleccionar carpeta">
                     📁
@@ -35,14 +35,14 @@
                    style="display: none;" />
         </div>
 
-        <!-- Directorio 2: Nueva Versión -->
+        <!-- Directorio 2: Versión Futura -->
         <div class="input-group">
-            <label class="input-label">Nueva Versión</label>
+            <label class="input-label">Versión Futura</label>
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
                        ng-model="directory2"
-                       placeholder="C:\Program Files\MiApp\nueva"
+                       placeholder="Ejemplo: C:\PROGRAM FILES\F2X\APIS"
                        title="{{directory2}}">
                 <button class="btn-icon" ng-click="openFolderDialog(2)" title="Seleccionar carpeta">
                     📁
@@ -87,100 +87,98 @@
         ✓ {{successMessage}}
     </div>
 
-    <!-- Tabla de Resultados MEJORADA -->
+    <!-- Tabla de Resultados - FORMATO MATRIZ -->
     <div class="table-wrapper" ng-if="showTable">
         <div class="table-header-info">
-            <h3>Comparación de Versiones</h3>
-            <p>Total de aplicaciones: {{tableData.length}}</p>
+            <h3>Matriz Resultante</h3>
+            <p>Total de aplicaciones coincidentes: {{tableData.length}}</p>
         </div>
         
         <div class="table-container">
-            <table>
+            <table class="matrix-table">
                 <thead>
                     <tr>
-                        <th>INSTALACIÓN ACTUAL</th>
-                        <th>NUEVA VERSIÓN</th>
+                        <th class="col-nombre">Nombre</th>
+                        <th class="col-version-actual">Versión Actual</th>
+                        <th class="col-peso-actual">Peso</th>
+                        <th class="col-version-futura">Versión Futura</th>
+                        <th class="col-peso-futuro">Peso</th>
+                        <th class="col-ruta">Ruta</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr ng-repeat="row in tableData track by $index" 
-                        ng-class="{'row-highlight': row.isDifferent, 'row-missing': row.isMissing}">
-                        <!-- COLUMNA 1: Instalación Actual -->
-                        <td>
-                            <div class="cell-content" ng-if="row.file1">
-                                <div class="file-info-grid">
-                                    <!-- Nombre del Archivo -->
-                                    <div class="info-row">
-                                        <span class="info-label">📄 Archivo:</span>
-                                        <span class="info-value app-name">{{row.file1.name}}</span>
-                                    </div>
-                                    
-                                    <!-- Ruta Completa -->
-                                    <div class="info-row">
-                                        <span class="info-label">📁 Ruta:</span>
-                                        <span class="info-value app-path" title="{{row.file1.fullPath}}">
-                                            {{row.file1.fullPath}}
-                                        </span>
-                                    </div>
-                                    
-                                    <!-- Versión -->
-                                    <div class="info-row">
-                                        <span class="info-label">🔢 Versión:</span>
-                                        <span class="info-value app-version">{{row.file1.version}}</span>
-                                    </div>
-                                    
-                                    <!-- Peso del Archivo -->
-                                    <div class="info-row">
-                                        <span class="info-label">⚖️ Peso:</span>
-                                        <span class="info-value app-size">{{row.file1.size}}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cell-content empty-cell" ng-if="!row.file1">
-                                <span class="missing-text">❌ No encontrado</span>
+                        ng-class="{
+                            'version-changed': row.versionChanged,
+                            'size-changed': row.sizeChanged,
+                            'no-changes': !row.versionChanged && !row.sizeChanged
+                        }">
+                        <!-- Nombre -->
+                        <td class="col-nombre">
+                            <div class="cell-nombre">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">{{row.name}}</span>
                             </div>
                         </td>
-
-                        <!-- COLUMNA 2: Nueva Versión -->
-                        <td>
-                            <div class="cell-content" ng-if="row.file2">
-                                <div class="file-info-grid">
-                                    <!-- Nombre del Archivo -->
-                                    <div class="info-row">
-                                        <span class="info-label">📄 Archivo:</span>
-                                        <span class="info-value app-name">{{row.file2.name}}</span>
-                                    </div>
-                                    
-                                    <!-- Ruta Completa -->
-                                    <div class="info-row">
-                                        <span class="info-label">📁 Ruta:</span>
-                                        <span class="info-value app-path" title="{{row.file2.fullPath}}">
-                                            {{row.file2.fullPath}}
-                                        </span>
-                                    </div>
-                                    
-                                    <!-- Versión -->
-                                    <div class="info-row">
-                                        <span class="info-label">🔢 Versión:</span>
-                                        <span class="info-value app-version">{{row.file2.version}}</span>
-                                    </div>
-                                    
-                                    <!-- Peso del Archivo -->
-                                    <div class="info-row">
-                                        <span class="info-label">⚖️ Peso:</span>
-                                        <span class="info-value app-size">{{row.file2.size}}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="cell-content empty-cell" ng-if="!row.file2">
-                                <span class="missing-text">❌ No encontrado</span>
+                        
+                        <!-- Versión Actual -->
+                        <td class="col-version-actual text-center">
+                            <span class="version-badge version-actual">{{row.versionActual}}</span>
+                        </td>
+                        
+                        <!-- Peso Actual -->
+                        <td class="col-peso-actual text-center">
+                            <span class="peso-value">{{row.pesoActual}}</span>
+                        </td>
+                        
+                        <!-- Versión Futura -->
+                        <td class="col-version-futura text-center">
+                            <span class="version-badge version-futura" 
+                                  ng-class="{'version-highlight': row.versionChanged}">
+                                {{row.versionFutura}}
+                            </span>
+                        </td>
+                        
+                        <!-- Peso Futuro -->
+                        <td class="col-peso-futuro text-center">
+                            <span class="peso-value" 
+                                  ng-class="{'peso-highlight': row.sizeChanged}">
+                                {{row.pesoFuturo}}
+                            </span>
+                        </td>
+                        
+                        <!-- Ruta -->
+                        <td class="col-ruta">
+                            <div class="ruta-container">
+                                <span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span>
                             </div>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            
             <div class="no-data" ng-if="tableData.length === 0">
-                No hay datos para mostrar
+                No hay archivos coincidentes para comparar
+            </div>
+            
+            <!-- Estadísticas -->
+            <div class="statistics" ng-if="tableData.length > 0">
+                <div class="stat-item">
+                    <span class="stat-label">Total Coincidentes:</span>
+                    <span class="stat-value">{{statistics.total}}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Versiones Actualizadas:</span>
+                    <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Tamaños Diferentes:</span>
+                    <span class="stat-value stat-changed">{{statistics.sizeChanged}}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Sin Cambios:</span>
+                    <span class="stat-value stat-unchanged">{{statistics.noChanges}}</span>
+                </div>
             </div>
         </div>
     </div>

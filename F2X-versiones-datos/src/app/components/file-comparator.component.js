@@ -1,22 +1,29 @@
 angular.module('fileComparatorApp')
-    .controller('FileComparatorController', ['$scope', 
-        function($scope) {
+    .controller('FileComparatorController', ['$scope', '$http', '$timeout',
+        function($scope, $http, $timeout) {
             
             // Inicialización de variables
-            $scope.directory1 = '';
-            $scope.directory2 = '';
+            $scope.directory1 = 'C:\\';
+            $scope.directory2 = 'C:\\';
             $scope.file1Data = null;
             $scope.file2Data = null;
             $scope.file1Count = 0;
             $scope.file2Count = 0;
             $scope.tableData = [];
+            $scope.statistics = {
+                total: 0,
+                versionChanged: 0,
+                sizeChanged: 0,
+                noChanges: 0
+            };
             $scope.showTable = false;
             $scope.errorMessage = '';
             $scope.successMessage = '';
             $scope.isScanning1 = false;
             $scope.isScanning2 = false;
-            $scope.baseDirectory1 = '';
-            $scope.baseDirectory2 = '';
+
+            // URL del backend
+            const API_URL = 'https://localhost:7000/api/versionscanner/scan';
 
             /**
              * Abre el diálogo de selección de carpetas
@@ -31,41 +38,30 @@ angular.module('fileComparatorApp')
                     if (files && files.length > 0) {
                         const firstFile = files[0];
                         
-                        // Obtener la ruta completa del archivo
                         let fullPath = '';
-                        
-                        // Intentar obtener la ruta completa (disponible en algunos navegadores)
                         if (firstFile.path) {
-                            // Electron o algunos navegadores modernos
                             fullPath = firstFile.path;
                         } else if (firstFile.webkitRelativePath) {
-                            // Navegadores que soportan webkitRelativePath
                             fullPath = firstFile.webkitRelativePath;
                         } else {
-                            // Fallback: usar solo el nombre
                             fullPath = firstFile.name;
                         }
                         
-                        // Extraer el directorio base
                         let baseDirectory = '';
                         let displayPath = '';
                         
                         if (fullPath.includes('/')) {
-                            // Si tiene barras, extraer el primer nivel
                             const parts = fullPath.split('/');
                             baseDirectory = parts[0];
                             
-                            // Para el display, simular una ruta Windows
-                            // Pedir al usuario que especifique la ruta base
                             const userBasePath = prompt(
                                 'Por favor ingrese la ruta completa del directorio seleccionado:\n' +
-                                'Ejemplo: C:\\Repositories\\' + baseDirectory,
-                                'C:\\Repositories\\' + baseDirectory
+                                'Ejemplo: C:\\' + baseDirectory,
+                                'C:\\' + baseDirectory
                             );
                             
                             if (userBasePath) {
                                 displayPath = userBasePath;
-                                // Normalizar las barras a formato Windows
                                 displayPath = displayPath.replace(/\//g, '\\');
                             } else {
                                 displayPath = baseDirectory;
@@ -77,120 +73,100 @@ angular.module('fileComparatorApp')
                         
                         if (folderNumber === 1) {
                             $scope.directory1 = displayPath;
-                            $scope.baseDirectory1 = displayPath;
                         } else {
                             $scope.directory2 = displayPath;
-                            $scope.baseDirectory2 = displayPath;
                         }
                         
-                        $scope.$apply();
-                        $scope.scanDirectory(folderNumber);
+                        // Usar $timeout en lugar de $apply
+                        $timeout(function() {
+                            $scope.scanDirectory(folderNumber);
+                        });
                     }
                 };
             };
 
             /**
-             * Escanea el directorio seleccionado buscando archivos .exe
+             * Escanea el directorio usando el backend de C#
              */
             $scope.scanDirectory = function(folderNumber) {
-                const folderInput = document.getElementById('folder' + folderNumber);
+                const directory = (folderNumber === 1) ? $scope.directory1 : $scope.directory2;
                 
-                if (folderInput.files && folderInput.files.length > 0) {
-                    processFiles(folderInput.files, folderNumber);
-                } else {
-                    $scope.errorMessage = 'Por favor, usa el botón 📁 para seleccionar la carpeta';
+                if (!directory || directory.trim() === '') {
+                    $scope.errorMessage = 'Por favor ingresa una ruta de directorio válida';
+                    return;
                 }
-            };
 
-            /**
-             * Procesa los archivos del directorio seleccionado
-             */
-            function processFiles(files, folderNumber) {
+                // Activar indicador de carga
                 if (folderNumber === 1) {
                     $scope.isScanning1 = true;
                 } else {
                     $scope.isScanning2 = true;
                 }
-                
-                const exeFiles = [];
-                
-                // Filtrar solo archivos .exe
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const fileName = file.name.toLowerCase();
-                    
-                    if (fileName.endsWith('.exe')) {
-                        const relativePath = file.webkitRelativePath || file.name;
-                        
-                        // Construir ruta completa
-                        const baseDir = folderNumber === 1 ? $scope.baseDirectory1 : $scope.baseDirectory2;
-                        
-                        // Construir la ruta completa en formato Windows
-                        let fullPath = '';
-                        if (relativePath.includes('/')) {
-                            // Remover el primer segmento (nombre de la carpeta raíz) ya que está en baseDir
-                            const pathParts = relativePath.split('/');
-                            pathParts.shift(); // Remover primer elemento
-                            const subPath = pathParts.join('\\');
-                            fullPath = baseDir + '\\' + subPath;
-                        } else {
-                            fullPath = baseDir + '\\' + relativePath;
-                        }
-                        
-                        // Limpiar barras dobles
-                        fullPath = fullPath.replace(/\\\\/g, '\\');
-                        
-                        exeFiles.push({
-                            name: file.name,
-                            relativePath: relativePath,
-                            fullPath: fullPath,
-                            size: formatFileSize(file.size),
-                            sizeBytes: file.size,
-                            lastModified: new Date(file.lastModified).toLocaleString('es-ES'),
-                            lastModifiedDate: new Date(file.lastModified).toLocaleDateString('es-ES'),
-                            version: extractVersion(file)
-                        });
-                    }
-                }
-                
-                // Ordenar por nombre
-                exeFiles.sort((a, b) => a.name.localeCompare(b.name));
-                
-                if (folderNumber === 1) {
-                    $scope.file1Data = exeFiles;
-                    $scope.file1Count = exeFiles.length;
-                    $scope.isScanning1 = false;
-                    $scope.successMessage = `Directorio 1: ${exeFiles.length} archivo(s) encontrado(s)`;
-                } else {
-                    $scope.file2Data = exeFiles;
-                    $scope.file2Count = exeFiles.length;
-                    $scope.isScanning2 = false;
-                    $scope.successMessage = `Directorio 2: ${exeFiles.length} archivo(s) encontrado(s)`;
-                }
-                
-                $scope.errorMessage = '';
-                $scope.$apply();
-                
-                setTimeout(() => {
-                    $scope.successMessage = '';
-                    $scope.$apply();
-                }, 3000);
-            }
 
-            /**
-             * Extrae la versión del archivo (simulada con fecha)
-             */
-            function extractVersion(file) {
-                // Intenta extraer versión del nombre del archivo
-                const versionMatch = file.name.match(/\d+\.\d+(\.\d+)?(\.\d+)?/);
-                
-                if (versionMatch) {
-                    return versionMatch[0];
-                }
-                
-                // Si no hay versión en el nombre, usa la fecha
-                return new Date(file.lastModified).toLocaleDateString('es-ES');
-            }
+                $scope.errorMessage = '';
+                $scope.successMessage = '';
+
+                // Llamar al backend
+                $http.post(API_URL, {
+                    directory: directory,
+                    includeSubdirectories: true,
+                    searchPattern: '*.exe'
+                })
+                .then(function(response) {
+                    console.log('Respuesta del backend:', response.data);
+                    
+                    if (response.data.success) {
+                        const files = response.data.files || [];
+                        
+                        if (folderNumber === 1) {
+                            $scope.file1Data = files;
+                            $scope.file1Count = files.length;
+                            $scope.isScanning1 = false;
+                            $scope.successMessage = `Versión Actual: ${files.length} archivo(s) encontrado(s)`;
+                        } else {
+                            $scope.file2Data = files;
+                            $scope.file2Count = files.length;
+                            $scope.isScanning2 = false;
+                            $scope.successMessage = `Versión Futura: ${files.length} archivo(s) encontrado(s)`;
+                        }
+
+                        // Limpiar mensaje después de 3 segundos
+                        $timeout(function() {
+                            $scope.successMessage = '';
+                        }, 3000);
+                    } else {
+                        $scope.errorMessage = response.data.error || 'Error al escanear el directorio';
+                        if (folderNumber === 1) {
+                            $scope.isScanning1 = false;
+                        } else {
+                            $scope.isScanning2 = false;
+                        }
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Error al llamar al backend:', error);
+                    
+                    let errorMsg = 'Error al conectar con el backend. ';
+                    
+                    if (error.status === -1) {
+                        errorMsg += 'Verifica que el backend esté ejecutándose en https://localhost:7000';
+                    } else if (error.status === 404) {
+                        errorMsg += 'Endpoint no encontrado. Verifica la URL del API.';
+                    } else if (error.data && error.data.error) {
+                        errorMsg += error.data.error;
+                    } else {
+                        errorMsg += error.statusText || 'Error desconocido';
+                    }
+                    
+                    $scope.errorMessage = errorMsg;
+                    
+                    if (folderNumber === 1) {
+                        $scope.isScanning1 = false;
+                    } else {
+                        $scope.isScanning2 = false;
+                    }
+                });
+            };
 
             /**
              * Formatea el tamaño del archivo
@@ -204,7 +180,7 @@ angular.module('fileComparatorApp')
             }
 
             /**
-             * Genera la tabla comparativa con información detallada
+             * Genera la tabla comparativa - SOLO ARCHIVOS COINCIDENTES
              */
             $scope.generateTable = function() {
                 if (!$scope.file1Data || !$scope.file2Data) {
@@ -213,56 +189,64 @@ angular.module('fileComparatorApp')
                 }
 
                 $scope.tableData = [];
+                $scope.statistics = {
+                    total: 0,
+                    versionChanged: 0,
+                    sizeChanged: 0,
+                    noChanges: 0
+                };
                 
-                // Crear un mapa de archivos por nombre para mejor comparación
+                // Crear mapa de archivos de la versión futura
                 const file2Map = new Map();
                 $scope.file2Data.forEach(file => {
-                    file2Map.set(file.name.toLowerCase(), file);
+                    file2Map.set(file.nameNormalized, file);
                 });
                 
-                const file1Map = new Map();
-                $scope.file1Data.forEach(file => {
-                    file1Map.set(file.name.toLowerCase(), file);
-                });
-                
-                // Obtener todos los nombres únicos (normalizado a minúsculas)
-                const allFileNames = new Set([
-                    ...$scope.file1Data.map(f => f.name.toLowerCase()),
-                    ...$scope.file2Data.map(f => f.name.toLowerCase())
-                ]);
-                
-                // Crear filas para cada archivo
-                allFileNames.forEach(fileName => {
-                    const file1 = file1Map.get(fileName);
-                    const file2 = file2Map.get(fileName);
+                // Comparar solo archivos que existen en ambas versiones
+                $scope.file1Data.forEach(fileActual => {
+                    const fileFuturo = file2Map.get(fileActual.nameNormalized);
                     
-                    const row = {
-                        file1: file1 || null,
-                        file2: file2 || null,
-                        isDifferent: file1 && file2 && (
-                            file1.version !== file2.version || 
-                            file1.sizeBytes !== file2.sizeBytes
-                        ),
-                        isMissing: !file1 || !file2
-                    };
-                    
-                    $scope.tableData.push(row);
+                    // SOLO agregar si existe en ambas versiones
+                    if (fileFuturo) {
+                        const versionChanged = fileActual.version !== fileFuturo.version;
+                        const sizeChanged = fileActual.sizeBytes !== fileFuturo.sizeBytes;
+                        
+                        const row = {
+                            name: fileActual.name,
+                            versionActual: fileActual.version,
+                            pesoActual: fileActual.size,
+                            versionFutura: fileFuturo.version,
+                            pesoFuturo: fileFuturo.size,
+                            ruta: fileActual.fullPath,
+                            versionChanged: versionChanged,
+                            sizeChanged: sizeChanged
+                        };
+                        
+                        $scope.tableData.push(row);
+                        
+                        // Actualizar estadísticas
+                        $scope.statistics.total++;
+                        if (versionChanged) $scope.statistics.versionChanged++;
+                        if (sizeChanged) $scope.statistics.sizeChanged++;
+                        if (!versionChanged && !sizeChanged) $scope.statistics.noChanges++;
+                    }
                 });
                 
                 // Ordenar por nombre
-                $scope.tableData.sort((a, b) => {
-                    const nameA = (a.file1 ? a.file1.name : a.file2.name).toLowerCase();
-                    const nameB = (b.file1 ? b.file1.name : b.file2.name).toLowerCase();
-                    return nameA.localeCompare(nameB);
-                });
+                $scope.tableData.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+
+                if ($scope.tableData.length === 0) {
+                    $scope.errorMessage = 'No se encontraron archivos coincidentes entre ambas versiones';
+                    $scope.showTable = false;
+                    return;
+                }
 
                 $scope.showTable = true;
                 $scope.errorMessage = '';
-                $scope.successMessage = 'Tabla generada exitosamente con ' + $scope.tableData.length + ' archivo(s)';
+                $scope.successMessage = `Comparación generada: ${$scope.tableData.length} archivo(s) coincidente(s)`;
                 
-                setTimeout(() => {
+                $timeout(function() {
                     $scope.successMessage = '';
-                    $scope.$apply();
                 }, 3000);
             };
 
@@ -277,11 +261,15 @@ angular.module('fileComparatorApp')
                 $scope.file1Count = 0;
                 $scope.file2Count = 0;
                 $scope.tableData = [];
+                $scope.statistics = {
+                    total: 0,
+                    versionChanged: 0,
+                    sizeChanged: 0,
+                    noChanges: 0
+                };
                 $scope.showTable = false;
                 $scope.errorMessage = '';
                 $scope.successMessage = '';
-                $scope.baseDirectory1 = '';
-                $scope.baseDirectory2 = '';
             };
         }
     ]);
