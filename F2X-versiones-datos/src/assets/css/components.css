@@ -174,7 +174,9 @@
     opacity: 0.95;
 }
 
-/* ESTADÍSTICAS */
+/* ==========================================
+   ESTADÍSTICAS
+   ========================================== */
 
 .statistics {
     display: flex;
@@ -214,7 +216,9 @@
     color: #888;
 }
 
-/* TABLA WRAPPER */
+/* ==========================================
+   TABLA WRAPPER
+   ========================================== */
 
 .table-wrapper {
     max-height: 700px;
@@ -229,58 +233,9 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
-/* RESPONSIVE */
-
-@media (max-width: 1400px) {
-    .col-nombre {
-        width: 18%;
-        min-width: 150px;
-    }
-    
-    .col-ruta {
-        width: 30%;
-    }
-}
-
-@media (max-width: 1200px) {
-    .matrix-table thead th {
-        font-size: 11px;
-        padding: 10px 8px;
-    }
-    
-    .file-name {
-        font-size: 12px;
-    }
-    
-    .version-badge {
-        font-size: 11px;
-        padding: 3px 8px;
-    }
-    
-    .peso-value {
-        font-size: 11px;
-    }
-    
-    .ruta-item {
-        font-size: 10px;
-    }
-}
-
-@media (max-width: 768px) {
-    .statistics {
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-    
-    .stat-item {
-        flex: 1 1 40%;
-    }
-    
-    .table-wrapper {
-        max-height: 500px;
-    }
-}
-
+/* ==========================================
+   INPUTS Y BOTONES
+   ========================================== */
 
 .file-inputs {
     display: flex;
@@ -351,11 +306,27 @@
     font-size: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-width: 50px;
 }
 
 .btn-icon:hover {
     background-color: #3b9dff;
     border-color: #3b9dff;
+    transform: scale(1.05);
+}
+
+.btn-icon.btn-clear {
+    background-color: #ff4444;
+    border-color: #ff4444;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 8px 12px;
+}
+
+.btn-icon.btn-clear:hover {
+    background-color: #ff0000;
+    border-color: #ff0000;
     transform: scale(1.05);
 }
 
@@ -471,11 +442,27 @@
     opacity: 0.6;
 }
 
+.btn-reset {
+    background-color: #ff4444;
+    color: white;
+    padding: 14px 40px;
+    font-size: 18px;
+    box-shadow: 0 4px 6px rgba(255, 68, 68, 0.3);
+    margin-left: 20px;
+}
+
+.btn-reset:hover {
+    background-color: #ff0000;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 8px rgba(255, 68, 68, 0.4);
+}
+
 .generate-section {
     text-align: center;
     margin-bottom: 40px;
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 
 .no-data {
@@ -520,4 +507,117 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ==========================================
+   RESPONSIVE
+   ========================================== */
+
+@media (max-width: 1400px) {
+    .col-nombre {
+        width: 18%;
+        min-width: 150px;
+    }
+    
+    .col-ruta {
+        width: 30%;
+    }
+}
+
+@media (max-width: 1200px) {
+    .matrix-table thead th {
+        font-size: 11px;
+        padding: 10px 8px;
+    }
+    
+    .file-name {
+        font-size: 12px;
+    }
+    
+    .version-badge {
+        font-size: 11px;
+        padding: 3px 8px;
+    }
+    
+    .peso-value {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 768px) {
+    .file-inputs {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .input-group {
+        flex: 1 1 100%;
+    }
+    
+    .generate-section {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .btn-reset {
+        margin-left: 0;
+    }
+    
+    .statistics {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .stat-item {
+        flex: 1 1 40%;
+    }
+    
+    .table-wrapper {
+        max-height: 500px;
+    }
+}
+
+.file-count {
+    font-size: 12px;
+    color: #3b9dff;
+    text-align: center;
+    margin-top: 5px;
+}
+
+.input-hint {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.input-hint {
+    font-size: 12px;
+    color: #3b9dff;
+    text-align: center;
+    margin-top: 8px;
+    font-style: normal;
+    padding: 8px 12px;
+    background-color: rgba(59, 157, 255, 0.1);
+    border-radius: 4px;
+    border-left: 3px solid #3b9dff;
+}
+
+.input-hint strong {
+    color: #5dbaff;
+}
+
+.comparison-paths {
+    color: #888;
+    font-size: 11px;
+    margin-top: 8px;
+    padding: 8px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.comparison-paths small {
+    line-height: 1.8;
 }

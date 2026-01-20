@@ -5,28 +5,33 @@
     </div>
 
     <div class="file-inputs">
-        <!-- Directorio 1: Versión Actual -->
+       <!-- Directorio 1: Versión Actual -->
         <div class="input-group">
             <label class="input-label">Versión Actual</label>
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
-                       ng-model="directory1"
-                       placeholder="Ejemplo: C:\Users\"
-                       title="{{directory1}}">
-                <button class="btn-icon" ng-click="openFolderDialog(1)" title="Seleccionar carpeta">
+                       ng-model="directory1Name"
+                       placeholder="Selecciona una carpeta con el botón 📁"
+                       readonly
+                       title="{{directory1 || 'Haz clic en 📁 para seleccionar'}}">
+                <button class="btn-icon" 
+                        ng-click="openFolderDialog(1)" 
+                        title="Seleccionar carpeta">
                     📁
                 </button>
+                <button class="btn-icon btn-clear" 
+                        ng-click="clearDirectory(1)" 
+                        ng-if="directory1Name"
+                        title="Limpiar">
+                    ✕
+                </button>
             </div>
-            <button class="btn btn-buscar" 
-                    ng-click="scanDirectory(1)"
-                    ng-disabled="!directory1 || isScanning1">
-                <span ng-if="!isScanning1">BUSCAR</span>
-                <span ng-if="isScanning1">ESCANEANDO...</span>
-            </button>
+        
             <div class="file-count" ng-if="file1Count > 0">
-                {{file1Count}} archivo(s) .exe encontrado(s)
+                ✅ {{file1Count}} archivo(s) .exe encontrado(s)
             </div>
+            
             <input type="file" 
                    id="folder1"
                    webkitdirectory
@@ -41,22 +46,27 @@
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
-                       ng-model="directory2"
-                       placeholder="Ejemplo: C:\PROGRAM FILES\F2X\APIS"
-                       title="{{directory2}}">
-                <button class="btn-icon" ng-click="openFolderDialog(2)" title="Seleccionar carpeta">
+                       ng-model="directory2Name"
+                       placeholder="Selecciona una carpeta con el botón 📁"
+                       readonly
+                       title="{{directory2 || 'Haz clic en 📁 para seleccionar'}}">
+                <button class="btn-icon" 
+                        ng-click="openFolderDialog(2)" 
+                        title="Seleccionar carpeta">
                     📁
                 </button>
+                <button class="btn-icon btn-clear" 
+                        ng-click="clearDirectory(2)" 
+                        ng-if="directory2Name"
+                        title="Limpiar">
+                    ✕
+                </button>
             </div>
-            <button class="btn btn-buscar" 
-                    ng-click="scanDirectory(2)"
-                    ng-disabled="!directory2 || isScanning2">
-                <span ng-if="!isScanning2">BUSCAR</span>
-                <span ng-if="isScanning2">ESCANEANDO...</span>
-            </button>
+
             <div class="file-count" ng-if="file2Count > 0">
-                {{file2Count}} archivo(s) .exe encontrado(s)
+                ✅ {{file2Count}} archivo(s) .exe encontrado(s)
             </div>
+            
             <input type="file" 
                    id="folder2"
                    webkitdirectory
@@ -72,6 +82,11 @@
                 ng-disabled="!file1Data || !file2Data || file1Data.length === 0 || file2Data.length === 0">
             GENERAR COMPARACIÓN
         </button>
+        <button class="btn btn-reset" 
+                ng-click="reset()"
+                ng-if="file1Data || file2Data || showTable">
+            LIMPIAR TODO
+        </button>
     </div>
 
     <!-- Mensajes -->
@@ -80,18 +95,24 @@
     </div>
 
     <div class="error-message" ng-if="errorMessage">
-        ⚠️ {{errorMessage}}
+        {{errorMessage}}
     </div>
 
     <div class="success-message" ng-if="successMessage">
-        ✓ {{successMessage}}
+        {{successMessage}}
     </div>
 
-    <!-- Tabla de Resultados - FORMATO MATRIZ -->
-    <div class="table-wrapper" ng-if="showTable">
+    <!-- Tabla de Resultados -->
+    <div class="table-wrapper" ng-show="showTable && tableData.length > 0">
         <div class="table-header-info">
             <h3>Matriz Resultante</h3>
-            <p>Total de aplicaciones coincidentes: {{tableData.length}}</p>
+            <p>Comparación: {{directory1Name}} vs {{directory2Name}}</p>
+            <p class="comparison-paths">
+                <small>
+                    📁 {{directory1}}<br>
+                    📁 {{directory2}}
+                </small>
+            </p>
         </div>
         
         <div class="table-container">
@@ -113,41 +134,30 @@
                             'size-changed': row.sizeChanged,
                             'no-changes': !row.versionChanged && !row.sizeChanged
                         }">
-                        <!-- Nombre -->
                         <td class="col-nombre">
                             <div class="cell-nombre">
                                 <span class="file-icon">📄</span>
                                 <span class="file-name">{{row.name}}</span>
                             </div>
                         </td>
-                        
-                        <!-- Versión Actual -->
                         <td class="col-version-actual text-center">
                             <span class="version-badge version-actual">{{row.versionActual}}</span>
                         </td>
-                        
-                        <!-- Peso Actual -->
                         <td class="col-peso-actual text-center">
                             <span class="peso-value">{{row.pesoActual}}</span>
                         </td>
-                        
-                        <!-- Versión Futura -->
                         <td class="col-version-futura text-center">
                             <span class="version-badge version-futura" 
                                   ng-class="{'version-highlight': row.versionChanged}">
                                 {{row.versionFutura}}
                             </span>
                         </td>
-                        
-                        <!-- Peso Futuro -->
                         <td class="col-peso-futuro text-center">
                             <span class="peso-value" 
                                   ng-class="{'peso-highlight': row.sizeChanged}">
                                 {{row.pesoFuturo}}
                             </span>
                         </td>
-                        
-                        <!-- Ruta -->
                         <td class="col-ruta">
                             <div class="ruta-container">
                                 <span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span>
@@ -157,18 +167,13 @@
                 </tbody>
             </table>
             
-            <div class="no-data" ng-if="tableData.length === 0">
-                No hay archivos coincidentes para comparar
-            </div>
-            
-            <!-- Estadísticas -->
             <div class="statistics" ng-if="tableData.length > 0">
                 <div class="stat-item">
-                    <span class="stat-label">Total Coincidentes:</span>
+                    <span class="stat-label">Total:</span>
                     <span class="stat-value">{{statistics.total}}</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-label">Versiones Actualizadas:</span>
+                    <span class="stat-label">Versiones Cambiadas:</span>
                     <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
                 </div>
                 <div class="stat-item">
