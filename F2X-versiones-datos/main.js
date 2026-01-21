@@ -9,22 +9,31 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true
-        }
+        },
+        icon: path.join(__dirname, 'icon.png') // Opcional
     });
 
-    win.loadFile('index.html');
-    win.webContents.openDevTools(); // Opcional: para debugging
+    // Cargar index.html desde src/
+    win.loadFile(path.join(__dirname, 'src', 'index.html'));
+    
+    // Abrir DevTools automáticamente (para debugging)
+    win.webContents.openDevTools();
 }
 
-// Manejar selección de carpeta
+//  Manejar selección de carpeta automatico
 ipcMain.handle('select-folder', async () => {
     const result = await dialog.showOpenDialog({
-        properties: ['openDirectory']
+        properties: ['openDirectory'],
+        title: 'Selecciona una carpeta'
     });
     
     if (!result.canceled && result.filePaths.length > 0) {
         const fullPath = result.filePaths[0];
         const folderName = path.basename(fullPath);
+        
+        console.log('📁 Carpeta seleccionada:');
+        console.log('   Nombre:', folderName);
+        console.log('   Ruta completa:', fullPath);
         
         return {
             success: true,
@@ -41,5 +50,11 @@ app.whenReady().then(createWindow);
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
         app.quit();
+    }
+});
+
+app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
     }
 });
