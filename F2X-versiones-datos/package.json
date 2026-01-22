@@ -10,5 +10,9 @@
   "license": "ISC",
   "devDependencies": {
     "electron": "^33.2.0"
+  },
+  "dependencies": {
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7"
   }
 }

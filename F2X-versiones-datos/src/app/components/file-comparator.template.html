@@ -80,18 +80,24 @@
         </div>
     </div>
 
-    <div class="generate-section">
-        <button class="btn btn-generar" 
-                ng-click="generateTable()" 
-                ng-disabled="!file1Data || !file2Data || file1Data.length === 0 || file2Data.length === 0">
-            GENERAR COMPARACIÓN
-        </button>
-        <button class="btn btn-reset" 
-                ng-click="reset()"
-                ng-if="file1Data || file2Data || showTable">
-            LIMPIAR TODO
-        </button>
+    <div class="generate-section" style="display: flex; gap: 10px; margin-top: 20px; align-items: stretch;">
+    
+        <div class="actions-container">
+            <button ng-click="generateTable()" class="btn btn-primary" ng-disabled="isScanning1 || isScanning2">
+                <i class="fas fa-sync-alt"></i> Generar Comparación
+            </button>
+
+            <button ng-if="showTable" ng-click="generatePDF()" class="btn btn-pdf">
+                <i class="fas fa-file-pdf"></i> Exportar a PDF
+            </button>
+
+            <button ng-if="file1Data || file2Data || showTable" ng-click="reset()" class="btn btn-reset">
+                <i class="fas fa-trash-alt"></i> Limpiar Todo
+            </button>
+        </div>
     </div>
+
+</div>
 
     <!-- Mensajes -->
     <div class="info-message" ng-if="isScanning1 || isScanning2">
@@ -195,7 +201,7 @@
         <div class="footer-content">
             <div class="footer-section">
                 <span class="footer-label">Aplicación:</span>
-                <span class="footer-value">F2X Versión de Datos>
+                <span class="footer-value">F2X Versión de Datos
             </div>
             
             <div class="footer-divider"></div>

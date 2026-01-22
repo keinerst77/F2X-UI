@@ -288,3 +288,96 @@
     .generate-section { flex-direction: column; }
     .statistics { flex-wrap: wrap; gap: 20px; }
 }
+
+/* Contenedor de acciones principal */
+.actions-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px; /* Espacio entre botones */
+    margin: 30px 0;
+    width: 100%;
+}
+
+/* Base común para todos los botones de acción */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px; /* Altura fija para uniformidad */
+    padding: 0 25px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    min-width: 200px; /* Ancho mínimo para que no se vean desiguales */
+}
+
+.btn i {
+    margin-right: 10px; /* Espacio para el icono */
+    font-size: 16px;
+}
+
+/* Botón Primario (Generar) */
+.btn-primary {
+    background: var(--f2x-green);
+    color: var(--text-main);
+    box-shadow: 0 4px 12px rgba(190, 214, 47, 0.2);
+}
+
+.btn-primary:hover {
+    background: #AEC828;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(190, 214, 47, 0.4);
+}
+
+/* Botón PDF (Rojo) */
+.btn-pdf {
+    background-color: #e74c3c;
+    color: white;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.2);
+}
+
+.btn-pdf:hover {
+    background-color: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+}
+
+/* Botón Limpiar (Outline Rojo) */
+.btn-reset {
+    background: transparent;
+    border: 2px solid #e74c3c;
+    color: #e74c3c;
+}
+
+.btn-reset:hover {
+    background: #e74c3c;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Estado deshabilitado */
+.btn:disabled {
+    background: #ccc !important;
+    border-color: #ccc !important;
+    color: #888 !important;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Responsivo: En móviles se apilan */
+@media (max-width: 768px) {
+    .actions-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .btn {
+        width: 100%;
+    }
+}
