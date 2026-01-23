@@ -1,12 +1,5 @@
 <div class="container">
     <!-- HEADER CON LOGO F2X -->
-    <div class="header">
-        <div class="header-logo">
-            <img src="./assets/images/f2x-logo.png" alt="F2X Logo" class="f2x-logo">
-        </div>
-        <h1>Versión de Datos</h1>
-        <p class="subtitle">Comparador de Versiones de Aplicaciones</p>
-    </div>
 
     <div class="file-inputs">
        <!-- Directorio 1: Versión Actual -->
@@ -15,8 +8,8 @@
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
-                       ng-model="directory1Name"
-                       placeholder="Selecciona una carpeta con el botón 📁"
+                       ng-model="directory1"
+                       placeholder="Selecciona una carpeta"
                        readonly
                        title="{{directory1 || 'Haz clic en 📁 para seleccionar'}}">
                 <button class="btn-icon" 
@@ -26,7 +19,7 @@
                 </button>
                 <button class="btn-icon btn-clear" 
                         ng-click="clearDirectory(1)" 
-                        ng-if="directory1Name"
+                        ng-if="directory1"
                         title="Limpiar">
                     ✕
                 </button>
@@ -50,8 +43,8 @@
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
-                       ng-model="directory2Name"
-                       placeholder="Selecciona una carpeta con el botón 📁"
+                       ng-model="directory2"
+                       placeholder="Selecciona una carpeta"
                        readonly
                        title="{{directory2 || 'Haz clic en 📁 para seleccionar'}}">
                 <button class="btn-icon" 
@@ -61,7 +54,7 @@
                 </button>
                 <button class="btn-icon btn-clear" 
                         ng-click="clearDirectory(2)" 
-                        ng-if="directory2Name"
+                        ng-if="directory2"
                         title="Limpiar">
                     ✕
                 </button>
@@ -113,112 +106,113 @@
     </div>
 
     <!-- Tabla de Resultados -->
-    <div class="table-wrapper" ng-show="showTable && tableData.length > 0">
-        <div class="table-header-info">
-            <h3>Matriz Resultante</h3>
-            <p>Comparación: {{directory1Name}} vs {{directory2Name}}</p>
-            <p class="comparison-paths">
-                <small>
-                    📁 {{directory1}}<br>
-                    📁 {{directory2}}
-                </small>
-            </p>
-        </div>
+<div class="table-wrapper" ng-show="showTable && tableData.length > 0">
+    <div class="table-header-info">
+        <h3>Matriz Resultante</h3>
+        <p>Comparación: {{directory1Name}} vs {{directory2Name}}</p>
+        <p class="comparison-paths">
+            <small>
+                📁 {{directory1}}<br>
+                📁 {{directory2}}
+            </small>
+        </p>
+    </div>
+    
+    <div class="table-container">
+        <table class="matrix-table">
+            <thead>
+                <tr>
+                    <th class="col-nombre">Archivo</th>
+                    <th class="col-equipo">Equipo</th>
+                    <th class="col-version-actual">Versión Actual</th>
+                    <th class="col-peso-actual">Peso Actual</th>
+                    <th class="col-version-futura">Versión Futura</th>
+                    <th class="col-peso-futuro">Peso Futuro</th>
+                    <th class="col-ruta">Ubicación</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="row in tableData track by $index" 
+                    ng-class="{
+                        'version-changed': row.versionChanged,
+                        'size-changed': row.sizeChanged,
+                        'no-changes': !row.versionChanged && !row.sizeChanged
+                    }">
+                    <td class="col-nombre">
+                        <div class="cell-nombre">
+                            <span class="file-icon">📄</span>
+                            <span class="file-name">{{row.name}}</span>
+                        </div>
+                    </td>
+                    <td class="col-equipo text-center">
+                        <span class="equipo-value">-</span>
+                    </td>
+                    <td class="col-version-actual text-center">
+                        <span class="version-badge version-actual">{{row.versionActual}}</span>
+                    </td>
+                    <td class="col-peso-actual text-center">
+                        <span class="peso-value">{{row.pesoActual}}</span>
+                    </td>
+                    <td class="col-version-futura text-center">
+                        <span class="version-badge version-futura" 
+                              ng-class="{'version-highlight': row.versionChanged}">
+                            {{row.versionFutura}}
+                        </span>
+                    </td>
+                    <td class="col-peso-futuro text-center">
+                        <span class="peso-value" 
+                              ng-class="{'peso-highlight': row.sizeChanged}">
+                            {{row.pesoFuturo}}
+                        </span>
+                    </td>
+                    <td class="col-ruta">
+                        <div class="ruta-container">
+                            <span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
         
-        <div class="table-container">
-            <table class="matrix-table">
-                <thead>
-                    <tr>
-                        <th class="col-nombre">Nombre</th>
-                        <th class="col-version-actual">Versión Actual</th>
-                        <th class="col-peso-actual">Peso</th>
-                        <th class="col-version-futura">Versión Futura</th>
-                        <th class="col-peso-futuro">Peso</th>
-                        <th class="col-ruta">Ruta</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr ng-repeat="row in tableData track by $index" 
-                        ng-class="{
-                            'version-changed': row.versionChanged,
-                            'size-changed': row.sizeChanged,
-                            'no-changes': !row.versionChanged && !row.sizeChanged
-                        }">
-                        <td class="col-nombre">
-                            <div class="cell-nombre">
-                                <span class="file-icon">📄</span>
-                                <span class="file-name">{{row.name}}</span>
-                            </div>
-                        </td>
-                        <td class="col-version-actual text-center">
-                            <span class="version-badge version-actual">{{row.versionActual}}</span>
-                        </td>
-                        <td class="col-peso-actual text-center">
-                            <span class="peso-value">{{row.pesoActual}}</span>
-                        </td>
-                        <td class="col-version-futura text-center">
-                            <span class="version-badge version-futura" 
-                                  ng-class="{'version-highlight': row.versionChanged}">
-                                {{row.versionFutura}}
-                            </span>
-                        </td>
-                        <td class="col-peso-futuro text-center">
-                            <span class="peso-value" 
-                                  ng-class="{'peso-highlight': row.sizeChanged}">
-                                {{row.pesoFuturo}}
-                            </span>
-                        </td>
-                        <td class="col-ruta">
-                            <div class="ruta-container">
-                                <span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-            
-            <div class="statistics" ng-if="tableData.length > 0">
-                <div class="stat-item">
-                    <span class="stat-label">Total:</span>
-                    <span class="stat-value">{{statistics.total}}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Versiones Cambiadas:</span>
-                    <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Tamaños Diferentes:</span>
-                    <span class="stat-value stat-changed">{{statistics.sizeChanged}}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Sin Cambios:</span>
-                    <span class="stat-value stat-unchanged">{{statistics.noChanges}}</span>
-                </div>
+        <div class="statistics" ng-if="tableData.length > 0">
+            <div class="stat-item">
+                <span class="stat-label">Total:</span>
+                <span class="stat-value">{{statistics.total}}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Versiones Cambiadas:</span>
+                <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Tamaños Diferentes:</span>
+                <span class="stat-value stat-changed">{{statistics.sizeChanged}}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Sin Cambios:</span>
+                <span class="stat-value stat-unchanged">{{statistics.noChanges}}</span>
             </div>
         </div>
     </div>
+</div>
     <div class="footer">
         <div class="footer-content">
             <div class="footer-section">
                 <span class="footer-label">Aplicación:</span>
-                <span class="footer-value">F2X Versión de Datos
+                <span class="footer-value">F2X - Generador de Ficha Técnica</span>
             </div>
             
-            <div class="footer-divider"></div>
-            
-            <div class="footer-section">
-                <span class="footer-label">Desarrollado por:</span>
-                <span class="footer-value highlight">Flytech Simplexity</span>
-            </div>
-
             <div class="footer-divider"></div>
 
             <div class="footer-section">
                 <span class="footer-label">Versión:</span>
                 <span class="footer-badge">v1.2.0</span>
             </div>
-            
-            </div>
+        </div>
+        
+        <div class="footer-logo">
+            <img src="./assets/images/f2x-logo.png" alt="F2X Logo" class="footer-f2x-logo">
+        </div>
+        
         <p class="copyright">© 2026 Todos los derechos reservados.</p>
     </div>
 </div>

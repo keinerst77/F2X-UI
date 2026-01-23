@@ -144,7 +144,8 @@ angular.module('fileComparatorApp')
                     cellPadding: 2.5,
                     lineColor: this.colors.GRAY_LIGHT,
                     lineWidth: 0.1,
-                    overflow: 'linebreak'
+                    overflow: 'linebreak',
+                    fillColor: this.colors.WHITE  // Color por defecto (filas impares)
                 },
                 columnStyles: {
                     0: { 
@@ -154,24 +155,23 @@ angular.module('fileComparatorApp')
                     },
                     1: { 
                         halign: 'center', 
-                        cellWidth: 22 
+                        cellWidth: 25 
                     },
                     2: { 
                         halign: 'center', 
-                        cellWidth: 20 
+                        cellWidth: 22 
                     },
                     3: { 
                         halign: 'center', 
-                        cellWidth: 22 
+                        cellWidth: 20 
                     },
                     4: { 
                         halign: 'center', 
-                        cellWidth: 20 
+                        cellWidth: 22 
                     },
                     5: { 
                         halign: 'center', 
-                        cellWidth: 28, 
-                        fontStyle: 'bold' 
+                        cellWidth: 20 
                     },
                     6: { 
                         cellWidth: 'auto', 
@@ -180,7 +180,7 @@ angular.module('fileComparatorApp')
                     }
                 },
                 alternateRowStyles: {
-                    fillColor: [250, 250, 250]
+                    fillColor: [235, 235, 235]  // Gris más oscuro para mayor contraste
                 }
             };
         };
@@ -246,7 +246,7 @@ angular.module('fileComparatorApp')
         // ========== GENERAR ENCABEZADOS DE TABLA ==========
         this.getTableHeaders = function() {
             return [
-                ["Archivo", "Version Actual", "Peso Actual", "Version Futura", "Peso Futuro", "Cambios", "Ruta"]
+                ["Archivo", "Equipo", "Versión Actual", "Peso Actual", "Versión Futura", "Peso Futuro", "Ubicación"]
             ];
         };
 

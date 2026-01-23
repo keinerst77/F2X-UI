@@ -263,7 +263,7 @@ function($scope, $http, $timeout, PdfStylesService) {
         $scope.successMessage = '';
     };
 
-// Función para Generar el Reporte PDF (versión refactorizada)
+    // Función para Generar el Reporte PDF
 $scope.generatePDF = function() {
     if (!$scope.tableData || $scope.tableData.length === 0) {
         $scope.errorMessage = '❌ No hay datos para exportar';
@@ -280,7 +280,6 @@ $scope.generatePDF = function() {
     const colors = PdfStylesService.colors;
     const headerStyles = PdfStylesService.getHeaderStyles();
     const directoryStyles = PdfStylesService.getDirectoryCardStyles();
-    const statsCards = PdfStylesService.getStatsCardStyles();
     const tableStyles = PdfStylesService.getTableStyles();
     const footerStyles = PdfStylesService.getFooterStyles();
     const dims = PdfStylesService.dimensions;
@@ -311,7 +310,7 @@ $scope.generatePDF = function() {
     doc.setFontSize(headerStyles.title.fontSize);
     doc.setTextColor(...headerStyles.title.textColor);
     doc.setFont(undefined, headerStyles.title.fontStyle);
-    doc.text('Reporte de Comparación de Versiones', headerStyles.title.position.x, headerStyles.title.position.y);
+    doc.text('Ficha Técnica', headerStyles.title.position.x, headerStyles.title.position.y);
 
     // Fecha de generación
     doc.setFontSize(headerStyles.date.fontSize);
@@ -368,43 +367,6 @@ $scope.generatePDF = function() {
 
     currentY += 32;
 
-    // ========== ESTADÍSTICAS DESTACADAS ==========
-    
-    const statsY = currentY;
-
-    statsCards.forEach((stat, index) => {
-        const x = dims.margin + (dims.cardWidth + dims.cardSpacing) * index;
-        
-        // Tarjeta con fondo blanco
-        doc.setFillColor(...colors.WHITE);
-        doc.roundedRect(x, statsY, dims.cardWidth, dims.cardHeight, dims.borderRadius, dims.borderRadius, 'F');
-        
-        // Borde de color
-        doc.setDrawColor(...stat.color);
-        doc.setLineWidth(1);
-        doc.roundedRect(x, statsY, dims.cardWidth, dims.cardHeight, dims.borderRadius, dims.borderRadius, 'S');
-        
-        // Etiqueta
-        doc.setFontSize(PdfStylesService.fontSizes.cardLabel);
-        doc.setTextColor(...colors.GRAY_TEXT);
-        doc.setFont(undefined, 'normal');
-        doc.text(stat.label, x + dims.cardWidth/2, statsY + 7, { align: 'center' });
-        
-        // Valor
-        doc.setFontSize(PdfStylesService.fontSizes.cardValue);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...stat.color);
-        
-        const value = index === 0 ? $scope.statistics.total :
-                      index === 1 ? $scope.statistics.versionChanged :
-                      index === 2 ? $scope.statistics.sizeChanged :
-                      $scope.statistics.noChanges;
-        
-        doc.text(String(value), x + dims.cardWidth/2, statsY + 14, { align: 'center' });
-    });
-
-    currentY = statsY + 25;
-
     // ========== TÍTULO DE TABLA ==========
     
     doc.setFontSize(PdfStylesService.fontSizes.sectionTitle);
@@ -419,17 +381,14 @@ $scope.generatePDF = function() {
     const headers = PdfStylesService.getTableHeaders();
     
     const body = $scope.tableData.map(item => {
-        const changeType = PdfStylesService.getChangeType(item.versionChanged, item.sizeChanged);
-        const estado = PdfStylesService.getStatusText(changeType);
-        
         return [
-            item.name,
-            item.versionActual || 'N/A',
-            item.pesoActual,
-            item.versionFutura || 'N/A',
-            item.pesoFuturo,
-            estado,
-            item.ruta || ''
+            item.name,                      // Archivo
+            '',                             // Equipo
+            item.versionActual || 'N/A',   // Versión Actual
+            item.pesoActual,               // Peso Actual
+            item.versionFutura || 'N/A',   // Versión Futura
+            item.pesoFuturo,               // Peso Futuro
+            item.ruta || ''                // Ubicación
         ];
     });
 
@@ -441,43 +400,7 @@ $scope.generatePDF = function() {
         headStyles: tableStyles.headStyles,
         styles: tableStyles.bodyStyles,
         columnStyles: tableStyles.columnStyles,
-        alternateRowStyles: tableStyles.alternateRowStyles,
-        didParseCell: function(data) {
-            // Colorear la columna de estado según el tipo de cambio
-            if (data.section === 'body' && data.column.index === 5) {
-                const cellText = data.cell.raw;
-                let changeType = 'no_change';
-                
-                if (cellText.includes('Version y Peso')) {
-                    changeType = 'version_and_size';
-                } else if (cellText === 'Version') {
-                    changeType = 'version';
-                } else if (cellText === 'Peso') {
-                    changeType = 'size';
-                }
-                
-                data.cell.styles.textColor = PdfStylesService.getChangeColor(changeType);
-            }
-            
-            // Resaltar filas con cambios
-            if (data.section === 'body') {
-                const estado = body[data.row.index][5];
-                let changeType = 'no_change';
-                
-                if (estado.includes('Version y Peso')) {
-                    changeType = 'version_and_size';
-                } else if (estado === 'Version') {
-                    changeType = 'version';
-                } else if (estado === 'Peso') {
-                    changeType = 'size';
-                }
-                
-                const bgColor = PdfStylesService.getChangeBgColor(changeType);
-                if (bgColor) {
-                    data.cell.styles.fillColor = bgColor;
-                }
-            }
-        }
+        alternateRowStyles: tableStyles.alternateRowStyles
     });
 
     // ========== PIE DE PÁGINA ==========
@@ -498,19 +421,29 @@ $scope.generatePDF = function() {
     const resumenLines = doc.splitTextToSize(resumenTexto, pageWidth - (dims.margin * 2));
     doc.text(resumenLines, dims.margin, finalY + 6);
     
-    // Información adicional en el pie
-    const footerY = pageHeight - 12;
+    // Calcular la posición del footer según el contenido del resumen
+    const resumenHeight = resumenLines.length * 4; 
+    const footerStartY = finalY + 6 + resumenHeight + 8; 
     
+    // Verificar si hay espacio suficiente, sino usar el pie de página fijo
+    const footerY = Math.max(footerStartY, pageHeight - 15);
+    
+    // Información adicional en el pie - LÍNEA 1
     doc.setFontSize(footerStyles.info.fontSize);
     doc.setTextColor(...footerStyles.info.textColor);
     doc.setFont(undefined, footerStyles.info.fontStyle);
-    doc.text('F2X - Versión de Datos v1.2.0', dims.margin, footerY);
-    doc.text('Desarrollado por Flytech Simplexity', dims.margin, footerY + 4);
+    doc.text('F2X - Ficha Técnica', dims.margin, footerY);
     
     doc.setFontSize(footerStyles.highlight.fontSize);
     doc.setTextColor(...footerStyles.highlight.textColor);
     doc.setFont(undefined, footerStyles.highlight.fontStyle);
-    doc.text(`Pagina 1 de 1`, pageWidth - dims.margin, footerY, { align: 'right' });
+    doc.text(`Página 1 de 1`, pageWidth - dims.margin, footerY, { align: 'right' });
+    
+    // Información adicional en el pie - LÍNEA 2
+    doc.setFontSize(footerStyles.info.fontSize);
+    doc.setTextColor(...footerStyles.info.textColor);
+    doc.setFont(undefined, footerStyles.info.fontStyle);
+    doc.text('Desarrollado por Flytech Simplexity', dims.margin, footerY + 4);
     
     doc.setFontSize(footerStyles.copyright.fontSize);
     doc.setTextColor(...footerStyles.copyright.textColor);
