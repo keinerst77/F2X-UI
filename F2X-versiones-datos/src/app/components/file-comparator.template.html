@@ -77,16 +77,10 @@
     
         <div class="actions-container">
             <button ng-click="generateTable()" class="btn btn-primary" ng-disabled="isScanning1 || isScanning2">
-                <i class="fas fa-sync-alt"></i> Generar Comparación
+                <i class="fas fa-sync-alt"></i> Generar Ficha
             </button>
 
-            <button ng-if="showTable" ng-click="generatePDF()" class="btn btn-pdf">
-                <i class="fas fa-file-pdf"></i> Exportar a PDF
-            </button>
 
-            <button ng-if="file1Data || file2Data || showTable" ng-click="reset()" class="btn btn-reset">
-                <i class="fas fa-trash-alt"></i> Limpiar Todo
-            </button>
         </div>
     </div>
 
@@ -105,7 +99,7 @@
         {{successMessage}}
     </div>
 
-    <!-- Tabla de Resultados -->
+ <!-- Tabla de Resultados -->
 <div class="table-wrapper" ng-show="showTable && tableData.length > 0">
     <div class="table-header-info">
         <h3>Matriz Resultante</h3>
@@ -193,6 +187,13 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Botón Exportar a PDF después de la tabla -->
+<div class="pdf-export-section" ng-if="showTable && tableData.length > 0">
+    <button ng-click="generatePDF()" class="btn btn-pdf">
+        <i class="fas fa-file-pdf"></i> Exportar a PDF
+    </button>
 </div>
     <div class="footer">
         <div class="footer-content">

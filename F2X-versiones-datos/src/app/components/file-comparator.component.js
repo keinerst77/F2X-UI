@@ -136,7 +136,7 @@ function($scope, $http, $timeout, PdfStylesService) {
         $scope.errorMessage = '';
         $scope.successMessage = '';
 
-        $http.post(API_URL, {
+        $http.post(API_URL, {   
             directory: directory,
             includeSubdirectories: true,
             searchPattern: '*.exe'
