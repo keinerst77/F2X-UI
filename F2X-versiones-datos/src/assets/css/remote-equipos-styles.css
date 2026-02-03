@@ -1,0 +1,318 @@
+/* ════════════════════════════════════════
+   ESTILOS PARA SECCIÓN DE EQUIPOS REMOTOS
+   ════════════════════════════════════════*/
+
+/* Contenedor principal de equipos remotos */
+.remote-equipos-section {
+    background: #F8F9FA;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Header de la sección */
+.remote-equipos-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--border-subtle);
+}
+
+.remote-equipos-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Botón toggle para mostrar/ocultar equipos */
+.btn-toggle-equipos {
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--f2x-green), #AEC828);
+    color: var(--text-main);
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 6px rgba(190, 214, 47, 0.2);
+}
+
+.btn-toggle-equipos:hover {
+    background: #AEC828;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(190, 214, 47, 0.3);
+}
+
+/* Lista de equipos */
+.equipos-list {
+    margin-top: 15px;
+}
+
+/* Placeholder cuando no hay equipos */
+.no-equipos-placeholder {
+    text-align: center;
+    padding: 40px 20px;
+    background: #FFFFFF;
+    border-radius: 10px;
+    border: 2px dashed var(--border-subtle);
+}
+
+.placeholder-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 15px;
+    opacity: 0.5;
+}
+
+.placeholder-text {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.btn-add-first-equipo {
+    padding: 12px 24px;
+    background: var(--f2x-green);
+    color: var(--text-main);
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-add-first-equipo:hover {
+    background: #AEC828;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(190, 214, 47, 0.3);
+}
+
+/* Contenedor de tarjetas de equipos */
+.equipos-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Tarjeta individual de equipo */
+.equipo-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.equipo-card:hover {
+    border-color: var(--f2x-green);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+/* Header de la tarjeta */
+.equipo-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.equipo-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--f2x-green);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Botón para eliminar equipo */
+.btn-remove-card {
+    width: 28px;
+    height: 28px;
+    background: #FFFFFF;
+    border: 1px solid var(--state-error);
+    color: var(--state-error);
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.btn-remove-card:hover {
+    background: var(--state-error);
+    color: #FFFFFF;
+    transform: scale(1.1);
+}
+
+/* Body de la tarjeta con inputs */
+.equipo-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Inputs dentro de las tarjetas */
+.equipo-input {
+    width: 100%;
+    background: #F5F7FA;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 12px 14px;
+    color: var(--text-main);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.equipo-input:focus {
+    outline: none;
+    border-color: var(--f2x-green);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.15);
+}
+
+.equipo-input::placeholder {
+    color: #9E9E9E;
+    font-size: 12px;
+}
+
+/* Botón para agregar más equipos */
+.btn-add-more-equipo {
+    width: 100%;
+    padding: 12px;
+    background: #FFFFFF;
+    border: 2px dashed var(--f2x-green);
+    color: var(--f2x-green);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+}
+
+.btn-add-more-equipo:hover {
+    background: var(--f2x-green);
+    color: var(--text-main);
+    border-style: solid;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(190, 214, 47, 0.2);
+}
+
+/* Botón de escaneo */
+.scan-button-wrapper {
+    margin-top: 15px;
+}
+
+.btn-scan {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--f2x-green), #AEC828);
+    color: var(--text-main);
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 4px 12px rgba(190, 214, 47, 0.25);
+}
+
+.btn-scan:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(190, 214, 47, 0.4);
+}
+
+.btn-scan:disabled {
+    background: #E0E0E0;
+    color: #9E9E9E;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* Información de escaneo */
+.scan-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+/* Estado de conexión */
+.connection-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.connection-status.connected {
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #81C784;
+}
+
+.connection-status.disconnected {
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #EF5350;
+}
+
+.connection-status.connecting {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #FFB74D;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .remote-equipos-section {
+        padding: 15px;
+    }
+    
+    .remote-equipos-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    
+    .btn-toggle-equipos {
+        width: 100%;
+    }
+    
+    .equipo-card {
+        padding: 12px;
+    }
+}

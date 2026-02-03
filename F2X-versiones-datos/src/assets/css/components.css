@@ -381,3 +381,259 @@
         width: 100%;
     }
 }
+
+/* Columna Equipos */
+.col-equipos {
+    width: 180px;
+    text-align: center;
+}
+
+.equipos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+
+/* Badges de equipos */
+.equipo-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+}
+
+.badge-local {
+    background: #E3F2FD;
+    color: #1565C0;
+    border: 1px solid #BBDEFB;
+}
+
+.badge-remote {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #FFE0B2;
+}
+
+/* Indicador de dato no disponible */
+.no-data {
+    color: #BDBDBD;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Estilos de filas según tipo de cambio */
+.has-changes td {
+    background: rgba(255, 152, 0, 0.08) !important;
+}
+
+.only-local td {
+    background: rgba(33, 150, 243, 0.08) !important;
+}
+
+.only-remote td {
+    background: rgba(255, 87, 34, 0.08) !important;
+}
+
+.no-changes td {
+    background: rgba(76, 175, 80, 0.05) !important;
+}
+
+/* Estadísticas adicionales */
+.stat-only-local {
+    color: #1976D2;
+    font-weight: 800;
+}
+
+.stat-only-remote {
+    color: #F57C00;
+    font-weight: 800;
+}
+
+/* ═══════════════════════════════════════════════
+   TOGGLE LOCAL / REMOTO
+   ═══════════════════════════════════════════════ */
+
+.toggle-scan-type {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.btn-toggle {
+    flex: 1;
+    padding: 6px 10px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    background: #F5F7FA;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-toggle:hover {
+    border-color: var(--f2x-green);
+    color: var(--text-main);
+}
+
+.btn-toggle.active {
+    background: var(--f2x-green);
+    border-color: var(--f2x-green);
+    color: var(--text-main);
+    font-weight: 700;
+}
+
+/* ═══════════════════════════════════════════════
+   INPUTS REMOTOS
+   ═══════════════════════════════════════════════ */
+
+.remote-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.remote-input {
+    width: 100%;
+    background: #F5F7FA;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--text-main);
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.remote-input:focus {
+    outline: none;
+    border-color: var(--f2x-green);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.2);
+}
+
+.remote-input::placeholder {
+    color: #9E9E9E;
+}
+
+.btn-scan-remoto {
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-scan-remoto:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+}
+
+.btn-scan-remoto:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════════════
+   IP TAG
+   ═══════════════════════════════════════════════ */
+
+.ip-tag {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    color: #F57C00;
+    margin-left: 4px;
+}
+
+/* ═══════════════════════════════════════════════
+   COLUMNA EQUIPOS
+   ═══════════════════════════════════════════════ */
+
+.col-equipos {
+    width: 140px;
+    text-align: center;
+}
+
+.equipos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: center;
+}
+
+.equipo-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+}
+
+.badge-local {
+    background: #E3F2FD;
+    color: #1565C0;
+    border: 1px solid #BBDEFB;
+}
+
+.badge-remote {
+    background: #FFF3E0;
+    color: #E65100;
+    border: 1px solid #FFE0B2;
+}
+
+/* ═══════════════════════════════════════════════
+   DATO NO DISPONIBLE
+   ═══════════════════════════════════════════════ */
+
+.no-data {
+    color: #BDBDBD;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* ═══════════════════════════════════════════════
+   ESTILOS DE FILAS
+   ═══════════════════════════════════════════════ */
+
+.has-changes td {
+    background: rgba(255, 152, 0, 0.08) !important;
+}
+
+.only-local td {
+    background: rgba(33, 150, 243, 0.08) !important;
+}
+
+.only-remote td {
+    background: rgba(255, 87, 34, 0.08) !important;
+}
+
+.no-changes td {
+    background: rgba(76, 175, 80, 0.04) !important;
+}
+
+/* ═══════════════════════════════════════════════
+   ESTADÍSTICAS
+   ═══════════════════════════════════════════════ */
+.stat-only-local {
+    color: #1976D2;
+    font-weight: 800;
+}
+
+.stat-only-remote {
+    color: #F57C00;
+    font-weight: 800;
+}

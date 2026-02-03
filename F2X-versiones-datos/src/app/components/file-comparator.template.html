@@ -1,115 +1,206 @@
 <div class="container">
-    <!-- HEADER CON LOGO F2X -->
 
+    <!-- ═══════════════════════════════════════════════════════════
+         SECCIÓN DE EQUIPOS REMOTOS
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="remote-equipos-section">
+        <div class="remote-equipos-header">
+            <span class="remote-equipos-title">🌐 Equipos Remotos</span>
+            <button class="btn-toggle-equipos" 
+                    ng-click="showEquiposRemotos = !showEquiposRemotos">
+                <span ng-if="!showEquiposRemotos">➕ Agregar Equipos</span>
+                <span ng-if="showEquiposRemotos">➖ Ocultar</span>
+            </button>
+        </div>
+
+        <!-- Lista de equipos remotos -->
+        <div class="equipos-list" ng-if="showEquiposRemotos">
+            
+            <div ng-if="equiposRemotos.length === 0" class="no-equipos-placeholder">
+                <span class="placeholder-icon">🖥️</span>
+                <p class="placeholder-text">No hay equipos remotos configurados</p>
+                <button class="btn-add-first-equipo" ng-click="agregarEquipoRemoto()">
+                    ➕ Agregar Primer Equipo
+                </button>
+            </div>
+
+            <div ng-if="equiposRemotos.length > 0" class="equipos-cards">
+                <div ng-repeat="equipo in equiposRemotos track by $index" class="equipo-card">
+                    <div class="equipo-card-header">
+                        <span class="equipo-card-title">🖥️ Equipo {{$index + 1}}</span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <!-- Estado de conexión -->
+                            <span class="connection-status" 
+                                  ng-class="{
+                                      'connected': equipo.status === 'connected',
+                                      'disconnected': equipo.status === 'disconnected',
+                                      'connecting': equipo.status === 'connecting'
+                                  }"
+                                  ng-if="equipo.status">
+                                <span ng-if="equipo.status === 'connected'">✓ Conectado</span>
+                                <span ng-if="equipo.status === 'disconnected'">✕ Desconectado</span>
+                                <span ng-if="equipo.status === 'connecting'">⏳ Conectando...</span>
+                            </span>
+                            <button class="btn-remove-card" 
+                                    ng-click="quitarEquipoRemoto($index)" 
+                                    title="Eliminar">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                    <div class="equipo-card-body">
+                        <input type="text" 
+                               class="equipo-input" 
+                               ng-model="equipo.ipEquipo" 
+                               ng-change="equipo.status = null; equipo.connectionMessage = null"
+                               placeholder="🌐 IP del equipo">
+                        <input type="text" 
+                               class="equipo-input" 
+                               ng-model="equipo.usuario" 
+                               ng-change="equipo.status = null; equipo.connectionMessage = null"
+                               placeholder="👤 Usuario">
+                        <input type="password" 
+                               class="equipo-input" 
+                               ng-model="equipo.password" 
+                               ng-change="equipo.status = null; equipo.connectionMessage = null"
+                               placeholder="🔒 Contraseña">
+                        
+                        <!-- Botón para validar conexión -->
+                        <button class="btn-validate-connection" 
+                                ng-click="validarConexion(equipo, $index)"
+                                ng-disabled="!equipo.ipEquipo || !equipo.usuario || !equipo.password || equipo.status === 'connecting'"
+                                ng-class="{'btn-validated': equipo.status === 'connected'}">
+                            <span ng-if="equipo.status !== 'connecting' && equipo.status !== 'connected'">🔌 Validar Conexión</span>
+                            <span ng-if="equipo.status === 'connecting'">⏳ Validando...</span>
+                            <span ng-if="equipo.status === 'connected'">✅ Conexión Verificada</span>
+                        </button>
+                        
+                        <!-- Mensaje de confirmación de conexión exitosa -->
+                        <div class="connection-success-message" ng-if="equipo.status === 'connected' && equipo.connectionMessage">
+                            <span class="success-icon">✓</span>
+                            <span class="success-text">
+                                <strong>✅ Conectado exitosamente</strong><br>
+                                Equipo: <strong>{{equipo.connectionMessage.replace('Conectado exitosamente al equipo: ', '')}}</strong>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-add-more-equipo" ng-click="agregarEquipoRemoto()">
+                    ➕ Agregar Otro Equipo
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         INPUTS DE CARPETAS (Versión Actual y Versión Futura)
+         ═══════════════════════════════════════════════════════════ -->
     <div class="file-inputs">
-       <!-- Directorio 1: Versión Actual -->
+
+        <!-- Directorio 1: Versión Actual -->
         <div class="input-group">
-            <label class="input-label">Versión Actual</label>
+            <label class="input-label">📁 Versión Actual</label>
+
+            <!-- Selector de Carpeta -->
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
                        ng-model="directory1"
                        placeholder="Selecciona una carpeta"
-                       readonly
-                       title="{{directory1 || 'Haz clic en 📁 para seleccionar'}}">
-                <button class="btn-icon" 
-                        ng-click="openFolderDialog(1)" 
-                        title="Seleccionar carpeta">
-                    📁
-                </button>
+                       readonly>
+                <button class="btn-icon" ng-click="openFolderDialog(1)" title="Seleccionar carpeta">📁</button>
                 <button class="btn-icon btn-clear" 
                         ng-click="clearDirectory(1)" 
                         ng-if="directory1"
-                        title="Limpiar">
-                    ✕
-                </button>
+                        title="Limpiar">✕</button>
             </div>
-        
+
+            <!-- Contador de archivos -->
             <div class="file-count" ng-if="file1Count > 0">
-                ✅ {{file1Count}} archivo(s) .exe encontrado(s)
+                ✅ {{file1Count}} archivo(s) encontrado(s)
+                <span class="scan-info" ng-if="equiposConectados.length > 0">
+                    (LOCAL + {{equiposConectados.length}} equipos remotos)
+                </span>
+                <span class="scan-info" ng-if="equiposConectados.length === 0">
+                    (LOCAL únicamente)
+                </span>
             </div>
-            
-            <input type="file" 
-                   id="folder1"
-                   webkitdirectory
-                   directory
-                   multiple
-                   style="display: none;" />
         </div>
 
         <!-- Directorio 2: Versión Futura -->
         <div class="input-group">
-            <label class="input-label">Versión Futura</label>
+            <label class="input-label">📁 Versión Futura</label>
+
+            <!-- Selector de Carpeta -->
             <div class="path-input-wrapper">
                 <input type="text" 
                        class="path-input" 
                        ng-model="directory2"
                        placeholder="Selecciona una carpeta"
-                       readonly
-                       title="{{directory2 || 'Haz clic en 📁 para seleccionar'}}">
-                <button class="btn-icon" 
-                        ng-click="openFolderDialog(2)" 
-                        title="Seleccionar carpeta">
-                    📁
-                </button>
+                       readonly>
+                <button class="btn-icon" ng-click="openFolderDialog(2)" title="Seleccionar carpeta">📁</button>
                 <button class="btn-icon btn-clear" 
                         ng-click="clearDirectory(2)" 
                         ng-if="directory2"
-                        title="Limpiar">
-                    ✕
-                </button>
+                        title="Limpiar">✕</button>
             </div>
 
+            <!-- Contador de archivos -->
             <div class="file-count" ng-if="file2Count > 0">
-                ✅ {{file2Count}} archivo(s) .exe encontrado(s)
+                ✅ {{file2Count}} archivo(s) encontrado(s)
+                <span class="scan-info" ng-if="equiposConectados.length > 0">
+                    (LOCAL + {{equiposConectados.length}} equipos remotos)
+                </span>
+                <span class="scan-info" ng-if="equiposConectados.length === 0">
+                    (LOCAL únicamente)
+                </span>
             </div>
-            
-            <input type="file" 
-                   id="folder2"
-                   webkitdirectory
-                   directory
-                   multiple
-                   style="display: none;" />
         </div>
     </div>
 
-    <div class="generate-section" style="display: flex; gap: 10px; margin-top: 20px; align-items: stretch;">
-    
+    <!-- ═══════════════════════════════════════════════════════════
+         BOTÓN DE ESCANEO Y COMPARACIÓN
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="generate-section">
         <div class="actions-container">
-            <button ng-click="generateTable()" class="btn btn-primary" ng-disabled="isScanning1 || isScanning2">
-                <i class="fas fa-sync-alt"></i> Generar Ficha
+            <button ng-click="escanearYComparar()" 
+                    class="btn btn-primary" 
+                    ng-disabled="isScanning || !directory1 || !directory2">
+                <i class="fas fa-sync-alt"></i> 
+                <span ng-if="!isScanning">Escanear y Comparar</span>
+                <span ng-if="isScanning">⏳ Escaneando...</span>
             </button>
-
-
+            <button ng-click="reset()" class="btn btn-reset" ng-if="showTable">
+                <i class="fas fa-trash"></i> Limpiar Todo
+            </button>
         </div>
     </div>
 
 </div>
 
-    <!-- Mensajes -->
-    <div class="info-message" ng-if="isScanning1 || isScanning2">
-        ⏳ Escaneando archivos... Por favor espere.
-    </div>
+<!-- ═══════════════════════════════════════════════════════════
+     MENSAJES DE ESTADO
+     ═══════════════════════════════════════════════════════════ -->
+<div class="info-message" ng-if="isScanning">
+    ⏳ Escaneando archivos en {{equiposConectados.length + 1}} ubicación(es)... Por favor espere.
+</div>
 
-    <div class="error-message" ng-if="errorMessage">
-        {{errorMessage}}
-    </div>
+<div class="error-message" ng-if="errorMessage">
+    {{errorMessage}}
+</div>
 
-    <div class="success-message" ng-if="successMessage">
-        {{successMessage}}
-    </div>
+<div class="success-message" ng-if="successMessage">
+    {{successMessage}}
+</div>
 
- <!-- Tabla de Resultados -->
+<!-- ═══════════════════════════════════════════════════════════
+     TABLA DE RESULTADOS
+     ═══════════════════════════════════════════════════════════ -->
 <div class="table-wrapper" ng-show="showTable && tableData.length > 0">
     <div class="table-header-info">
         <h3>Matriz Resultante</h3>
-        <p>Comparación: {{directory1Name}} vs {{directory2Name}}</p>
-        <p class="comparison-paths">
-            <small>
-                📁 {{directory1}}<br>
-                📁 {{directory2}}
-            </small>
-        </p>
+        <p>Comparación de archivos entre equipos</p>
     </div>
     
     <div class="table-container">
@@ -117,7 +208,7 @@
             <thead>
                 <tr>
                     <th class="col-nombre">Archivo</th>
-                    <th class="col-equipo">Equipo</th>
+                    <th class="col-equipos">Equipo / IP</th>
                     <th class="col-version-actual">Versión Actual</th>
                     <th class="col-peso-actual">Peso Actual</th>
                     <th class="col-version-futura">Versión Futura</th>
@@ -128,37 +219,63 @@
             <tbody>
                 <tr ng-repeat="row in tableData track by $index" 
                     ng-class="{
-                        'version-changed': row.versionChanged,
-                        'size-changed': row.sizeChanged,
-                        'no-changes': !row.versionChanged && !row.sizeChanged
+                        'has-changes': row.changeType === 'has-changes',
+                        'only-local': row.changeType === 'only-local',
+                        'only-remote': row.changeType === 'only-remote',
+                        'no-changes': row.changeType === 'no-changes'
                     }">
+                    
+                    <!-- Nombre -->
                     <td class="col-nombre">
                         <div class="cell-nombre">
                             <span class="file-icon">📄</span>
                             <span class="file-name">{{row.name}}</span>
                         </div>
                     </td>
-                    <td class="col-equipo text-center">
-                        <span class="equipo-value">-</span>
+                    
+                    <!-- Equipo / IP -->
+                    <td class="col-equipos">
+                        <div class="equipos-container">
+                            <span ng-repeat="equipo in row.equiposArray"
+                                  class="equipo-badge"
+                                  ng-class="{
+                                      'badge-local': equipo === 'LOCAL',
+                                      'badge-remote': equipo !== 'LOCAL'
+                                  }">
+                                {{equipo}}
+                            </span>
+                        </div>
                     </td>
+                    
+                    <!-- Versión Actual -->
                     <td class="col-version-actual text-center">
-                        <span class="version-badge version-actual">{{row.versionActual}}</span>
+                        <span class="version-badge version-actual" ng-if="row.versionActual !== '-'">{{row.versionActual}}</span>
+                        <span class="no-data" ng-if="row.versionActual === '-'">-</span>
                     </td>
+                    
+                    <!-- Peso Actual -->
                     <td class="col-peso-actual text-center">
-                        <span class="peso-value">{{row.pesoActual}}</span>
+                        <span class="peso-value" ng-if="row.pesoActual !== '-'">{{row.pesoActual}}</span>
+                        <span class="no-data" ng-if="row.pesoActual === '-'">-</span>
                     </td>
+                    
+                    <!-- Versión Futura -->
                     <td class="col-version-futura text-center">
                         <span class="version-badge version-futura" 
-                              ng-class="{'version-highlight': row.versionChanged}">
-                            {{row.versionFutura}}
-                        </span>
+                              ng-class="{'version-highlight': row.versionChanged}" 
+                              ng-if="row.versionFutura !== '-'">{{row.versionFutura}}</span>
+                        <span class="no-data" ng-if="row.versionFutura === '-'">-</span>
                     </td>
+                    
+                    <!-- Peso Futuro -->
                     <td class="col-peso-futuro text-center">
                         <span class="peso-value" 
-                              ng-class="{'peso-highlight': row.sizeChanged}">
-                            {{row.pesoFuturo}}
-                        </span>
+                              ng-class="{'peso-highlight': row.sizeChanged}" 
+                              ng-if="row.pesoFuturo !== '-'">{{row.pesoFuturo}}</span>
+                        <span class="no-data" ng-if="row.pesoFuturo === '-'">-</span>
                     </td>
+                    
+                    <!-- Ubicación -->
                     <td class="col-ruta">
                         <div class="ruta-container">
                             <span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span>
@@ -168,18 +285,27 @@
             </tbody>
         </table>
         
+        <!-- Estadísticas -->
         <div class="statistics" ng-if="tableData.length > 0">
             <div class="stat-item">
                 <span class="stat-label">Total:</span>
                 <span class="stat-value">{{statistics.total}}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Versiones Cambiadas:</span>
-                <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
+                <span class="stat-label">En Ambos:</span>
+                <span class="stat-value stat-unchanged">{{statistics.enAmbos}}</span>
             </div>
             <div class="stat-item">
-                <span class="stat-label">Tamaños Diferentes:</span>
-                <span class="stat-value stat-changed">{{statistics.sizeChanged}}</span>
+                <span class="stat-label">Solo Actual:</span>
+                <span class="stat-value stat-only-local">{{statistics.onlyLocal}}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Solo Futura:</span>
+                <span class="stat-value stat-only-remote">{{statistics.onlyRemote}}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Con Cambios:</span>
+                <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-label">Sin Cambios:</span>
@@ -189,31 +315,32 @@
     </div>
 </div>
 
-<!-- Botón Exportar a PDF después de la tabla -->
+<!-- ═══════════════════════════════════════════════════════════
+     EXPORTAR PDF
+     ═══════════════════════════════════════════════════════════ -->
 <div class="pdf-export-section" ng-if="showTable && tableData.length > 0">
     <button ng-click="generatePDF()" class="btn btn-pdf">
         <i class="fas fa-file-pdf"></i> Exportar a PDF
     </button>
 </div>
-    <div class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <span class="footer-label">Aplicación:</span>
-                <span class="footer-value">F2X - Generador de Ficha Técnica</span>
-            </div>
-            
-            <div class="footer-divider"></div>
 
-            <div class="footer-section">
-                <span class="footer-label">Versión:</span>
-                <span class="footer-badge">v1.2.0</span>
-            </div>
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+     ═══════════════════════════════════════════════════════════ -->
+<div class="footer">
+    <div class="footer-content">
+        <div class="footer-section">
+            <span class="footer-label">Aplicación:</span>
+            <span class="footer-value">F2X - Generador de Ficha Técnica</span>
         </div>
-        
-        <div class="footer-logo">
-            <img src="./assets/images/f2x-logo.png" alt="F2X Logo" class="footer-f2x-logo">
+        <div class="footer-divider"></div>
+        <div class="footer-section">
+            <span class="footer-label">Versión:</span>
+            <span class="footer-badge">v2.1.0</span>
         </div>
-        
-        <p class="copyright">© 2026 Todos los derechos reservados.</p>
     </div>
+    <div class="footer-logo">
+        <img src="./assets/images/f2x-logo.png" alt="F2X Logo" class="footer-f2x-logo">
+    </div>
+    <p class="copyright">© 2026 Todos los derechos reservados.</p>
 </div>

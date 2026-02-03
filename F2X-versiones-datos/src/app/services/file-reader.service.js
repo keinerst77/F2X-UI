@@ -1,43 +1,61 @@
 angular.module('fileComparatorApp')
-    .service('FileReaderService', [function() {
-        
-        /**
-         * Lee el contenido de un archivo y lo procesa
-         * @param {File} file - Archivo a leer
-         * @param {Function} successCallback - Callback en caso de éxito
-         * @param {Function} errorCallback - Callback en caso de error
-         */
-        this.readFile = function(file, successCallback, errorCallback) {
+.service('FileReaderService', function() {
+    
+    /**
+     * Lee el contenido de un archivo de texto
+     * @param {File} file - Archivo a leer
+     * @returns {Promise<string>} - Contenido del archivo
+     */
+    this.readAsText = function(file) {
+        return new Promise((resolve, reject) => {
             const reader = new FileReader();
             
             reader.onload = function(e) {
-                try {
-                    const content = e.target.result;
-                    const lines = content.split('\n')
-                        .map(line => line.trim())
-                        .filter(line => line !== '');
-                    
-                    successCallback(lines);
-                } catch (error) {
-                    errorCallback('Error al procesar el archivo: ' + error.message);
-                }
+                resolve(e.target.result);
             };
             
-            reader.onerror = function() {
-                errorCallback('Error al leer el archivo');
+            reader.onerror = function(e) {
+                reject(new Error('Error al leer el archivo'));
             };
             
             reader.readAsText(file);
-        };
-
-        /**
-         * Valida el tipo de archivo
-         * @param {File} file - Archivo a validar
-         * @param {Array} allowedTypes - Tipos permitidos
-         * @returns {boolean}
-         */
-        this.validateFileType = function(file, allowedTypes) {
-            const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-            return allowedTypes.includes(fileExtension);
-        };
-    }]);
+        });
+    };
+    
+    /**
+     * Parsea un archivo CSV y retorna un array de objetos
+     * @param {string} csvContent - Contenido del CSV
+     * @returns {Array} - Array de objetos parseados
+     */
+    this.parseCSV = function(csvContent) {
+        const lines = csvContent.split('\n').filter(line => line.trim());
+        if (lines.length === 0) return [];
+        
+        const headers = lines[0].split(',').map(h => h.trim());
+        const data = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(',').map(v => v.trim());
+            const obj = {};
+            
+            headers.forEach((header, index) => {
+                obj[header] = values[index] || '';
+            });
+            
+            data.push(obj);
+        }
+        
+        return data;
+    };
+    
+    /**
+     * Valida que un archivo tenga la extensión correcta
+     * @param {File} file - Archivo a validar
+     * @param {Array<string>} validExtensions - Extensiones válidas
+     * @returns {boolean}
+     */
+    this.validateFileExtension = function(file, validExtensions) {
+        const fileName = file.name.toLowerCase();
+        return validExtensions.some(ext => fileName.endsWith(ext.toLowerCase()));
+    };
+});
