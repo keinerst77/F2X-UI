@@ -10,12 +10,14 @@ function createWindow() {
             nodeIntegration: false,
             contextIsolation: true
         },
-        icon: path.join(__dirname, 'icon.png') // Opcional
+        icon: path.join(__dirname, 'icon.png')
     });
 
     // Cargar index.html desde src/
     win.loadFile(path.join(__dirname, 'src', 'index.html'));
     
+    // Abre el devtools automaticamente
+    win.webContents.openDevTools();
 }
 
 // ========== MENÚ PERSONALIZADO EN ESPAÑOL ==========
@@ -77,6 +79,17 @@ function createMenu() {
                 {
                     label: 'Restablecer zoom',
                     role: 'resetZoom'
+                },
+                { type: 'separator' },
+                // AGREGAR OPCIÓN PARA DEVTOOLS
+                {
+                    label: 'Herramientas de Desarrollador',
+                    accelerator: 'F12',
+                    click: (item, focusedWindow) => {
+                        if (focusedWindow) {
+                            focusedWindow.webContents.toggleDevTools();
+                        }
+                    }
                 }
             ]
         },
@@ -136,7 +149,7 @@ ipcMain.handle('select-folder', async () => {
 });
 
 app.whenReady().then(() => {
-    createMenu(); // Crear menú en español
+    createMenu();
     createWindow();
 });
 

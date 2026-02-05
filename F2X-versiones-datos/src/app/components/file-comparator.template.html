@@ -49,41 +49,53 @@
                         </div>
                     </div>
                     <div class="equipo-card-body">
-                        <input type="text" 
-                               class="equipo-input" 
-                               ng-model="equipo.ipEquipo" 
-                               ng-change="equipo.status = null; equipo.connectionMessage = null"
-                               placeholder="🌐 IP del equipo">
-                        <input type="text" 
-                               class="equipo-input" 
-                               ng-model="equipo.usuario" 
-                               ng-change="equipo.status = null; equipo.connectionMessage = null"
-                               placeholder="👤 Usuario">
-                        <input type="password" 
-                               class="equipo-input" 
-                               ng-model="equipo.password" 
-                               ng-change="equipo.status = null; equipo.connectionMessage = null"
-                               placeholder="🔒 Contraseña">
-                        
-                        <!-- Botón para validar conexión -->
-                        <button class="btn-validate-connection" 
-                                ng-click="validarConexion(equipo, $index)"
-                                ng-disabled="!equipo.ipEquipo || !equipo.usuario || !equipo.password || equipo.status === 'connecting'"
-                                ng-class="{'btn-validated': equipo.status === 'connected'}">
-                            <span ng-if="equipo.status !== 'connecting' && equipo.status !== 'connected'">🔌 Validar Conexión</span>
-                            <span ng-if="equipo.status === 'connecting'">⏳ Validando...</span>
-                            <span ng-if="equipo.status === 'connected'">✅ Conexión Verificada</span>
-                        </button>
-                        
-                        <!-- Mensaje de confirmación de conexión exitosa -->
-                        <div class="connection-success-message" ng-if="equipo.status === 'connected' && equipo.connectionMessage">
-                            <span class="success-icon">✓</span>
-                            <span class="success-text">
-                                <strong>✅ Conectado exitosamente</strong><br>
-                                Equipo: <strong>{{equipo.connectionMessage.replace('Conectado exitosamente al equipo: ', '')}}</strong>
-                            </span>
-                        </div>
-                    </div>
+        <input type="text" 
+            class="equipo-input" 
+            ng-model="equipo.ipEquipo" 
+            placeholder="🌐 IP del equipo">
+        <input type="text" 
+            class="equipo-input" 
+            ng-model="equipo.usuario" 
+            placeholder="👤 Usuario">
+        <input type="password" 
+            class="equipo-input" 
+            ng-model="equipo.password" 
+            placeholder="🔒 Contraseña">
+        
+       <!-- Rutas específicas para este equipo -->
+<input type="text" 
+    class="equipo-input" 
+    ng-model="equipo.rutaActual" 
+    placeholder="📁 Ruta Versión Actual en este equipo"
+    ng-class="{'auto-found': equipo.rutaActual && equipo.carpetasEncontradas}">
+
+<input type="text" 
+    class="equipo-input" 
+    ng-model="equipo.rutaFutura" 
+    placeholder="📁 Ruta Versión Futura en este equipo"
+    ng-class="{'auto-found': equipo.rutaFutura && equipo.carpetasEncontradas}">
+        
+        <button class="btn-validate-connection" 
+                ng-click="validarConexion(equipo, $index)"
+                ng-disabled="!equipo.ipEquipo || !equipo.usuario || !equipo.password"
+                ng-class="{'btn-validated': equipo.status === 'connected'}">
+            <!-- ... -->
+        </button>
+
+        <!-- Botón de búsqueda automática de carpetas -->
+<button class="btn-auto-search" 
+        ng-click="buscarCarpetasAutomaticamente(equipo)"
+        ng-disabled="equipo.status !== 'connected' || !directory1Name || !directory2Name"
+        ng-if="equipo.status === 'connected'">
+    <span ng-if="!equipo.searchingFolders">🔍 Buscar Carpetas Automáticamente</span>
+    <span ng-if="equipo.searchingFolders">⏳ Buscando...</span>
+</button>
+
+<!-- Mensaje de confirmación si encuentra las carpetas -->
+<div ng-if="equipo.rutaActual && equipo.rutaFutura" class="folders-found-message">
+    ✅ Carpetas encontradas automáticamente
+</div>
+</div>
                 </div>
 
                 <button class="btn-add-more-equipo" ng-click="agregarEquipoRemoto()">
@@ -218,12 +230,13 @@
             </thead>
             <tbody>
                 <tr ng-repeat="row in tableData track by $index" 
-                    ng-class="{
-                        'has-changes': row.changeType === 'has-changes',
-                        'only-local': row.changeType === 'only-local',
-                        'only-remote': row.changeType === 'only-remote',
-                        'no-changes': row.changeType === 'no-changes'
-                    }">
+                ng-class="{
+                    'has-changes': row.changeType === 'has-changes',
+                    'only-local': row.changeType === 'only-local',
+                    'only-remote': row.changeType === 'only-remote',
+                    'no-changes': row.changeType === 'no-changes',
+                    'version-menor': row.versionMenor
+                }">
                     
                     <!-- Nombre -->
                     <td class="col-nombre">
@@ -237,11 +250,11 @@
                     <td class="col-equipos">
                         <div class="equipos-container">
                             <span ng-repeat="equipo in row.equiposArray"
-                                  class="equipo-badge"
-                                  ng-class="{
-                                      'badge-local': equipo === 'LOCAL',
-                                      'badge-remote': equipo !== 'LOCAL'
-                                  }">
+                                class="equipo-badge"
+                                ng-class="{
+                                    'badge-local': equipo.startsWith('10.0.134'),
+                                    'badge-remote': !equipo.startsWith('10.0.134')
+                                }">
                                 {{equipo}}
                             </span>
                         </div>
@@ -286,32 +299,20 @@
         </table>
         
         <!-- Estadísticas -->
-        <div class="statistics" ng-if="tableData.length > 0">
-            <div class="stat-item">
-                <span class="stat-label">Total:</span>
-                <span class="stat-value">{{statistics.total}}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">En Ambos:</span>
-                <span class="stat-value stat-unchanged">{{statistics.enAmbos}}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Solo Actual:</span>
-                <span class="stat-value stat-only-local">{{statistics.onlyLocal}}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Solo Futura:</span>
-                <span class="stat-value stat-only-remote">{{statistics.onlyRemote}}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Con Cambios:</span>
-                <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
-            </div>
-            <div class="stat-item">
-                <span class="stat-label">Sin Cambios:</span>
-                <span class="stat-value stat-unchanged">{{statistics.noChanges}}</span>
-            </div>
-        </div>
+<div class="statistics" ng-if="tableData.length > 0">
+    <div class="stat-item">
+        <span class="stat-label">Total:</span>
+        <span class="stat-value">{{statistics.total}}</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">Con Cambios:</span>
+        <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
+    </div>
+    <div class="stat-item">
+        <span class="stat-label">Sin Cambios:</span>
+        <span class="stat-value stat-unchanged">{{statistics.noChanges}}</span>
+    </div>
+</div>
     </div>
 </div>
 

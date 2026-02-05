@@ -636,4 +636,99 @@
 .stat-only-remote {
     color: #F57C00;
     font-weight: 800;
+
+}
+
+.equipo-input.auto-found {
+    background-color: #e8f5e9;
+    border-color: #4caf50;
+}
+
+.equipo-input.auto-found::placeholder {
+    color: #2e7d32;
+}
+
+/* ═══════════════════════════════════════════════
+   CARPETAS ENCONTRADAS AUTOMÁTICAMENTE
+   ═══════════════════════════════════════════════ */
+
+.equipo-input.auto-found {
+    background-color: #e8f5e9;
+    border-color: #4caf50;
+}
+
+.equipo-input.auto-found::placeholder {
+    color: #2e7d32;
+}
+
+.folders-found-message {
+    margin-top: 10px;
+    padding: 8px;
+    background-color: #d4edda;
+    color: #155724;
+    border-radius: 6px;
+    font-size: 12px;
+    text-align: center;
+    border: 1px solid #c3e6cb;
+}
+
+/* Botón de búsqueda automática */
+.btn-auto-search {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+.btn-auto-search:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+}
+
+.btn-auto-search:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Agregar al final de components.css */
+
+/* ═══════════════════════════════════════════════
+   RESALTADO DE VERSIONES MENORES
+   ═══════════════════════════════════════════════ */
+
+.version-menor {
+    background: linear-gradient(135deg, #FFEBEE, #FFCDD2) !important;
+    border-left: 4px solid #F44336 !important;
+}
+
+.version-menor .version-badge.version-futura {
+    background: #FFCDD2 !important;
+    color: #C62828 !important;
+    border-color: #EF5350 !important;
+    animation: pulse-warning 2s ease-in-out infinite;
+    position: relative;
+}
+
+/* Agregar icono de advertencia DENTRO del badge de versión futura */
+.version-menor .version-badge.version-futura::before {
+    content: '⚠️ ';
+    margin-right: 4px;
+}
+
+@keyframes pulse-warning {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(244, 67, 54, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(244, 67, 54, 0);
+    }
 }

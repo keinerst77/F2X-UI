@@ -46,42 +46,42 @@ angular.module('fileComparatorApp')
     // ═══════════════════════════════════════════════════
     
     this.getHeaderStyles = function() {
-        return {
-            background: {
-                fillColor: this.colors.F2X_DARK,
-                height: 40
-            },
-            line: {
-                fillColor: this.colors.F2X_GREEN,
-                height: 3
-            },
-            logo: {
-                fontSize: 28,
-                textColor: this.colors.WHITE,
-                fontStyle: 'bold',
-                position: { x: 20, y: 28 }
-            },
-            logoSubtitle: {
-                fontSize: 10,
-                textColor: this.colors.F2X_GREEN,
-                fontStyle: 'normal',
-                position: { x: 20, y: 34 }
-            },
-            title: {
-                fontSize: 20,
-                textColor: this.colors.WHITE,
-                fontStyle: 'bold',
-                position: { x: 148, y: 28 }
-            },
-            date: {
-                fontSize: 9,
-                textColor: [200, 200, 200],
-                fontStyle: 'normal',
-                position: { y: 28 },
-                align: 'right'
-            }
-        };
+    return {
+        background: {
+            fillColor: this.colors.F2X_DARK,
+            height: 40
+        },
+        line: {
+            fillColor: this.colors.F2X_GREEN,
+            height: 3
+        },
+        logo: {
+            fontSize: 28,
+            textColor: this.colors.WHITE,
+            fontStyle: 'bold',
+            position: { x: 20, y: 28 }
+        },
+        logoSubtitle: {
+            fontSize: 10,
+            textColor: this.colors.F2X_GREEN,
+            fontStyle: 'normal',
+            position: { x: 20, y: 34 }
+        },
+        title: {
+            fontSize: 18, 
+            textColor: this.colors.WHITE,
+            fontStyle: 'bold',
+            position: { x: 148, y: 25 }  
+        },
+        date: {
+            fontSize: 9,
+            textColor: [200, 200, 200],
+            fontStyle: 'normal',
+            position: { y: 35 },
+            align: 'right'
+        }
     };
+};
     
     // ═══════════════════════════════════════════════════
     // ESTILOS DE TARJETAS DE DIRECTORIO
