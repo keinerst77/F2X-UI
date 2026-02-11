@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
+const nativeTextarea = require('./native-textarea');
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -8,17 +9,43 @@ function createWindow() {
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
-            contextIsolation: true
+            contextIsolation: true,
+            // Deshabilitar aceleración de hardware para inputs
+            offscreen: false,
+            enableRemoteModule: false,
+            // Forzar renderizado inmediato
+            backgroundThrottling: false
         },
-        icon: path.join(__dirname, 'icon.png')
+        icon: path.join(__dirname, 'icon.png'),
+        // Forzar composición de ventana
+        transparent: false,
+        frame: true
     });
+
+    // Deshabilitar throttling de eventos
+    win.webContents.setBackgroundThrottling(false);
 
     // Cargar index.html desde src/
     win.loadFile(path.join(__dirname, 'src', 'index.html'));
     
-    // Abre el devtools automaticamente
+    // Abre el devtools automáticamente
     win.webContents.openDevTools();
+    
+    // Asegurar que los eventos de teclado no se bloqueen
+    win.webContents.on('did-finish-load', () => {
+        win.webContents.setIgnoreMenuShortcuts(false);
+    });
 }
+// Handler para abrir textarea nativa
+ipcMain.handle('open-native-textarea', async (event, options) => {
+    const result = await nativeTextarea.open(
+        options.title || 'Motivo del Cambio',
+        options.placeholder || 'Especifica el motivo o justificación para realizar este cambio de versión...',
+        options.defaultValue || ''
+    );
+    
+    return result;
+});
 
 // ========== MENÚ PERSONALIZADO EN ESPAÑOL ==========
 function createMenu() {
@@ -81,7 +108,6 @@ function createMenu() {
                     role: 'resetZoom'
                 },
                 { type: 'separator' },
-                // AGREGAR OPCIÓN PARA DEVTOOLS
                 {
                     label: 'Herramientas de Desarrollador',
                     accelerator: 'F12',
@@ -123,7 +149,7 @@ function createMenu() {
     Menu.setApplicationMenu(menu);
 }
 
-// Manejar selección de carpeta automatico
+// Manejar selección de carpeta automático
 ipcMain.handle('select-folder', async () => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
@@ -147,6 +173,10 @@ ipcMain.handle('select-folder', async () => {
     
     return { success: false };
 });
+
+// Deshabilitar aceleración de hardware globalmente
+app.commandLine.appendSwitch('disable-gpu-vsync');
+app.commandLine.appendSwitch('disable-frame-rate-limit');
 
 app.whenReady().then(() => {
     createMenu();
