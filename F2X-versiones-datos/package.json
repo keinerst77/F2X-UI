@@ -4,32 +4,13 @@
   "description": "Comparador de Versiones de Aplicaciones",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
-  },
-  "author": "F2X",
-  "license": "ISC",
-  "devDependencies": {
-    "electron": "^33.2.0",
-    "electron-builder": "^26.4.0"
-  },
-  "dependencies": {
-    "jspdf": "^4.0.0",
-    "jspdf-autotable": "^5.0.7"
-  },
-
-  
-
-
-
-  "name": "Ficha",
-  "version": "1.0.0",
-  "main": "main.js",
-  "scripts": {
     "start": "electron .",
     "dist": "electron-builder"
   },
+  "author": "F2X",
+  "license": "ISC",
   "build": {
-    "appId": "com.tuusuario.miapp",
+    "appId": "com.f2x.fichа теcnica",
     "productName": "Ficha",
     "win": {
       "target": [
@@ -42,5 +23,13 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^26.4.0"
+  },
+  "dependencies": {
+    "jspdf": "^2.5.2",
+    "jspdf-autotable": "^3.8.5"
   }
 }

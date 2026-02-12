@@ -4,6 +4,8 @@ class NativeTextarea {
     constructor() {
         this.textareaWindow = null;
         this.resolvePromise = null;
+        this._resultHandler = null;
+        this._cancelHandler = null;
     }
 
     /**
@@ -15,6 +17,11 @@ class NativeTextarea {
      */
     open(title = 'Motivo del Cambio', placeholder = '', defaultValue = '') {
         return new Promise((resolve) => {
+            // Si ya hay una ventana abierta, cerrarla primero
+            if (this.textareaWindow) {
+                this.close();
+            }
+
             this.resolvePromise = resolve;
 
             this.textareaWindow = new BrowserWindow({
@@ -223,33 +230,68 @@ class NativeTextarea {
 
             this.textareaWindow.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
 
-            // Manejar resultado
-            ipcMain.once('native-textarea-result', (event, value) => {
-                this.resolvePromise(value);
-                this.close();
-            });
-
-            // Manejar cancelación
-            ipcMain.once('native-textarea-cancel', () => {
-                this.resolvePromise(null);
-                this.close();
-            });
-
-            // Manejar cierre de ventana
-            this.textareaWindow.on('closed', () => {
+            // Guardar referencia a los handlers para poder removerlos manualmente
+            // y usar arrow functions para preservar el contexto `this`
+            this._resultHandler = (event, value) => {
+                this._cleanup();
                 if (this.resolvePromise) {
-                    this.resolvePromise(null);
+                    const resolveFn = this.resolvePromise;
+                    this.resolvePromise = null;
+                    resolveFn(value);
+                }
+                this._closeWindow();
+            };
+
+            this._cancelHandler = () => {
+                this._cleanup();
+                if (this.resolvePromise) {
+                    const resolveFn = this.resolvePromise;
+                    this.resolvePromise = null;
+                    resolveFn(null);
+                }
+                this._closeWindow();
+            };
+
+            ipcMain.once('native-textarea-result', this._resultHandler);
+            ipcMain.once('native-textarea-cancel', this._cancelHandler);
+
+            //  El evento 'closed' solo resuelve si aún no se resolvió
+            // (cuando el usuario cierra la ventana con la X)
+            this.textareaWindow.on('closed', () => {
+                this._cleanup();
+                if (this.resolvePromise) {
+                    const resolveFn = this.resolvePromise;
+                    this.resolvePromise = null;
+                    resolveFn(null);
                 }
                 this.textareaWindow = null;
             });
         });
     }
 
-    close() {
-        if (this.textareaWindow) {
-            this.textareaWindow.close();
-            this.textareaWindow = null;
+    // Limpia los listeners de IPC para evitar acumulación y conflictos
+    _cleanup() {
+        if (this._resultHandler) {
+            ipcMain.removeListener('native-textarea-result', this._resultHandler);
+            this._resultHandler = null;
         }
+        if (this._cancelHandler) {
+            ipcMain.removeListener('native-textarea-cancel', this._cancelHandler);
+            this._cancelHandler = null;
+        }
+    }
+
+    _closeWindow() {
+        if (this.textareaWindow) {
+            const win = this.textareaWindow;
+            this.textareaWindow = null;
+            win.close();
+        }
+    }
+
+    close() {
+        this._cleanup();
+        this._closeWindow();
         this.resolvePromise = null;
     }
 }
