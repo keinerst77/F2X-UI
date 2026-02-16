@@ -28,8 +28,6 @@ function createWindow() {
     // Cargar index.html desde src/
     win.loadFile(path.join(__dirname, 'src', 'index.html'));
     
-    // Abre el devtools automáticamente
-    win.webContents.openDevTools();
     
     // Asegurar que los eventos de teclado no se bloqueen
     win.webContents.on('did-finish-load', () => {

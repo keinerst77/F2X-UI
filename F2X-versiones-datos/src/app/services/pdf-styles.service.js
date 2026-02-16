@@ -6,15 +6,25 @@ angular.module('fileComparatorApp')
     // ═══════════════════════════════════════════════════
     
     this.colors = {
-        F2X_GREEN: [190, 214, 47],
-        F2X_DARK: [56, 56, 56],
-        WHITE: [255, 255, 255],
-        BLACK: [0, 0, 0],
-        GRAY_LIGHT: [245, 247, 250],
-        GRAY_TEXT: [102, 102, 102],
-        BLUE_LIGHT: [227, 242, 253],
-        ORANGE_LIGHT: [255, 243, 224],
-        YELLOW_LIGHT: [255, 248, 225]
+        // Encabezado
+        F2X_GREEN:      [190, 214, 47],   
+        F2X_DARK:       [56, 56, 56],     
+        WHITE:          [255, 255, 255],
+
+        // Paleta monocromática para el resto del documento
+        BLACK:          [20, 20, 20],     
+        GRAY_900:       [70, 70, 70],     
+        GRAY_700:       [80, 80, 80],     
+        GRAY_500:       [120, 120, 120],  
+        GRAY_200:       [220, 220, 220],  
+        GRAY_100:       [245, 245, 245],  
+        GRAY_50:        [250, 250, 250],  
+        GRAY_TEXT:      [100, 100, 100], 
+
+        // Colores de estado de fila
+        BLUE_LIGHT:     [235, 235, 235],  
+        ORANGE_LIGHT:   [225, 225, 225],  
+        YELLOW_LIGHT:   [240, 240, 240]   
     };
     
     // ═══════════════════════════════════════════════════
@@ -46,42 +56,42 @@ angular.module('fileComparatorApp')
     // ═══════════════════════════════════════════════════
     
     this.getHeaderStyles = function() {
-    return {
-        background: {
-            fillColor: this.colors.F2X_DARK,
-            height: 40
-        },
-        line: {
-            fillColor: this.colors.F2X_GREEN,
-            height: 3
-        },
-        logo: {
-            fontSize: 28,
-            textColor: this.colors.WHITE,
-            fontStyle: 'bold',
-            position: { x: 20, y: 28 }
-        },
-        logoSubtitle: {
-            fontSize: 10,
-            textColor: this.colors.F2X_GREEN,
-            fontStyle: 'normal',
-            position: { x: 20, y: 34 }
-        },
-        title: {
-            fontSize: 18, 
-            textColor: this.colors.WHITE,
-            fontStyle: 'bold',
-            position: { x: 148, y: 25 }  
-        },
-        date: {
-            fontSize: 9,
-            textColor: [200, 200, 200],
-            fontStyle: 'normal',
-            position: { y: 35 },
-            align: 'right'
-        }
+        return {
+            background: {
+                fillColor: this.colors.F2X_DARK,  
+                height: 40
+            },
+            line: {
+                fillColor: this.colors.F2X_GREEN,  
+                height: 3
+            },
+            logo: {
+                fontSize: 28,
+                textColor: this.colors.WHITE,
+                fontStyle: 'bold',
+                position: { x: 20, y: 28 }
+            },
+            logoSubtitle: {
+                fontSize: 10,
+                textColor: this.colors.F2X_GREEN,
+                fontStyle: 'normal',
+                position: { x: 20, y: 34 }
+            },
+            title: {
+                fontSize: 18,
+                textColor: this.colors.WHITE,
+                fontStyle: 'bold',
+                position: { x: 148, y: 25 }
+            },
+            date: {
+                fontSize: 9,
+                textColor: [200, 200, 200],
+                fontStyle: 'normal',
+                position: { y: 35 },
+                align: 'right'
+            }
+        };
     };
-};
     
     // ═══════════════════════════════════════════════════
     // ESTILOS DE TARJETAS DE DIRECTORIO
@@ -89,17 +99,17 @@ angular.module('fileComparatorApp')
     
     this.getDirectoryCardStyles = function() {
         return {
-            fillColor: this.colors.GRAY_LIGHT,
+            fillColor: this.colors.GRAY_100,       
             height: 28,
             borderRadius: 3,
             label: {
                 fontSize: 10,
-                textColor: this.colors.GRAY_TEXT,
+                textColor: this.colors.GRAY_700,   
                 fontStyle: 'bold'
             },
             text: {
                 fontSize: 9,
-                textColor: this.colors.F2X_DARK,
+                textColor: this.colors.BLACK,      
                 fontStyle: 'normal'
             }
         };
@@ -113,7 +123,7 @@ angular.module('fileComparatorApp')
         return {
             theme: 'grid',
             headStyles: {
-                fillColor: this.colors.F2X_DARK,
+                fillColor: this.colors.GRAY_900,   
                 textColor: this.colors.WHITE,
                 fontSize: 9,
                 fontStyle: 'bold',
@@ -124,44 +134,44 @@ angular.module('fileComparatorApp')
             bodyStyles: {
                 fontSize: 8,
                 cellPadding: 3,
-                textColor: this.colors.F2X_DARK,
-                lineColor: [224, 224, 224],
+                textColor: this.colors.BLACK,      
+                lineColor: this.colors.GRAY_200,   
                 lineWidth: 0.1
             },
             alternateRowStyles: {
-                fillColor: [250, 250, 250]
+                fillColor: this.colors.GRAY_50     
             }
         };
     };
     
     // ═══════════════════════════════════════════════════
-    // ESTILOS DE PIE DE PÁGINA
+    // ESTILOS DE PIE DE PÁGINA 
     // ═══════════════════════════════════════════════════
     
     this.getFooterStyles = function() {
         return {
             line: {
-                drawColor: [200, 200, 200],
+                drawColor: this.colors.GRAY_200,  
                 lineWidth: 0.5
             },
             summary: {
                 fontSize: 10,
-                textColor: this.colors.GRAY_TEXT,
+                textColor: this.colors.GRAY_700,
                 fontStyle: 'normal'
             },
             info: {
                 fontSize: 9,
-                textColor: this.colors.GRAY_TEXT,
+                textColor: this.colors.GRAY_700,
                 fontStyle: 'normal'
             },
             highlight: {
                 fontSize: 9,
-                textColor: this.colors.F2X_DARK,
+                textColor: this.colors.BLACK,      
                 fontStyle: 'bold'
             },
             copyright: {
                 fontSize: 8,
-                textColor: [150, 150, 150],
+                textColor: this.colors.GRAY_500,
                 fontStyle: 'italic'
             }
         };
@@ -171,23 +181,16 @@ angular.module('fileComparatorApp')
     // UTILIDADES
     // ═══════════════════════════════════════════════════
     
-    /**
-     * Formatea la fecha actual
-     */
     this.formatDate = function() {
         const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
+        const day   = String(now.getDate()).padStart(2, '0');
         const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = now.getFullYear();
+        const year  = now.getFullYear();
         const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        
-        return `${day}/${month}/${year} ${hours}:${minutes}`;
+        const mins  = String(now.getMinutes()).padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${mins}`;
     };
     
-    /**
-     * Genera el texto de resumen de estadísticas
-     */
     this.getSummaryText = function(statistics) {
         return `Resumen: ${statistics.total} archivo(s) total | ` +
                `${statistics.enAmbos} en ambas versiones | ` +
@@ -198,14 +201,10 @@ angular.module('fileComparatorApp')
                `${statistics.noChanges} sin cambios`;
     };
     
-    /**
-     * Genera el nombre del archivo PDF
-     */
     this.generateFileName = function(dir1Name, dir2Name) {
         const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
         const name1 = dir1Name ? dir1Name.replace(/[^a-z0-9]/gi, '_') : 'VersionActual';
         const name2 = dir2Name ? dir2Name.replace(/[^a-z0-9]/gi, '_') : 'VersionFutura';
-        
         return `FichaTecnica_${name1}_vs_${name2}_${timestamp}.pdf`;
     };
 });

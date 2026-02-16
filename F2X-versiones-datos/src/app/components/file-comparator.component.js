@@ -134,13 +134,69 @@ function($scope, $http, $timeout, PdfStylesService) {
         $timeout(() => { $scope.successMessage = ''; }, 3000);
     };
 
+ 
     function formatBytes(bytes) {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    if (bytes === 0 || bytes == null) return '0 Bytes';
+
+    const KB = 1024;
+    const MB = KB * 1024;
+    const GB = MB * 1024;
+
+    if (bytes < KB) {
+        return bytes + ' Bytes';
     }
+
+    if (bytes < MB) {
+        const kb = bytes / KB;
+
+        if (kb < 10) {
+            const truncated = Math.floor(kb * 100) / 100;
+            return truncated.toFixed(2).replace('.', ',') + ' KB';
+        }
+
+        if (kb < 100) {
+            const truncated = Math.floor(kb * 10) / 10;
+            return truncated.toFixed(1).replace('.', ',') + ' KB';
+        }
+
+        return Math.floor(kb) + ' KB';
+    }
+
+    if (bytes < GB) {
+        const mb = bytes / MB;
+
+        if (mb < 10) {
+            const mbTimes100 = mb * 100;
+            let truncated = Math.floor(mbTimes100);
+            
+            const remainder = mbTimes100 - truncated;
+            if (remainder > 0 && remainder < 0.02) {
+                truncated = truncated - 1;
+            }
+            
+            const result = truncated / 100;
+            return result.toFixed(2).replace('.', ',') + ' MB';
+        }
+        else {
+            const mbTruncated = Math.floor(mb);
+            const decimalPart = mb - mbTruncated;
+
+            if (decimalPart < 0.05) {
+                return mbTruncated + ' MB';
+            }
+            else {
+                const truncated = Math.floor(mb * 10) / 10;
+                return truncated.toFixed(1).replace('.', ',') + ' MB';
+            }
+        }
+    }
+
+    const gb = bytes / GB;
+    const truncated = Math.floor(gb * 100) / 100;
+    return truncated.toFixed(2).replace('.', ',') + ' GB';
+}
+
+
 
     $scope.abrirModalImagenes = function() { $scope.showImageModal = true; };
     $scope.cerrarModalImagenes = function() { $scope.showImageModal = false; };
@@ -632,6 +688,8 @@ function($scope, $http, $timeout, PdfStylesService) {
             doc.text(`© ${new Date().getFullYear()} Todos los derechos reservados`, pageWidth - dims.margin, footerY + 4, { align: 'right' });
         };
 
+        
+
         // ========== ENCABEZADO ==========
         const bgColor = applyColor(headerStyles.background.fillColor);
         doc.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
@@ -670,6 +728,7 @@ function($scope, $http, $timeout, PdfStylesService) {
         const year = now.getFullYear();
         doc.text(`Fecha de generación: ${day}/${month}/${year} ${hours12}:${minutes} ${ampm}`, pageWidth - 15, 15, { align: 'right' });
 
+
         // ========== INFORMACIÓN DE DIRECTORIOS ==========
         let currentY = 55;
 
@@ -701,30 +760,35 @@ function($scope, $http, $timeout, PdfStylesService) {
 
         currentY += 32;
 
+
+
         // ========== MOTIVO DEL CAMBIO ==========
-        // altura calculada como número antes de llamar roundedRect
         if ($scope.motivoCambio && $scope.motivoCambio.trim() !== '') {
             const motivoLines = doc.splitTextToSize($scope.motivoCambio, pageWidth - 50);
             const motivoHeight = Math.max(22, (motivoLines.length * 4.5) + 14);
 
-            doc.setFillColor(255, 248, 220);
+            // Fondo gris claro
+            doc.setFillColor(245, 245, 245);
             doc.roundedRect(dims.margin, currentY, pageWidth - (dims.margin * 2), motivoHeight, 3, 3, 'F');
 
-            doc.setFillColor(190, 214, 47);
+            // Barra lateral negra
+            doc.setFillColor(30, 30, 30);
             doc.rect(dims.margin, currentY, 4, motivoHeight, 'F');
 
             doc.setFontSize(10);
-            doc.setTextColor(102, 102, 102);
+            doc.setTextColor(80, 80, 80);
             doc.setFont(undefined, 'bold');
             doc.text('Motivo del Cambio:', 23, currentY + 7);
 
             doc.setFontSize(9);
-            doc.setTextColor(51, 51, 51);
+            doc.setTextColor(20, 20, 20);
             doc.setFont(undefined, 'normal');
             doc.text(motivoLines, 23, currentY + 13);
 
             currentY += motivoHeight + 8;
         }
+
+        
 
         // ========== TÍTULO TABLA ==========
         doc.setFontSize(PdfStylesService.fontSizes.sectionTitle);
@@ -767,9 +831,9 @@ function($scope, $http, $timeout, PdfStylesService) {
             didParseCell: function(data) {
                 if (data.section === 'body') {
                     const rowData = archivosConCambios[data.row.index];
-                    if (rowData.changeType === 'only-local') data.cell.styles.fillColor = [227, 242, 253];
-                    else if (rowData.changeType === 'only-remote') data.cell.styles.fillColor = [255, 243, 224];
-                    else if (rowData.changeType === 'has-changes') data.cell.styles.fillColor = [255, 248, 225];
+                    if (rowData.changeType === 'only-local') data.cell.styles.fillColor = [235, 235, 235];
+                    else if (rowData.changeType === 'only-remote') data.cell.styles.fillColor = [225, 225, 225];
+                    else if (rowData.changeType === 'has-changes') data.cell.styles.fillColor = [240, 240, 240];
                 }
             },
             didDrawPage: function(data) {
