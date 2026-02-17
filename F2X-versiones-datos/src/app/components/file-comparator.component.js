@@ -134,67 +134,63 @@ function($scope, $http, $timeout, PdfStylesService) {
         $timeout(() => { $scope.successMessage = ''; }, 3000);
     };
 
- 
+    
+
     function formatBytes(bytes) {
-    if (bytes === 0 || bytes == null) return '0 Bytes';
+        if (bytes === 0 || bytes == null) return '0 Bytes';
 
-    const KB = 1024;
-    const MB = KB * 1024;
-    const GB = MB * 1024;
+        const KB = 1024;
+        const MB = KB * 1024;
+        const GB = MB * 1024;
 
-    if (bytes < KB) {
-        return bytes + ' Bytes';
-    }
-
-    if (bytes < MB) {
-        const kb = bytes / KB;
-
-        if (kb < 10) {
-            const truncated = Math.floor(kb * 100) / 100;
-            return truncated.toFixed(2).replace('.', ',') + ' KB';
+        if (bytes < KB) {
+            return bytes + ' Bytes';
         }
 
-        if (kb < 100) {
-            const truncated = Math.floor(kb * 10) / 10;
-            return truncated.toFixed(1).replace('.', ',') + ' KB';
-        }
+        const kib = Math.floor(bytes / KB);
 
-        return Math.floor(kb) + ' KB';
-    }
-
-    if (bytes < GB) {
-        const mb = bytes / MB;
-
-        if (mb < 10) {
-            const mbTimes100 = mb * 100;
-            let truncated = Math.floor(mbTimes100);
-            
-            const remainder = mbTimes100 - truncated;
-            if (remainder > 0 && remainder < 0.02) {
-                truncated = truncated - 1;
+        if (bytes < MB) {
+            // KB
+            const kb = bytes / KB;
+            if (kb < 10) {
+                const x100 = Math.floor(kb * 100);
+                return Math.floor(x100 / 100) + ',' + String(x100 % 100).padStart(2, '0') + ' KB';
             }
-            
-            const result = truncated / 100;
-            return result.toFixed(2).replace('.', ',') + ' MB';
+            if (kb < 100) {
+                const x10 = Math.floor(kb * 10);
+                return Math.floor(x10 / 10) + ',' + (x10 % 10) + ' KB';
+            }
+            return kib + ' KB';
         }
-        else {
-            const mbTruncated = Math.floor(mb);
-            const decimalPart = mb - mbTruncated;
 
-            if (decimalPart < 0.05) {
-                return mbTruncated + ' MB';
+        if (bytes < GB) {
+            // MB 
+            const x1   = Math.floor(kib / 1024);
+            const x10  = Math.floor((kib * 10) / 1024);
+            const x100 = Math.floor((kib * 100) / 1024);
+
+            if (x1 < 10) {
+                return Math.floor(x100 / 100) + ',' + String(x100 % 100).padStart(2, '0') + ' MB';
             }
-            else {
-                const truncated = Math.floor(mb * 10) / 10;
-                return truncated.toFixed(1).replace('.', ',') + ' MB';
+            if (x1 < 100) {
+                return Math.floor(x10 / 10) + ',' + (x10 % 10) + ' MB';
             }
+            return x1 + ' MB';
         }
+
+        // GB r
+        const x1   = Math.floor(kib / (1024 * 1024));
+        const x10  = Math.floor((kib * 10) / (1024 * 1024));
+        const x100 = Math.floor((kib * 100) / (1024 * 1024));
+
+        if (x1 < 10) {
+            return Math.floor(x100 / 100) + ',' + String(x100 % 100).padStart(2, '0') + ' GB';
+        }
+        if (x1 < 100) {
+            return Math.floor(x10 / 10) + ',' + (x10 % 10) + ' GB';
+        }
+        return x1 + ' GB';
     }
-
-    const gb = bytes / GB;
-    const truncated = Math.floor(gb * 100) / 100;
-    return truncated.toFixed(2).replace('.', ',') + ' GB';
-}
 
 
 
