@@ -197,6 +197,7 @@
     white-space: nowrap;
 }
 
+
 .matrix-table tbody td {
     padding: 14px 15px;
     border-bottom: 1px solid var(--border-subtle);
@@ -383,9 +384,11 @@
 }
 
 /* Columna Equipos */
-.col-equipos {
+.matrix-table th.col-equipos,
+.matrix-table td.col-equipos {
     width: 180px;
     text-align: center;
+    vertical-align: middle;
 }
 
 .equipos-container {
@@ -395,6 +398,8 @@
     align-items: center;
     justify-content: center;
     padding: 4px;
+    width: 100%;
+    overflow: hidden;
 }
 
 /* Badges de equipos */
@@ -406,6 +411,9 @@
     font-weight: 700;
     font-family: 'Courier New', monospace;
     white-space: nowrap;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 
 .badge-local {
@@ -640,6 +648,12 @@
 
 .no-match-table .col-ubicacion {
     text-align: left;
+}
+
+.no-match-table th.col-equipos,
+.no-match-table td.col-equipos {
+    text-align: center;
+    vertical-align: middle;
 }
 
 .no-match-table .version-badge {

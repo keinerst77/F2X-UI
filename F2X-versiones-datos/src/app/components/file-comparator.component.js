@@ -331,6 +331,31 @@ function($scope, $http, $timeout, PdfStylesService) {
     // LIMPIAR DIRECTORIOS
     // ═══════════════════════════════════════════════════
 
+    $scope.clearDirectory = function(directoryNumber) {
+        if (directoryNumber === 1) {
+            $scope.directory1 = '';
+            $scope.directory1Name = '';
+            $scope.file1Data = null;
+            $scope.file1Count = 0;
+        } else if (directoryNumber === 2) {
+            $scope.directory2 = '';
+            $scope.directory2Name = '';
+            $scope.file2Data = null;
+            $scope.file2Count = 0;
+        }
+        
+        // Limpiar tabla si ambos directorios están vacíos
+        if (!$scope.directory1 && !$scope.directory2) {
+            $scope.showTable = false;
+            $scope.tableData = [];
+            $scope.archivosSinCoincidencia = [];
+            $scope.statistics = { total: 0, versionChanged: 0, sizeChanged: 0, noChanges: 0 };
+        }
+        
+        $scope.errorMessage = '';
+        $scope.successMessage = '';
+    };
+
     $scope.reset = function() {
         $scope.directory1 = '';
         $scope.directory2 = '';
