@@ -208,7 +208,7 @@
 .matrix-table tbody tr:hover { background: #F5F5F5; }
 
 
-/* Informacion recta y organizada del Peso y la Versión */
+/* Informacion organizada del Peso y la Versión */
 .col-version-actual, 
 .col-version-futura,
 .col-peso-actual, 
@@ -349,7 +349,7 @@
     box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
 }
 
-/* Botón Limpiar (Outline Rojo) */
+/* Botón Limpiar */
 .btn-reset {
     background: transparent;
     border: 2px solid #e74c3c;
@@ -372,7 +372,7 @@
     box-shadow: none !important;
 }
 
-/* Responsivo: En móviles se apilan */
+/* Responsive*/
 @media (max-width: 768px) {
     .actions-container {
         flex-direction: column;
@@ -499,9 +499,7 @@
     box-shadow: none;
 }
 
-/* ═══════════════════════════════════════════════
-   RESALTADO DE VERSIONES MENORES
-   ═══════════════════════════════════════════════ */
+/* RESALTADO DE VERSIONES MENORES */
 
 .version-menor {
     background: linear-gradient(135deg, #FFEBEE, #FFCDD2) !important;
@@ -530,9 +528,7 @@
     }
 }
 
-/* ═══════════════════════════════════════════════
-   TABLA DE ARCHIVOS SIN COINCIDENCIAS
-   ═══════════════════════════════════════════════ */
+/* TABLA ARCHIVOS SIN COINCIDENCIAS */
 
 .no-match-wrapper {
     margin-top: 30px;
@@ -570,10 +566,6 @@
     white-space: nowrap;
 }
 
-.no-match-table thead th.col-ubicacion {
-    text-align: left;
-}
-
 .no-match-row {
     background: #FFFEF5 !important;
     border-left: 3px solid var(--f2x-green);
@@ -583,12 +575,13 @@
     background: #F5F5F5 !important;
 }
 
+/* Summary */
 .no-match-summary {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 12px;
-    padding: 20px;
+    padding: 20px 30px;
     background: #FAFAFA;
     border-top: 1px solid var(--border-subtle);
 }
@@ -607,47 +600,69 @@
     color: var(--f2x-green);
 }
 
-.col-version {
-    width: 150px;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
+/* ── N/A Badge ── */
+.no-data-na {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    background: #F5F5F5;
+    color: #BDBDBD;
+    border: 1px solid #E0E0E0;
+    letter-spacing: 0.5px;
 }
 
-.col-peso {
-    width: 130px;
-    text-align: center;
-    white-space: nowrap;
-    vertical-align: middle;
-    padding: 14px 15px !important;
+/* ── Input de ubicación editable ── */
+.ubicacion-input {
+    width: 100%;
+    background: #FAFAFA;
+    border: 1px dashed #D0D0D0;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333333;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+    min-width: 200px;
 }
 
-.col-ubicacion {
-    min-width: 250px;
-    max-width: 500px;
+.ubicacion-input:focus {
+    outline: none;
+    border-color: #BED62F;
+    border-style: solid;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.15);
+}
+
+.ubicacion-input::placeholder {
+    color: #C0C0C0;
+    font-style: italic;
+    font-size: 11px;
+}
+
+.ubicacion-input:hover:not(:focus) {
+    border-color: #BDBDBD;
+    border-style: solid;
+    background: #FFFFFF;
+}
+
+/* ── Columnas reutilizadas de la tabla principal ── */
+.no-match-table thead th.col-ubicacion,
+.no-match-table tbody td.col-ruta {
     text-align: left;
 }
 
-.no-match-table .peso-value {
+.no-match-table .version-badge {
     display: inline-block;
     white-space: nowrap;
-    font-weight: 600;
-    color: var(--text-main);
-    font-family: 'Courier New', monospace;
 }
 
 .no-match-table tbody td {
     vertical-align: middle;
     padding: 14px 15px;
-}
-
-.no-match-table .col-version,
-.no-match-table .col-peso {
-    text-align: center;
-}
-
-.no-match-table .col-ubicacion {
-    text-align: left;
 }
 
 .no-match-table th.col-equipos,
@@ -656,14 +671,14 @@
     vertical-align: middle;
 }
 
-.no-match-table .version-badge {
-    display: inline-block;
-    white-space: nowrap;
+.no-match-table .col-version-actual,
+.no-match-table .col-peso-actual,
+.no-match-table .col-version-futura,
+.no-match-table .col-peso-futuro {
+    text-align: center;
+    vertical-align: middle;
 }
-
-/* ═══════════════════════════════════════════════
-   SECCIÓN DE MOTIVO DEL CAMBIO
-   ═══════════════════════════════════════════════ */
+/* SECCIÓN DE MOTIVO DEL CAMBIO */
 
 .change-reason-section {
     background: var(--bg-card);
@@ -727,7 +742,7 @@
 
 .reason-textarea {
     width: 100%;
-    display: block !important;  /* ⬅️ CRÍTICO: Forzar display block */
+    display: block !important; 
     background: #F5F7FA;
     border: 2px solid var(--border-subtle);
     border-radius: 8px;
@@ -741,8 +756,6 @@
     max-height: 200px;
     transition: all 0.3s ease;
     box-sizing: border-box;
-    
-    /* FORZAR INTERACTIVIDAD INMEDIATA */
     pointer-events: auto !important;
     user-select: text !important;
     -webkit-user-select: text !important;
@@ -753,7 +766,6 @@
     touch-action: auto !important;
 }
 
-/* Asegurar que esté habilitado incluso si Angular intenta deshabilitarlo */
 .reason-textarea:disabled,
 .reason-textarea[disabled],
 .reason-textarea[readonly] {
@@ -764,9 +776,7 @@
     pointer-events: auto !important;
 }
 
-/* ═══════════════════════════════════════════════
-   TRIGGER PARA TEXTAREA NATIVA
-   ═══════════════════════════════════════════════ */
+/* TRIGGER PARA TEXTAREA NATIVA */
 
 .native-textarea-trigger {
     background: #F5F7FA;
@@ -840,4 +850,138 @@
     background: #AEC828;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(190, 214, 47, 0.3);
+}
+
+.motivo-vigente-container {
+    display: flex;
+    gap: 16px;
+    margin: 16px 0;
+    align-items: flex-start;
+}
+
+.motivo-card {
+    flex: 1;
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.motivo-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+.motivo-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+.motivo-texto {
+    font-size: 13px;
+    color: #222;
+    flex: 1;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.vigente-card {
+    width: 200px;
+    min-width: 180px;
+    background: #fff;
+    border-radius: 8px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.vigente-header {
+    font-size: 11px;
+    font-weight: 700;
+    color: #555;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+.vigente-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.vigente-input {
+    width: 100%;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: #222;
+    background: #f7f7f7;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.vigente-input:focus {
+    outline: none;
+    border-color: #8db600;
+    background: #fff;
+}
+.vigente-display {
+    font-size: 13px;
+    color: #555;
+    text-align: center;
+}
+
+/* FILAS CLICABLES DE DESCRIPCIÓN RELEASE */
+
+.release-row--clickable {
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.release-row--clickable:hover {
+    background: #f0f7e0;
+}
+
+.release-row--clickable:hover .release-label-cell {
+    background: #e4edca;
+}
+
+.release-row--clickable:hover .release-content-cell {
+    background: #f7fce8;
+}
+
+.release-placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b0b0b0;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    padding: 14px;
+    text-align: center;
+    user-select: none;
+}
+
+
+.release-text {
+    padding: 10px 14px;
+    font-size: 13px;
+    font-family: 'Segoe UI', sans-serif;
+    color: #222;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-align: left !important;
+    display: block;
+}
+
+.release-content-cell {
+    vertical-align: top !important;
+    text-align: left !important;
+    padding: 0 !important;
 }

@@ -1,0 +1,224 @@
+/* SECCIÓN EVIDENCIAS DE PRUEBAS */
+
+.evidencias-section {
+    margin: 0 0 30px 0;
+}
+
+/* Tarjeta contenedora */
+.evidencias-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Título */
+.evidencias-title {
+    background: #B0BEC5;
+    color: #1A1A1A;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 12px 20px;
+    text-align: center;
+    border-bottom: 2px solid #90A4AE;
+}
+
+/* Cuerpo con el botón */
+.evidencias-body {
+    padding: 20px 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Botón adjuntar */
+.btn-adjuntar-evidencias {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 24px;
+    background: #29B6D6;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 10px rgba(41, 182, 214, 0.25);
+}
+
+.btn-adjuntar-evidencias:hover {
+    background: #0097A7;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(41, 182, 214, 0.4);
+}
+
+.btn-adjuntar-evidencias:active {
+    transform: translateY(0);
+}
+
+.btn-adjuntar-evidencias i {
+    font-size: 15px;
+}
+
+/* Wrapper interno de imágenes */
+.evidencias-images-wrapper {
+    border-top: 1px solid var(--border-subtle);
+}
+
+.evidencias-inner-header {
+    padding: 16px 28px 8px 28px;
+    background: #FAFAFA;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.evidencias-inner-header h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+}
+
+.evidencias-images-wrapper .images-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    padding: 20px 28px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .evidencias-body {
+        padding: 16px;
+    }
+    .evidencias-images-wrapper .images-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        padding: 16px;
+    }
+    .btn-adjuntar-evidencias {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ── Textarea de descripción por imagen ── */
+.image-descripcion-wrapper {
+    padding: 0 10px 10px 10px;
+    background: #FFFFFF;
+}
+
+.image-descripcion-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #F5F7FA;
+    border: 1px dashed #D0D0D0;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 11px;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+    resize: none;
+    line-height: 1.5;
+    transition: all 0.2s ease;
+}
+
+.image-descripcion-input:focus {
+    outline: none;
+    border-color: #BED62F;
+    border-style: solid;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.12);
+}
+
+.image-descripcion-input::placeholder {
+    color: #C0C0C0;
+    font-style: italic;
+}
+
+/* DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS */
+
+.cambios-bd-section {
+    margin-top: 40px;
+}
+
+.cambios-bd-card {
+    border-color: #CFD8DC !important;
+}
+
+.cambios-bd-title {
+    background: #B0BEC5 !important;
+    border-bottom-color: #90A4AE !important;
+}
+
+.cambios-bd-card:hover {
+    border-color: var(--f2x-green) !important;
+    box-shadow: 0 4px 20px rgba(190, 214, 47, 0.18) !important;
+}
+
+.cambios-bd-card:hover .cambios-bd-title {
+    background: #C8DBA5 !important;
+    border-bottom-color: #AEC828 !important;
+    color: #2E3B12 !important;
+}
+
+/* ── Descripción de Cambios en Archivos de Configuración ── */
+.cambios-cfg-section {
+    margin-top: 50px;
+}
+
+.cambios-cfg-card {
+    border-color: #CFD8DC !important;
+}
+
+.cambios-cfg-title {
+    background: #B0BEC5 !important;
+    border-bottom-color: #90A4AE !important;
+}
+
+.cambios-cfg-card:hover {
+    border-color: var(--f2x-green) !important;
+    box-shadow: 0 4px 20px rgba(190, 214, 47, 0.18) !important;
+}
+
+.cambios-cfg-card:hover .cambios-cfg-title {
+    background: #C8DBA5 !important;
+    border-bottom-color: #AEC828 !important;
+    color: #2E3B12 !important;
+}
+
+/* ── Observaciones ── */
+.cambios-obs-section {
+    margin-top: 50px;
+}
+
+.cambios-obs-card {
+    border-color: #CFD8DC !important;
+}
+
+.cambios-obs-title {
+    background: #B0BEC5 !important;
+    border-bottom-color: #90A4AE !important;
+}
+
+.cambios-obs-card:hover {
+    border-color: var(--f2x-green) !important;
+    box-shadow: 0 4px 20px rgba(190, 214, 47, 0.18) !important;
+}
+
+.cambios-obs-card:hover .cambios-obs-title {
+    background: #C8DBA5 !important;
+    border-bottom-color: #AEC828 !important;
+    color: #2E3B12 !important;
+}
+
+/* Título DESCRIPCIÓN RELEASE ── */
+.release-table-title {
+    text-align: center !important;
+}

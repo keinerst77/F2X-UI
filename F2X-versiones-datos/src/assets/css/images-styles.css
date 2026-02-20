@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════════════════════════════
-   ESTILOS PARA SECCIÓN DE EXPORTACIÓN CON BOTONES
-   ═══════════════════════════════════════════════════════════ */
+/* ESTILOS PARA SECCIÓN DE EXPORTACIÓN CON BOTONES */
 
 .pdf-export-section {
     display: flex;
@@ -11,7 +9,7 @@
     margin: 30px 0;
 }
 
-/* Botón PDF - Estilo Rojo */
+/* Botón PDF */
 .btn-pdf {
     display: flex;
     align-items: center;
@@ -42,7 +40,7 @@
     transform: translateY(0);
 }
 
-/* Botón Adjuntar Imágenes - Estilo Púrpura Claro */
+/* Botón Adjuntar Imágenes */
 .btn-images {
     display: flex;
     align-items: center;
@@ -86,9 +84,7 @@
     margin-left: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ESTILOS PARA LISTA DE IMÁGENES ADJUNTADAS
-   ═══════════════════════════════════════════════════════════ */
+/* ESTILOS PARA LISTA DE IMÁGENES ADJUNTADAS*/
 
 .images-list {
     margin: 30px 0;
@@ -225,9 +221,7 @@
     transform: scale(1.1);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ESTILOS PARA MODAL DE VISTA PREVIA
-   ═══════════════════════════════════════════════════════════ */
+/* ESTILOS PARA MODAL DE VISTA PREVIA */
 
 .modal-overlay {
     position: fixed;
@@ -368,9 +362,7 @@
     font-size: 12px;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   RESPONSIVE DESIGN
-   ═══════════════════════════════════════════════════════════ */
+/* RESPONSIVE DESIGN */
 
 @media (max-width: 768px) {
     .pdf-export-section {
@@ -429,17 +421,13 @@
     }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ESTILOS ADICIONALES PARA INPUT FILE
-   ═══════════════════════════════════════════════════════════ */
+/* ESTILOS ADICIONALES PARA INPUT FILE */
 
 input[type="file"] {
     display: none;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   ANIMACIONES ADICIONALES
-   ═══════════════════════════════════════════════════════════ */
+/* ANIMACIONES ADICIONALES */
 
 @keyframes pulse {
     0% {

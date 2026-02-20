@@ -1,0 +1,253 @@
+/* Descripción Release y Vigente a partir de */
+
+.release-section {
+    display: flex;
+    gap: 16px;
+    margin: 24px 0 32px 0;
+    align-items: flex-start;
+}
+
+.release-table-card {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.release-table-title {
+    background: #B0BEC5;
+    color: #1A1A1A;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 12px 20px;
+    text-align: center;
+    border-bottom: 2px solid #90A4AE;
+}
+
+.release-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.release-row {
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.release-row:last-child {
+    border-bottom: none;
+}
+
+.release-label-cell {
+    width: 210px;
+    min-width: 180px;
+    background: #DDEAEF;
+    border-right: 1px solid var(--border-subtle);
+    padding: 16px 14px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #37474F;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    vertical-align: middle;
+    text-align: center;
+    word-break: break-word;
+}
+
+.release-content-cell {
+    padding: 0 !important;
+    vertical-align: top !important;
+    text-align: left !important;
+}
+
+.release-row--clickable {
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.release-row--clickable:hover {
+    background: #F9FBE7;
+}
+
+.release-row--clickable:hover .release-label-cell {
+    background: #C8DBA5;
+    color: #2E3B12;
+}
+
+.release-row--clickable:hover .release-content-cell {
+    background: #FAFFF0;
+}
+
+.release-placeholder {
+    width: 100%;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #BDBDBD;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 16px 20px;
+    text-align: center;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+.release-placeholder::before {
+    content: '✏️';
+    font-size: 13px;
+    opacity: 0.5;
+}
+
+.release-row--clickable:hover .release-placeholder {
+    color: #AEC828;
+}
+
+.release-text {
+    padding: 14px 18px;
+    font-size: 13px;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-align: left !important;
+    display: block;
+    margin: 0;
+    text-indent: 0 !important;
+}
+
+.vigente-card {
+    width: 195px;
+    min-width: 175px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.vigente-header {
+    background: #B0BEC5;
+    color: #1A1A1A;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 12px 14px;
+    text-align: center;
+    border-bottom: 2px solid #90A4AE;
+}
+
+.vigente-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 14px;
+}
+
+.vigente-input {
+    width: 100%;
+    background: #F5F7FA;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 13px;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.vigente-input:focus {
+    outline: none;
+    border-color: var(--f2x-green);
+    background: #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.2);
+}
+
+@media (max-width: 768px) {
+    .release-section { flex-direction: column; }
+    .vigente-card { width: 100%; }
+    .release-label-cell { width: 130px; min-width: 110px; font-size: 10px; }
+}
+
+/* DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS */
+
+.cambios-section {
+    margin: 0 0 24px 0;
+}
+
+.cambios-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.cambios-card:hover {
+    border-color: var(--f2x-green);
+    box-shadow: 0 4px 20px rgba(190, 214, 47, 0.18);
+}
+
+.cambios-title {
+    background: #B0BEC5;
+    color: #1A1A1A;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 12px 20px;
+    text-align: left;
+    border-bottom: 2px solid #90A4AE;
+    transition: background 0.2s ease;
+}
+
+.cambios-card:hover .cambios-title {
+    background: #C8DBA5;
+    border-bottom-color: #AEC828;
+    color: #2E3B12;
+}
+
+.cambios-placeholder {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 500;
+    color: #BDBDBD;
+    padding: 28px 40px;
+    text-align: center;
+    user-select: none;
+    transition: color 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.cambios-card:hover .cambios-placeholder {
+    color: #AEC828;
+}
+
+.cambios-text {
+    padding: 20px 28px;
+    font-size: 13px;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-align: left;
+    display: block;
+}

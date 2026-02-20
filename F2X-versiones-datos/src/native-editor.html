@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --f2x-green:    #BED62F;
+            --f2x-green-dk: #AEC828;
+            --f2x-dark:     #383838;
+            --bg-app:       #EEF2F6;
+            --bg-card:      #FFFFFF;
+            --bg-table-hd:  #F8F9FA;
+            --text-main:    #333333;
+            --text-muted:   #666666;
+            --border:       #E0E0E0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
+            background: var(--bg-app);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Barra superior F2X */
+        .titlebar {
+            background: var(--f2x-dark);
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 3px solid var(--f2x-green);
+            flex-shrink: 0;
+        }
+        .titlebar-icon { font-size: 16px; }
+        .titlebar-label {
+            font-size: 9px;
+            font-weight: 700;
+            color: var(--f2x-green);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .titlebar-text {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #fff;
+        }
+
+        /* Cuerpo */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            gap: 12px;
+            overflow: hidden;
+        }
+
+        /* Tarjeta del editor */
+        .editor-card {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .editor-card-title {
+            background: #ECEFF1;
+            color: var(--text-main);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 10px 16px;
+            text-align: center;
+            border-bottom: 2px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        /* Barra de formato */
+        .rich-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            background: var(--bg-table-hd);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .rich-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+            color: var(--text-main);
+        }
+        .rich-btn:hover  { background: #F9FBE7; border-color: var(--f2x-green); }
+        .rich-btn:active { background: #F0F4D4; transform: scale(0.93); }
+        .rich-separator  { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+        /* etiqueta + editor */
+        .editor-row {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .editor-label {
+            width: 200px;
+            min-width: 170px;
+            background: var(--bg-table-hd);
+            border-right: 1px solid var(--border);
+            padding: 16px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            text-align: center;
+            word-break: break-word;
+            flex-shrink: 0;
+        }
+
+        #editor {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 13px;
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--text-main);
+            line-height: 1.7;
+            outline: none;
+            background: #fff;
+            overflow-y: auto;
+            word-break: break-word;
+            cursor: text;
+            text-align: left;
+            direction: ltr;
+        }
+        #editor:focus {
+            background: #FAFFF0;
+            box-shadow: inset 0 0 0 2px rgba(190,214,47,0.25);
+        }
+        #editor p { margin: 0 0 10px 0; }
+        #editor p:last-child { margin-bottom: 0; }
+        #editor.empty::before {
+            content: attr(data-placeholder);
+            color: #BDBDBD;
+            font-style: italic;
+            pointer-events: none;
+        }
+        #editor::-webkit-scrollbar { width: 8px; }
+        #editor::-webkit-scrollbar-track { background: var(--bg-app); }
+        #editor::-webkit-scrollbar-thumb { background: #BDBDBD; border-radius: 8px; }
+        #editor::-webkit-scrollbar-thumb:hover { background: var(--f2x-green); }
+
+        /* Área de botones */
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .keyboard-tip {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-right: auto;
+            letter-spacing: 0.3px;
+        }
+        .keyboard-tip kbd {
+            display: inline-block;
+            padding: 1px 5px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--bg-table-hd);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 10px;
+        }
+
+        #apiStatus {
+            display: none;
+            font-size: 11px;
+            color: #C62828;
+            padding: 5px 10px;
+            background: #FFEBEE;
+            border-radius: 8px;
+            border-left: 3px solid #FF5252;
+        }
+        #apiStatus.visible { display: block; }
+
+        .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-cancel {
+            background: #FFFFFF;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .btn-cancel:hover { background: #F5F5F5; border-color: #BDBDBD; }
+        .btn-save {
+            background: var(--f2x-green);
+            color: var(--text-main);
+            box-shadow: 0 4px 12px rgba(190,214,47,0.3);
+        }
+        .btn-save:hover {
+            background: var(--f2x-green-dk);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px rgba(190,214,47,0.4);
+        }
+        .btn-save:active   { transform: translateY(0); }
+        .btn-save:disabled { background: #C8D860; cursor: wait; transform: none; box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="titlebar">
+        <span class="titlebar-icon">📋</span>
+        <div>
+            <div class="titlebar-label">F2X · Descripción Release</div>
+            <div class="titlebar-text" id="titlebarText">CAMPO</div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="editor-card">
+            <div class="editor-card-title">DESCRIPCIÓN RELEASE</div>
+
+            <div class="rich-toolbar">
+                <button class="rich-btn" id="btnBold"      title="Negrita (Ctrl+B)"><strong>B</strong></button>
+                <button class="rich-btn" id="btnItalic"    title="Cursiva (Ctrl+I)"><em>I</em></button>
+                <button class="rich-btn" id="btnUnderline" title="Subrayado (Ctrl+U)"><u>U</u></button>
+                <div class="rich-separator"></div>
+                <button class="rich-btn" id="btnList"      title="Lista con viñetas">☰</button>
+            </div>
+
+            <div class="editor-row">
+                <div class="editor-label" id="labelCell">CAMPO</div>
+                <div id="editor"
+                     contenteditable="true"
+                     class="empty"
+                     data-placeholder="Ingrese el contenido aquí...">
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <span class="keyboard-tip"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> guardar · <kbd>Esc</kbd> cancelar</span>
+            <span id="apiStatus">⚠ Error de comunicación</span>
+            <button class="btn btn-cancel" id="btnCancel">CANCELAR</button>
+            <button class="btn btn-save"   id="btnSave">GUARDAR</button>
+        </div>
+    </div>
+
+    <script>
+        const editor      = document.getElementById('editor');
+        const btnSave     = document.getElementById('btnSave');
+        const btnCancel   = document.getElementById('btnCancel');
+        const labelCell   = document.getElementById('labelCell');
+        const titlebarTxt = document.getElementById('titlebarText');
+        const apiStatus   = document.getElementById('apiStatus');
+
+        let apiDisponible = false;
+
+        function verificarAPI() {
+            if (window.editorAPI) { apiDisponible = true; inicializarEditor(); return; }
+            let intentos = 0;
+            const interval = setInterval(() => {
+                intentos++;
+                if (window.editorAPI) {
+                    clearInterval(interval);
+                    apiDisponible = true;
+                    inicializarEditor();
+                } else if (intentos >= 10) {
+                    clearInterval(interval);
+                    apiStatus.classList.add('visible');
+                }
+            }, 100);
+        }
+
+        function inicializarEditor() {
+            window.editorAPI.onInit(function(data) {
+                if (data.fieldLabel) { labelCell.textContent = titlebarTxt.textContent = data.fieldLabel; }
+                if (data.placeholder) editor.setAttribute('data-placeholder', data.placeholder);
+                if (data.defaultValue && data.defaultValue.trim() !== '') {
+                    editor.innerHTML = textoAParagrafos(data.defaultValue);
+                    editor.classList.remove('empty');
+                }
+                setTimeout(() => {
+                    editor.focus();
+                    try {
+                        const r = document.createRange(), s = window.getSelection();
+                        r.selectNodeContents(editor); r.collapse(false);
+                        s.removeAllRanges(); s.addRange(r);
+                    } catch(e) {}
+                }, 80);
+            });
+        }
+
+        verificarAPI();
+
+        editor.addEventListener('input', () => {
+            editor.classList.toggle('empty', editor.textContent.trim() === '');
+        });
+
+        function textoAParagrafos(texto) {
+            if (!texto || texto.trim() === '') return '';
+            return texto.split(/\n\n+/).map(p => '<p>' + p.trim().replace(/\n/g, '<br>') + '</p>').join('');
+        }
+
+        document.execCommand('defaultParagraphSeparator', false, 'p');
+
+        function fmt(cmd) { editor.focus(); document.execCommand(cmd, false, null); }
+        document.getElementById('btnBold').addEventListener('click',      () => fmt('bold'));
+        document.getElementById('btnItalic').addEventListener('click',    () => fmt('italic'));
+        document.getElementById('btnUnderline').addEventListener('click', () => fmt('underline'));
+        document.getElementById('btnList').addEventListener('click',      () => fmt('insertUnorderedList'));
+
+        function extraerTexto() {
+            let r = '';
+            Array.from(editor.childNodes).forEach((n, i, arr) => {
+                if (n.nodeType === Node.TEXT_NODE) { r += n.textContent; }
+                else if (n.nodeName === 'P' || n.nodeName === 'DIV') {
+                    const c = n.cloneNode(true);
+                    c.querySelectorAll('br').forEach(b => b.replaceWith('\n'));
+                    r += c.textContent;
+                    if (i < arr.length - 1) r += '\n\n';
+                } else if (n.nodeName === 'BR') { r += '\n'; }
+                else { r += n.textContent; }
+            });
+            return r.trim();
+        }
+
+        function guardar() {
+            if (!apiDisponible || !window.editorAPI) { apiStatus.classList.add('visible'); return; }
+            btnSave.disabled = true; btnSave.textContent = 'GUARDANDO...';
+            try { window.editorAPI.sendResult(extraerTexto()); }
+            catch(e) { btnSave.disabled = false; btnSave.textContent = 'GUARDAR'; apiStatus.classList.add('visible'); }
+        }
+
+        function cancelar() { if (window.editorAPI) window.editorAPI.sendCancel(); }
+
+        btnSave.addEventListener('click',   guardar);
+        btnCancel.addEventListener('click', cancelar);
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); guardar(); }
+            if (e.key === 'Escape') { e.preventDefault(); cancelar(); }
+        });
+    </script>
+</body>
+</html>

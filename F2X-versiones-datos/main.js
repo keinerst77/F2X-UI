@@ -1,6 +1,8 @@
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, globalShortcut } = require('electron');
 const path = require('path');
 const nativeTextarea = require('./native-textarea');
+
+let mainWindow = null;
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -10,42 +12,36 @@ function createWindow() {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: false,
             contextIsolation: true,
-            // Deshabilitar aceleración de hardware para inputs
             offscreen: false,
             enableRemoteModule: false,
-            // Forzar renderizado inmediato
             backgroundThrottling: false
         },
         icon: path.join(__dirname, 'icon.png'),
-        // Forzar composición de ventana
         transparent: false,
         frame: true
     });
 
-    // Deshabilitar throttling de eventos
+    mainWindow = win;
     win.webContents.setBackgroundThrottling(false);
-
-    // Cargar index.html desde src/
     win.loadFile(path.join(__dirname, 'src', 'index.html'));
-    
-    
-    // Asegurar que los eventos de teclado no se bloqueen
+
     win.webContents.on('did-finish-load', () => {
         win.webContents.setIgnoreMenuShortcuts(false);
     });
+
+    win.on('closed', () => { mainWindow = null; });
 }
-// Handler para abrir textarea nativa
+
 ipcMain.handle('open-native-textarea', async (event, options) => {
     const result = await nativeTextarea.open(
-        options.title || 'Motivo del Cambio',
-        options.placeholder || 'Especifica el motivo o justificación para realizar este cambio de versión...',
-        options.defaultValue || ''
+        options.title        || 'Descripción Release',
+        options.placeholder  || 'Ingrese el contenido aquí...',
+        options.defaultValue || '',
+        options.fieldLabel   || options.title || '' 
     );
-    
     return result;
 });
 
-// ========== MENÚ PERSONALIZADO EN ESPAÑOL ==========
 function createMenu() {
     const menuTemplate = [
         {
@@ -62,9 +58,7 @@ function createMenu() {
                 {
                     label: 'Salir',
                     accelerator: 'CmdOrCtrl+Q',
-                    click: () => {
-                        app.quit();
-                    }
+                    click: () => { app.quit(); }
                 }
             ]
         },
@@ -87,32 +81,45 @@ function createMenu() {
                     label: 'Pantalla completa',
                     accelerator: 'F11',
                     click: (item, focusedWindow) => {
-                        if (focusedWindow) {
-                            focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
-                        }
+                        if (focusedWindow) focusedWindow.setFullScreen(!focusedWindow.isFullScreen());
                     }
                 },
                 { type: 'separator' },
                 {
                     label: 'Acercar',
-                    role: 'zoomIn'
+                    accelerator: 'CmdOrCtrl+=',
+                    click: (item, focusedWindow) => {
+                        if (focusedWindow) {
+                            const wc = focusedWindow.webContents;
+                            const current = wc.getZoomFactor();
+                            wc.setZoomFactor(Math.min(current + 0.1, 3.0));
+                        }
+                    }
                 },
                 {
                     label: 'Alejar',
-                    role: 'zoomOut'
+                    accelerator: 'CmdOrCtrl+-',
+                    click: (item, focusedWindow) => {
+                        if (focusedWindow) {
+                            const wc = focusedWindow.webContents;
+                            const current = wc.getZoomFactor();
+                            wc.setZoomFactor(Math.max(current - 0.1, 0.3));
+                        }
+                    }
                 },
                 {
                     label: 'Restablecer zoom',
-                    role: 'resetZoom'
+                    accelerator: 'CmdOrCtrl+0',
+                    click: (item, focusedWindow) => {
+                        if (focusedWindow) focusedWindow.webContents.setZoomFactor(1.0);
+                    }
                 },
                 { type: 'separator' },
                 {
                     label: 'Herramientas de Desarrollador',
                     accelerator: 'F12',
                     click: (item, focusedWindow) => {
-                        if (focusedWindow) {
-                            focusedWindow.webContents.toggleDevTools();
-                        }
+                        if (focusedWindow) focusedWindow.webContents.toggleDevTools();
                     }
                 }
             ]
@@ -147,48 +154,51 @@ function createMenu() {
     Menu.setApplicationMenu(menu);
 }
 
-// Manejar selección de carpeta automático
 ipcMain.handle('select-folder', async () => {
     const result = await dialog.showOpenDialog({
         properties: ['openDirectory'],
         title: 'Selecciona una carpeta'
     });
-    
+
     if (!result.canceled && result.filePaths.length > 0) {
-        const fullPath = result.filePaths[0];
+        const fullPath   = result.filePaths[0];
         const folderName = path.basename(fullPath);
-        
-        console.log('📁 Carpeta seleccionada:');
-        console.log('   Nombre:', folderName);
-        console.log('   Ruta completa:', fullPath);
-        
-        return {
-            success: true,
-            fullPath: fullPath,
-            folderName: folderName
-        };
+        return { success: true, fullPath, folderName };
     }
-    
     return { success: false };
 });
 
-// Deshabilitar aceleración de hardware globalmente
 app.commandLine.appendSwitch('disable-gpu-vsync');
 app.commandLine.appendSwitch('disable-frame-rate-limit');
 
 app.whenReady().then(() => {
     createMenu();
     createWindow();
+
+    // Atajos globales de zoom
+    globalShortcut.register('CommandOrControl+Plus', () => {
+        if (mainWindow) {
+            const current = mainWindow.webContents.getZoomFactor();
+            mainWindow.webContents.setZoomFactor(Math.min(current + 0.1, 3.0));
+        }
+    });
+
+    globalShortcut.register('CommandOrControl+numadd', () => {
+        if (mainWindow) {
+            const current = mainWindow.webContents.getZoomFactor();
+            mainWindow.webContents.setZoomFactor(Math.min(current + 0.1, 3.0));
+        }
+    });
+});
+
+app.on('will-quit', () => {
+    globalShortcut.unregisterAll();
 });
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    if (process.platform !== 'darwin') app.quit();
 });
 
 app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-        createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
 });
