@@ -26,16 +26,12 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     $scope.equiposConectados = [];
     $scope.tableData = []; $scope.archivosSinCoincidencia = [];
 
-
-    // CAMPOS DEL RELEASE
     $scope.releaseData = {
-        sistema: '',
-        caracteristicas: '', equipos: '', fechaFicha: '',
+        sistema: '', caracteristicas: '', equipos: '', fechaFicha: '',
         cambiosAplicativos: '', cambiosBaseDatos: '', cambiosConfiguracion: '', observaciones: ''
     };
     $scope.releaseDataRaw = {
-        sistema: '',
-        caracteristicas: '', equipos: '', fechaFicha: '',
+        sistema: '', caracteristicas: '', equipos: '', fechaFicha: '',
         cambiosAplicativos: '', cambiosBaseDatos: '', cambiosConfiguracion: '', observaciones: ''
     };
 
@@ -75,7 +71,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     const MULTI_EQUIPO_API_URL = 'https://localhost:7001/api/multiequiposcan';
     const VALIDATION_API_URL   = 'https://localhost:7001/api/powershellremotetest';
     const isElectron = window.electronAPI !== undefined;
-
 
     // IMAGENES
     $scope.abrirSelectorImagenes = function() {
@@ -121,7 +116,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     $scope.abrirModalImagenes  = () => $scope.showImageModal = true;
     $scope.cerrarModalImagenes = () => $scope.showImageModal = false;
 
-
     // EQUIPOS REMOTOS
     $scope.agregarEquipoRemoto = () => $scope.equiposRemotos.push({ ipEquipo:'', usuario:'', password:'', status:null });
     $scope.quitarEquipoRemoto  = function(index) {
@@ -134,9 +128,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     $scope.validarConexion = function(equipo) {
         if (!equipo.ipEquipo||!equipo.usuario||!equipo.password) { $scope.errorMessage='❌ Completa todos los campos del equipo'; return; }
         equipo.status='connecting'; equipo.connectionMessage=null; $scope.errorMessage=''; $scope.successMessage='';
-
         var payload = { ipEquipo: equipo.ipEquipo, usuario: equipo.usuario, password: equipo.password };
-
         $http.post(VALIDATION_API_URL+'/test-simple', payload)
         .then(function(r) {
             if (r.data.success) {
@@ -155,13 +147,9 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         .catch(function(err) {
             equipo.status = 'disconnected';
             var m = '❌ No se pudo conectar a ' + equipo.ipEquipo;
-            if (err.status === -1) {
-                m += ': Backend no disponible (¿está corriendo la API en puerto 7001?)';
-            } else if (err.data && (err.data.errorMessage || err.data.message)) {
-                m += ': ' + (err.data.errorMessage || err.data.message);
-            } else if (err.statusText) {
-                m += ': HTTP ' + err.status + ' - ' + err.statusText;
-            }
+            if (err.status === -1) m += ': Backend no disponible (¿está corriendo la API en puerto 7001?)';
+            else if (err.data && (err.data.errorMessage || err.data.message)) m += ': ' + (err.data.errorMessage || err.data.message);
+            else if (err.statusText) m += ': HTTP ' + err.status + ' - ' + err.statusText;
             $scope.errorMessage = m;
         });
     };
@@ -193,7 +181,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         }).catch(()=>{ equipo.searchingFolders=false; $scope.errorMessage='❌ Error al buscar carpetas'; });
     };
 
-
     // DIRECTORIOS
     $scope.clearDirectory = function(n) {
         if(n===1){$scope.directory1='';$scope.directory1Name='';$scope.file1Data=null;$scope.file1Count=0;}
@@ -206,16 +193,8 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         $scope.directory1=$scope.directory2=$scope.directory1Name=$scope.directory2Name='';
         $scope.file1Data=$scope.file2Data=null; $scope.file1Count=$scope.file2Count=0;
         $scope.showTable=false; $scope.tableData=[]; $scope.archivosSinCoincidencia=[];
-        $scope.releaseData = {
-            sistema: '',
-            caracteristicas:'', equipos:'', fechaFicha:'',
-            cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:''
-        };
-        $scope.releaseDataRaw = {
-            sistema: '',
-            caracteristicas:'', equipos:'', fechaFicha:'',
-            cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:''
-        };
+        $scope.releaseData = { sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
+        $scope.releaseDataRaw = { sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
         const h=new Date(); h.setHours(0,0,0,0); $scope.vigenteDesde=h;
         $scope.imagenesAdjuntas=[];
         $scope.statistics={total:0,versionChanged:0,sizeChanged:0,noChanges:0};
@@ -231,8 +210,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             }
         } catch(e) { $scope.$apply(()=>$scope.errorMessage='❌ Error: '+e.message); }
     };
-
-
 
     // ESCANEAR Y COMPARAR
     $scope.escanearYComparar = function() {
@@ -269,23 +246,8 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             if(orig?.rutaActual)rutasActual.push({ipEquipo:eq.ipEquipo,usuario:eq.usuario,password:eq.password,rutaRemota:orig.rutaActual});
             if(orig?.rutaFutura)rutasFutura.push({ipEquipo:eq.ipEquipo,usuario:eq.usuario,password:eq.password,rutaRemota:orig.rutaFutura});
         });
-
-        const p1=$http.post(MULTI_EQUIPO_API_URL+'/scan',{
-            directoryPath:$scope.directory1,
-            ipLocal:$scope.ipLocal,
-            equiposRemotos:rutasActual,
-            includeSubdirectories:true,
-            searchPattern:'*.exe'
-        }).catch(e=>({data:{success:false,message:e.message}}));
-
-        const p2=$http.post(MULTI_EQUIPO_API_URL+'/scan',{
-            directoryPath:$scope.directory2,
-            ipLocal:$scope.ipLocal,
-            equiposRemotos:rutasFutura,
-            includeSubdirectories:true,
-            searchPattern:'*.exe'
-        }).catch(e=>({data:{success:false,message:e.message}}));
-
+        const p1=$http.post(MULTI_EQUIPO_API_URL+'/scan',{directoryPath:$scope.directory1,ipLocal:$scope.ipLocal,equiposRemotos:rutasActual,includeSubdirectories:true,searchPattern:'*.exe'}).catch(e=>({data:{success:false,message:e.message}}));
+        const p2=$http.post(MULTI_EQUIPO_API_URL+'/scan',{directoryPath:$scope.directory2,ipLocal:$scope.ipLocal,equiposRemotos:rutasFutura,includeSubdirectories:true,searchPattern:'*.exe'}).catch(e=>({data:{success:false,message:e.message}}));
         Promise.all([p1,p2]).then(([r1,r2])=>{
             if(r1.data.success&&r2.data.success){
                 $scope.file1Data=r1.data.archivosConsolidados||[]; $scope.file2Data=r2.data.archivosConsolidados||[];
@@ -339,11 +301,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 tableData.push({name:f2.name,equipos:(f2.equiposIps||[$scope.ipLocal]).join(', '),equiposArray:f2.equiposIps||[$scope.ipLocal],versionActual:f1.version,pesoActual:f1.size,versionFutura:f2.version,pesoFuturo:f2.size,ruta:f2.fullPath||f2.relativePath,changeType:(vC||sC)?'has-changes':'no-changes',existeEnActual:true,existeEnFutura:true,versionChanged:vC,sizeChanged:sC,versionMenor:compararVersiones(f2.version,f1.version)<0});
                 if(vC)statistics.versionChanged++; if(sC)statistics.sizeChanged++; if(!vC&&!sC)statistics.noChanges++;
             } else {
-                archivosSinCoincidencia.push({
-                    name:f2.name, equipos:(f2.equiposIps||[$scope.ipLocal]).join(', '),
-                    equiposArray:f2.equiposIps||[$scope.ipLocal], version:f2.version, peso:f2.size,
-                    ubicacion:f2.fullPath||f2.relativePath, ubicacionUsuario:''
-                });
+                archivosSinCoincidencia.push({name:f2.name,equipos:(f2.equiposIps||[$scope.ipLocal]).join(', '),equiposArray:f2.equiposIps||[$scope.ipLocal],version:f2.version,peso:f2.size,ubicacion:f2.fullPath||f2.relativePath,ubicacionUsuario:''});
             }
         });
         statistics.total=tableData.length;
@@ -351,28 +309,20 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         $scope.statistics=statistics; $scope.showTable=true;
     };
 
-
     // EDITOR NATIVO
     $scope.abrirEditorCampo = function(campo) {
         if (!window.electronAPI?.openNativeTextarea) { $scope.errorMessage='❌ Función de entrada nativa no disponible'; return; }
         const titulo = releaseLabels[campo] || campo;
         window.electronAPI.openNativeTextarea({
-            title:        titulo,
-            placeholder:  `Ingrese ${titulo.toLowerCase()}...`,
-            defaultValue: $scope.releaseDataRaw[campo] || '',
-            fieldLabel:   titulo
+            title: titulo, placeholder: `Ingrese ${titulo.toLowerCase()}...`,
+            defaultValue: $scope.releaseDataRaw[campo] || '', fieldLabel: titulo
         }).then(result=>{
             if (result !== null) {
-                $scope.$apply(()=>{
-                    $scope.releaseDataRaw[campo] = result;
-                    $scope.releaseData[campo]    = result;
-                    $scope.successMessage=`✅ "${titulo}" guardado`;
-                });
+                $scope.$apply(()=>{ $scope.releaseDataRaw[campo]=result; $scope.releaseData[campo]=result; $scope.successMessage=`✅ "${titulo}" guardado`; });
                 $timeout(()=>$scope.successMessage='',3000);
             }
         }).catch(()=>{ $scope.$apply(()=>$scope.errorMessage='❌ Error al abrir el editor'); });
     };
-
 
 
     // MOTOR DE RENDERIZADO HTML
@@ -390,9 +340,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         if (m) return [+m[1], +m[2], +m[3]];
         return null;
     }
-
     const _fontSizeMap = { '1': 8, '2': 10, '3': 12, '4': 14, '5': 18, '6': 24, '7': 36 };
-
     function _extractFontSize(el) {
         if (el.tagName === 'FONT' && el.getAttribute('size')) return _fontSizeMap[el.getAttribute('size')] || 11;
         const fs = el.style && el.style.fontSize;
@@ -420,65 +368,62 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         if (!html || html.trim() === '') return [];
         const container = document.createElement('div');
         container.innerHTML = html;
-
         const lines = [];
         let currentSegments = [];
         let currentAlign = 'left';
-
-        function pushLine(align) {
-            lines.push({ align: align || currentAlign, segments: currentSegments });
-            currentSegments = [];
-        }
-
+        function pushLine(align) { lines.push({ align: align || currentAlign, segments: currentSegments }); currentSegments = []; }
         const BLOCK_TAGS = ['P','DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','LI','TR'];
-
         function walkNode(node, ctx) {
-            if (node.nodeType === Node.TEXT_NODE) {
-                const txt = node.textContent;
-                if (txt) currentSegments.push({ ...ctx, text: txt });
-                return;
-            }
-            if (node.nodeType !== Node.ELEMENT_NODE) return;
+    if (node.nodeType === Node.TEXT_NODE) {
+        const txt = node.textContent;
+        if (txt) currentSegments.push({ ...ctx, text: txt });
+        return;
+    }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+    const tag = node.tagName.toUpperCase();
+    const newCtx = { ...ctx };
 
-            const tag = node.tagName.toUpperCase();
-            const newCtx = { ...ctx };
 
-            if (tag === 'B' || tag === 'STRONG') newCtx.bold = true;
-            if (tag === 'I' || tag === 'EM')     newCtx.italic = true;
-            if (tag === 'U')                      newCtx.underline = true;
+    // Etiquetas semánticas
+    if (tag === 'B' || tag === 'STRONG') newCtx.bold = true;
+    if (tag === 'I' || tag === 'EM')     newCtx.italic = true;
+    if (tag === 'U' || tag === 'INS')    newCtx.underline = true;
+    if (tag === 'S' || tag === 'STRIKE' || tag === 'DEL') newCtx.strikethrough = true;
 
-            if (node.style) {
-                if (node.style.fontWeight === 'bold' || +node.style.fontWeight >= 700) newCtx.bold = true;
-                if (node.style.fontStyle === 'italic') newCtx.italic = true;
-                if (node.style.textDecoration && node.style.textDecoration.includes('underline')) newCtx.underline = true;
-            }
+    // Estilos inline
+    if (node.style) {
+        const fw = node.style.fontWeight;
+        if (fw === 'bold' || fw === 'bolder' || (+fw >= 600)) newCtx.bold = true;
 
-            const col = _extractColor(node);   if (col) newCtx.color = col;
-            const hl  = _extractHighlight(node); if (hl) newCtx.highlight = hl;
-            const fs  = _extractFontSize(node);  if (fs) newCtx.fontSize = fs;
+        const fi = node.style.fontStyle;
+        if (fi === 'italic' || fi === 'oblique') newCtx.italic = true;
 
-            const align   = _getAlign(node);
-            const isBlock = BLOCK_TAGS.includes(tag);
-            const isBr    = tag === 'BR';
-            const isLi    = tag === 'LI';
+        const td  = node.style.textDecoration || '';
+        const tdl = node.style.textDecorationLine || '';
+        if (td.includes('underline') || tdl.includes('underline')) newCtx.underline = true;
+        if (td.includes('line-through') || tdl.includes('line-through')) newCtx.strikethrough = true;
+    }
 
-            if (isBr) { pushLine(currentAlign); return; }
+    const col = _extractColor(node);     if (col) newCtx.color     = col;
+    const hl  = _extractHighlight(node); if (hl)  newCtx.highlight = hl;
+    const fs  = _extractFontSize(node);  if (fs)  newCtx.fontSize  = fs;
 
-            if (isBlock) {
-                if (currentSegments.length > 0) pushLine(currentAlign);
-                if (align) currentAlign = align;
-            }
+    const align   = _getAlign(node);
+    const isBlock = BLOCK_TAGS.includes(tag);
+    const isBr    = tag === 'BR';
+    const isLi    = tag === 'LI';
 
-            if (isLi) currentSegments.push({ ...newCtx, text: '• ' });
+    if (isBr) { pushLine(currentAlign); return; }
+    if (isBlock) {
+        if (currentSegments.length > 0) pushLine(currentAlign);
+        if (align) currentAlign = align;
+    }
+    if (isLi) currentSegments.push({ ...newCtx, text: '• ' });
 
-            node.childNodes.forEach(child => walkNode(child, newCtx));
+    node.childNodes.forEach(child => walkNode(child, newCtx));
 
-            if (isBlock) {
-                pushLine(align || currentAlign);
-                currentAlign = 'left';
-            }
-        }
-
+    if (isBlock) { pushLine(align || currentAlign); currentAlign = 'left'; }
+}
         const defaultCtx = { bold: false, italic: false, underline: false, color: null, highlight: null, fontSize: 11 };
         container.childNodes.forEach(child => walkNode(child, defaultCtx));
         if (currentSegments.length > 0) pushLine(currentAlign);
@@ -489,16 +434,11 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         if (!html || html.trim() === '') return startY;
         const parsedLines = parseHtmlToLines(html);
         if (!parsedLines.length) return startY;
-
-        const DEFAULT_FS   = 11;
-        const LINE_SPACING = 1.45;
+        const DEFAULT_FS   = 9;
+        const LINE_SPACING = 1.35;
         const SAFE_PAD     = 1;
         let curY = startY;
-
-        function ensurePage(neededH) {
-            if (curY + neededH > pageH - marginBot) { doc.addPage(); curY = 20; }
-        }
-
+        function ensurePage(neededH) { if (curY + neededH > pageH - marginBot) { doc.addPage(); curY = 18; } }
         function applyStyle(seg) {
             const fs = seg.fontSize || DEFAULT_FS;
             let style = 'normal';
@@ -511,7 +451,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             else           doc.setTextColor(20, 20, 20);
             return fs * 0.352778;
         }
-
         for (const line of parsedLines) {
             if (!line.segments || line.segments.length === 0) {
                 const fsMm = DEFAULT_FS * 0.352778;
@@ -519,57 +458,41 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 ensurePage(fsMm * LINE_SPACING * 2);
                 continue;
             }
-
             const tokens = [];
             for (const seg of line.segments) {
                 const parts = seg.text.split(/(\s+)/);
                 for (const part of parts) { if (part !== '') tokens.push({ text: part, seg }); }
             }
-
             const subLines  = [];
             let currentSub  = [];
             let currentSubW = 0;
             const rightLimit = maxW - SAFE_PAD;
-
             for (const tok of tokens) {
                 applyStyle(tok.seg);
                 const tokW = doc.getTextWidth(tok.text);
                 const isWS = /^\s+$/.test(tok.text);
-                if (currentSubW + tokW > rightLimit && currentSubW > 0 && !isWS) {
-                    subLines.push(currentSub); currentSub = []; currentSubW = 0;
-                }
+                if (currentSubW + tokW > rightLimit && currentSubW > 0 && !isWS) { subLines.push(currentSub); currentSub = []; currentSubW = 0; }
                 if (!isWS || currentSubW > 0) { currentSub.push(tok); currentSubW += tokW; }
             }
             if (currentSub.length > 0) subLines.push(currentSub);
-
             const lineAlign = line.align || 'left';
-
             for (const subLine of subLines) {
                 let lineH = 0;
-                for (const tok of subLine) {
-                    const fsMm = (tok.seg.fontSize || DEFAULT_FS) * 0.352778;
-                    lineH = Math.max(lineH, fsMm * LINE_SPACING);
-                }
+                for (const tok of subLine) { const fsMm = (tok.seg.fontSize || DEFAULT_FS) * 0.352778; lineH = Math.max(lineH, fsMm * LINE_SPACING); }
                 if (lineH === 0) lineH = DEFAULT_FS * 0.352778 * LINE_SPACING;
-
                 ensurePage(lineH * 2);
-
                 let totalW = 0;
                 for (const tok of subLine) { applyStyle(tok.seg); totalW += doc.getTextWidth(tok.text); }
                 totalW = Math.min(totalW, rightLimit);
-
                 let lineStartX;
                 if      (lineAlign === 'center') lineStartX = x + (maxW - totalW) / 2;
                 else if (lineAlign === 'right')  lineStartX = x + maxW - totalW - SAFE_PAD;
                 else                             lineStartX = x;
-
                 let curX = lineStartX;
                 const rightEdge = x + maxW - SAFE_PAD;
-
                 for (const tok of subLine) {
                     const fsMm = applyStyle(tok.seg);
                     const tokW = doc.getTextWidth(tok.text);
-
                     if (tok.seg.highlight) {
                         const hl = tok.seg.highlight;
                         doc.setFillColor(hl[0], hl[1], hl[2]);
@@ -577,74 +500,101 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                         if (tok.seg.color) doc.setTextColor(tok.seg.color[0], tok.seg.color[1], tok.seg.color[2]);
                         else               doc.setTextColor(20, 20, 20);
                     }
-
                     if (curX < rightEdge && tok.text.trim() !== '') doc.text(tok.text, curX, curY);
-
                     if (tok.seg.underline && curX < rightEdge) {
-                        const uc = tok.seg.color || [20, 20, 20];
-                        doc.setDrawColor(uc[0], uc[1], uc[2]);
-                        doc.setLineWidth(0.2);
-                        doc.line(curX, curY + 0.6, Math.min(curX + tokW, rightEdge), curY + 0.6);
+                    const uc = tok.seg.color || [20, 20, 20];
+                    doc.setDrawColor(uc[0], uc[1], uc[2]); doc.setLineWidth(0.2);
+                    doc.line(curX, curY + 0.6, Math.min(curX + tokW, rightEdge), curY + 0.6);
                     }
 
-                    curX += tokW;
-                    if (curX >= rightEdge) break;
-                }
+
+                    // TACHADO
+                    if (tok.seg.strikethrough && curX < rightEdge) {
+                        const sc = tok.seg.color || [20, 20, 20];
+                        doc.setDrawColor(sc[0], sc[1], sc[2]); doc.setLineWidth(0.2);
+                        doc.line(curX, curY - fsMm * 0.3, Math.min(curX + tokW, rightEdge), curY - fsMm * 0.3);
+                    }
+                        curX += tokW;
+                        if (curX >= rightEdge) break;
+                    }
                 curY += lineH;
             }
         }
         return curY;
     }
 
- 
-    function drawHtmlBlock(doc, label, html, startY, pageW, margin, pageH) {
-        const blockW    = pageW - margin * 2;
-        const labelH    = 9;
-        const padX      = 6;
-        const padTop    = 10;
-        const padBot    = 10;
-        const minBodyH  = 18;
-        const BOT_LIMIT = 25;
-        const innerX    = margin + padX;
-        const innerW    = blockW - padX * 2;
+    // NORMALIZAR TEXTO PLANO
+    function normalizeToHtml(input) {
+        if (!input) return '';
+        if (/<[a-z][\s\S]*>/i.test(input)) return input;
+        return input
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/\n/g, '<br>');
+    }
 
-        const isEmpty = !html || html.replace(/<[^>]+>/g, '').trim() === '';
+    // label header + body con HTML/texto
+    function drawCompactBlock(doc, label, rawContent, startY, pageW, margin, pageH) {
+        // Normalizar siempre el contenido antes de procesar
+        const html   = normalizeToHtml(rawContent);
+        const blockW = pageW - margin * 2;
+        const labelH  = 7;
+        const padX    = 4;
+        const padTop  = 9;
+        const padBot  = 6;
+        const minBodyH = 14;
+        const BOT_LIMIT = 20;
+        const innerX  = margin + padX;
+        const innerW  = blockW - padX * 2;
+        const GAP     = 3;
+
+        const plainText = html.replace(/<[^>]+>/g, '').trim();
+        const isEmpty   = !plainText;
 
         if (isEmpty) {
-            if (startY + labelH + minBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 20; }
-            doc.setFillColor(150, 150, 150); doc.rect(margin, startY, blockW, labelH, 'F');
-            doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4); doc.rect(margin, startY, blockW, labelH, 'S');
-            doc.setFontSize(9); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
-            doc.text(label, margin + 6, startY + 6);
-            const bodyY0 = startY + labelH;
-            doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4);
-            doc.rect(margin, bodyY0, blockW, minBodyH, 'FD');
-            doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
-            doc.text('N/A', margin + blockW / 2, bodyY0 + minBodyH / 2 + 1, { align: 'center', baseline: 'middle' });
-            return bodyY0 + minBodyH + 10;
+            if (startY + labelH + minBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 15; }
+            doc.setFillColor(191, 191, 191);
+            doc.rect(margin, startY, blockW, labelH, 'F');
+            doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
+            doc.rect(margin, startY, blockW, labelH, 'S');
+            doc.setFontSize(8); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
+            doc.text(label, margin + blockW / 2, startY + labelH / 2 + 1, { align: 'center', baseline: 'middle' });
+            const bodyY = startY + labelH;
+            doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
+            doc.rect(margin, bodyY, blockW, minBodyH, 'FD');
+            doc.setFontSize(8); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
+            doc.text('N/A', margin + blockW / 2, bodyY + minBodyH / 2 + 1, { align: 'center', baseline: 'middle' });
+            return bodyY + minBodyH + GAP;
         }
 
         const {jsPDF: jsPDFClass} = window.jspdf;
-        const tempDoc = new jsPDFClass('l', 'mm', 'a4');
-        const dryEndY = drawHtmlInPdf(tempDoc, html, innerX, 30, innerW, 9999, 0, innerX);
-        const measuredH = dryEndY - 30;
+        const tempDoc  = new jsPDFClass('l', 'mm', 'a4');
+        const dryStart = 30;
+        const dryEndY  = drawHtmlInPdf(tempDoc, html, innerX, dryStart, innerW, 9999, 0, innerX);
+        const measuredH = dryEndY - dryStart;
         const realBodyH = Math.max(minBodyH, measuredH + padTop + padBot);
 
-        if (startY + labelH + realBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 20; }
+        if (startY + labelH + realBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 15; }
 
-        doc.setFillColor(150, 150, 150); doc.rect(margin, startY, blockW, labelH, 'F');
-        doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4); doc.rect(margin, startY, blockW, labelH, 'S');
-        doc.setFontSize(9); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
-        doc.text(label, margin + 6, startY + 6);
+        // Header gris
+        doc.setFillColor(191, 191, 191);
+        doc.rect(margin, startY, blockW, labelH, 'F');
+        doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
+        doc.rect(margin, startY, blockW, labelH, 'S');
+        doc.setFontSize(8); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
+        doc.text(label, margin + blockW / 2, startY + labelH / 2 + 1, { align: 'center', baseline: 'middle' });
 
+        // Body
         const bodyY = startY + labelH;
-        doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4);
+        doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
         doc.rect(margin, bodyY, blockW, realBodyH, 'FD');
+
+        // Renderizar contenido HTML real
         drawHtmlInPdf(doc, html, innerX, bodyY + padTop, innerW, pageH, BOT_LIMIT, innerX);
 
-        return bodyY + realBodyH + 10;
+        return bodyY + realBodyH + GAP;
     }
-
 
 
     // GENERAR PDF
@@ -653,349 +603,337 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         const archivosConCambios=$scope.tableData.filter(item=>(!item.existeEnActual||!item.existeEnFutura||item.versionChanged||item.sizeChanged));
         if(!archivosConCambios.length){$scope.errorMessage='❌ No hay archivos con cambios';return;}
 
-        const {jsPDF}=window.jspdf;
-        const doc=new jsPDF('l','mm','a4');
-        const pageWidth=doc.internal.pageSize.getWidth(), pageHeight=doc.internal.pageSize.getHeight();
-        const tableStyles=PdfStylesService.getTableStyles(),
-              footerStyles=PdfStylesService.getFooterStyles(), dims=PdfStylesService.dimensions;
-        const applyColor=c=>(Array.isArray(c)&&c.length===3)?c:[0,0,0];
+        const {jsPDF} = window.jspdf;
+        const doc     = new jsPDF('l', 'mm', 'a4');
+        const pageW   = doc.internal.pageSize.getWidth();
+        const pageH   = doc.internal.pageSize.getHeight();
+        const M       = 12;  // margin compacto
+        const tableStyles  = PdfStylesService.getTableStyles();
+        const footerStyles = PdfStylesService.getFooterStyles();
 
-
-
-        // PÁGINA 1: HEADER
-        doc.setFillColor(29,33,28); doc.rect(0,0,pageWidth,42,'F');
-        doc.setFillColor(221,244,52); doc.rect(0,42,pageWidth,2,'F');
-
-        doc.setFontSize(28); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold'); doc.text('F2X',20,20);
-        doc.setFontSize(9);  doc.setTextColor(221,244,52);  doc.setFont(undefined,'normal'); doc.text('Flytech Simplexity',20,25);
-
-        doc.setFontSize(13); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-        doc.text('F2X S.A.S', pageWidth/2, 17, {align:'center'});
-        doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-        doc.text('FICHA TÉCNICA DE ACTUALIZACIÓN', pageWidth/2, 27, {align:'center'});
-
-        const now=new Date();
-        const d=String(now.getDate()).padStart(2,'0'), mo=String(now.getMonth()+1).padStart(2,'0'), yr=now.getFullYear();
-        const fechaGeneracion = `${d}/${mo}/${yr}`;
-
-        let currentY = 55;
-
-        // CONTENIDO HTML DE CADA CAMPO
+        // ── Datos release ──
         const htmlSistema    = $scope.releaseDataRaw.sistema             || '';
         const htmlCaract     = $scope.releaseDataRaw.caracteristicas     || '';
-        const htmlEquipos    = $scope.releaseDataRaw.equipos              || '';
-        const htmlFecha      = $scope.releaseDataRaw.fechaFicha           || fechaGeneracion;
-        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos   || '';
-        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos     || '';
-        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion || '';
-        const htmlObs        = $scope.releaseDataRaw.observaciones        || '';
+        const htmlEquipos    = $scope.releaseDataRaw.equipos             || '';
+        const htmlFecha      = $scope.releaseDataRaw.fechaFicha          || '';
+        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos  || '';
+        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos    || '';
+        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion|| '';
+        const htmlObs        = $scope.releaseDataRaw.observaciones       || '';
+        const fechaFmt       = ($scope.vigenteDesde instanceof Date && !isNaN($scope.vigenteDesde.getTime()))
+        ? $scope.formatearVigente($scope.vigenteDesde) : '';
 
-        const tieneVigente = $scope.vigenteDesde instanceof Date && !isNaN($scope.vigenteDesde.getTime());
-        const fechaFmt     = tieneVigente ? $scope.formatearVigente($scope.vigenteDesde) : '';
 
+        // FICHA COMPACTA
+        // HEADER
+        doc.setFillColor(29, 33, 28); doc.rect(0, 0, pageW, 36, 'F');
+        doc.setFillColor(221, 244, 52); doc.rect(0, 36, pageW, 2, 'F');
+
+        doc.setFontSize(24); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold'); doc.text('F2X', 16, 17);
+        doc.setFontSize(8);  doc.setTextColor(221,244,52);  doc.setFont(undefined,'normal'); doc.text('Flytech Simplexity', 16, 22);
+
+        doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+        doc.text('F2X S.A.S', pageW/2, 14, {align:'center'});
+        doc.setFontSize(10); doc.setFont(undefined,'bold');
+        doc.text('FICHA TÉCNICA DE ACTUALIZACIÓN', pageW/2, 23, {align:'center'});
+
+        let Y = 42;
+        const LH  = 7;  
+        const GAP = 3;  
+        const fullW = pageW - M * 2;
 
         // SISTEMA + VIGENTE A PARTIR DE
-        const vigenteW  = 65;
-        const gapW      = 5;
-        const sistemaW  = pageWidth - dims.margin * 2 - vigenteW - gapW;
-        const vigenteX  = dims.margin + sistemaW + gapW;
-        const labelH    = 9;
+        const vigenteW = 55;
+        const sistemaW = fullW - vigenteW - 2;
 
-        // Cabecera SISTEMA
-        doc.setFillColor(150,150,150);
-        doc.rect(dims.margin, currentY, sistemaW, labelH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
-        doc.rect(dims.margin, currentY, sistemaW, labelH, 'S');
-        doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('SISTEMA', dims.margin + sistemaW/2, currentY + 6, {align:'center'});
-
-        // Cabecera VIGENTE A PARTIR DE
-        doc.setFillColor(150,150,150);
-        doc.rect(vigenteX, currentY, vigenteW, labelH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
-        doc.rect(vigenteX, currentY, vigenteW, labelH, 'S');
+        // Header SISTEMA
+        doc.setFillColor(191,191,191); doc.rect(M, Y, sistemaW, LH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, sistemaW, LH, 'S');
         doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('VIGENTE A PARTIR DE', vigenteX + vigenteW/2, currentY + 6, {align:'center'});
+        doc.text('SISTEMA', M + sistemaW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
 
-        const sistemaHeaderY = currentY + labelH;
+        // Header VIGENTE
+        const vX = M + sistemaW + 2;
+        doc.setFillColor(191,191,191); doc.rect(vX, Y, vigenteW, LH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(vX, Y, vigenteW, LH, 'S');
+        doc.setFontSize(7); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('VIGENTE A PARTIR DE', vX + vigenteW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
 
-        let sistemaBodyH = 18;
-        if (htmlSistema && htmlSistema.replace(/<[^>]+>/g,'').trim() !== '') {
-            const {jsPDF: jsPDFClass} = window.jspdf;
-            const tempDoc = new jsPDFClass('l','mm','a4');
-            const dryEnd  = drawHtmlInPdf(tempDoc, htmlSistema, dims.margin+3, 30, sistemaW-6, 9999, 0, dims.margin+3);
-            sistemaBodyH  = Math.max(18, (dryEnd - 30) + 12);
-        }
+        Y += LH;
 
-        // Cuerpo SISTEMA
-        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
-        doc.rect(dims.margin, sistemaHeaderY, sistemaW, sistemaBodyH, 'FD');
-        const sistemaTexto = htmlSistema ? htmlSistema.replace(/<[^>]+>/g,'').trim() : '';
-        if (sistemaTexto !== '') {
-            doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
-            const sistemaLines = doc.splitTextToSize(sistemaTexto, sistemaW - 10);
-            doc.text(sistemaLines, dims.margin + sistemaW / 2, sistemaHeaderY + sistemaBodyH / 2, {align:'center', baseline:'middle'});
+        // Body SISTEMA
+        const sistemaBodyH = 12;
+        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
+        doc.rect(M, Y, sistemaW, sistemaBodyH, 'FD');
+        const sText = htmlSistema.replace(/<[^>]+>/g,'').trim();
+        if (sText) {
+            doc.setFontSize(10); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
+            doc.text(sText, M + sistemaW/2, Y + sistemaBodyH/2, {align:'center', baseline:'middle'});
         } else {
-            doc.setFontSize(9); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
-            doc.text('N/A', dims.margin + sistemaW/2, sistemaHeaderY + sistemaBodyH/2 + 1, {align:'center', baseline:'middle'});
+            doc.setFontSize(8); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
+            doc.text('N/A', M + sistemaW/2, Y + sistemaBodyH/2, {align:'center', baseline:'middle'});
         }
 
+        // Body VIGENTE
+        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
+        doc.rect(vX, Y, vigenteW, sistemaBodyH, 'FD');
+        doc.setFontSize(10); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
+        doc.text(fechaFmt || 'N/A', vX + vigenteW/2, Y + sistemaBodyH/2, {align:'center', baseline:'middle'});
 
-        // Cuerpo VIGENTE A PARTIR DE
-        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
-        doc.rect(vigenteX, sistemaHeaderY, vigenteW, sistemaBodyH, 'FD');
-        doc.setFontSize(12); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
-        doc.text(fechaFmt || 'N/A', vigenteX + vigenteW/2, sistemaHeaderY + sistemaBodyH/2, {align:'center', baseline:'middle'});
-
-        currentY = sistemaHeaderY + sistemaBodyH + 8;
+        Y += sistemaBodyH + GAP;
 
 
 
         // DESCRIPCIÓN RELEASE
-        const tablaW  = pageWidth - dims.margin * 2;
-        const labelW  = 65;
+        // Header principal
+        doc.setFillColor(191,191,191); doc.rect(M, Y, fullW, LH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, fullW, LH, 'S');
+        doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('DESCRIPCIÓN RELEASE', M + fullW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
+        Y += LH;
 
-        // CABECERA DESCRIPCION RELEASE
-        doc.setFillColor(150,150,150); doc.rect(dims.margin, currentY, tablaW, labelH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.rect(dims.margin, currentY, tablaW, labelH, 'S');
-        doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('DESCRIPCIÓN RELEASE', dims.margin + tablaW/2, currentY + 6, {align:'center'});
-
-        let filaY = currentY + labelH;
-
+        const labelW  = 55;
+        const contentW = fullW - labelW;
         const releaseRows = [
-            { label:'CARACTERÍSTICAS',              html: htmlCaract  },
-            { label:'EQUIPOS',                      html: htmlEquipos },
-            { label:'FECHA DE GENERACIÓN DE FICHA', html: htmlFecha   }
+            { label: 'CARACTERÍSTICAS',              html: htmlCaract  },
+            { label: 'EQUIPOS',                      html: htmlEquipos },
+            { label: 'FECHA DE GENERACIÓN DE FICHA', html: htmlFecha || fechaFmt }
         ];
 
-        // Pre-calcular alturas
-        const rowHeights = releaseRows.map(row => {
-            const isEmpty = !row.html || row.html.replace(/<[^>]+>/g,'').trim() === '';
-            if (isEmpty) return 18;
-            const td = document.createElement('div');
-            td.innerHTML = row.html;
-            const lc = (td.innerText||'').split('\n').filter(l=>l.trim()).length;
-            return Math.max(18, lc * 7 + 12);
-        });
+        releaseRows.forEach(row => {
+            const html    = normalizeToHtml(row.html);
+            const text    = html.replace(/<[^>]+>/g, '').trim();
+            const isEmpty = !text;
 
-        releaseRows.forEach((row, rowIndex) => {
-            const contentW = tablaW - labelW;
-            const isEmpty  = !row.html || row.html.replace(/<[^>]+>/g,'').trim() === '';
-            let rowH = rowHeights[rowIndex];
+            const padX   = 4;
+            const padTop = 5;
+            const padBot = 4;
+            const minH   = 14;
+            const innerX = M + labelW + padX;
+            const innerW = contentW - padX * 2;
 
-            doc.setFillColor(220,228,232); doc.rect(dims.margin, filaY, labelW, rowH, 'F');
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
-            doc.rect(dims.margin, filaY, tablaW, rowH, 'S');
-            doc.line(dims.margin+labelW, filaY, dims.margin+labelW, filaY+rowH);
-            doc.setFontSize(8); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
-            doc.text(row.label, dims.margin+labelW/2, filaY+rowH/2+1, {align:'center', baseline:'middle'});
-
-            if (isEmpty) {
-                doc.setFont(undefined,'italic'); doc.setFontSize(9); doc.setTextColor(160,160,160);
-                doc.text('N/A', dims.margin+labelW+contentW/2, filaY+rowH/2+1, {align:'center', baseline:'middle'});
-            } else {
-                const cellX = dims.margin + labelW + 3;
-                const cellW = contentW - 6;
-                const isFechaRow = row.label === 'FECHA DE GENERACIÓN DE FICHA';
-                let endY, realRowH;
-                if (isFechaRow) {
-                    const fechaX = cellX + 4;
-                    const fechaY = filaY + rowH / 2 + 1;
-                    doc.setFontSize(11); doc.setFont(undefined,'normal'); doc.setTextColor(20,20,20);
-                    doc.text(row.html.replace(/<[^>]+>/g,'').trim(), fechaX, fechaY, {baseline:'middle'});
-                    endY = fechaY + 4;
-                    realRowH = rowH;
-                } else {
-                    const cellTopY = filaY + 8;
-                    endY     = drawHtmlInPdf(doc, row.html, cellX, cellTopY, cellW, pageHeight, 25, cellX);
-                    realRowH = Math.max(rowH, endY - filaY + 8);
-                }
-                if (realRowH > rowH) {
-                    doc.setFillColor(255,255,255); doc.rect(dims.margin+labelW, filaY+rowH-0.5, contentW, realRowH-rowH+1, 'F');
-                    doc.setFillColor(220,228,232); doc.rect(dims.margin, filaY, labelW, realRowH, 'F');
-                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
-                    doc.rect(dims.margin, filaY, tablaW, realRowH, 'S');
-                    doc.line(dims.margin+labelW, filaY, dims.margin+labelW, filaY+realRowH);
-                    doc.setFontSize(8); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
-                    doc.text(row.label, dims.margin+labelW/2, filaY+realRowH/2+1, {align:'center', baseline:'middle'});
-                    rowH = realRowH;
-                }
+            let rowH = minH;
+            if (!isEmpty) {
+                const {jsPDF: jsPDFClass} = window.jspdf;
+                const tmpDoc  = new jsPDFClass('l', 'mm', 'a4');
+                const dryY    = drawHtmlInPdf(tmpDoc, html, innerX, 30, innerW, 9999, 0, innerX);
+                const measH   = dryY - 30;
+                rowH = Math.max(minH, measH + padTop + padBot);
             }
-            filaY += rowH;
+
+            // Fondos
+            doc.setFillColor(208, 216, 220); doc.rect(M,          Y, labelW,   rowH, 'F');
+            doc.setFillColor(255, 255, 255); doc.rect(M + labelW, Y, contentW, rowH, 'F');
+
+            // Bordes
+            doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
+            doc.rect(M, Y, fullW, rowH, 'S');
+            doc.line(M + labelW, Y, M + labelW, Y + rowH);
+
+            // Label
+            doc.setFontSize(7.5); doc.setTextColor(40, 40, 40); doc.setFont(undefined, 'bold');
+            doc.text(row.label, M + labelW / 2, Y + rowH / 2, { align: 'center', baseline: 'middle' });
+
+            // Contenido con formato HTML
+            if (isEmpty) {
+                doc.setFontSize(8); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
+                doc.text('N/A', M + labelW + contentW / 2, Y + rowH / 2, { align: 'center', baseline: 'middle' });
+            } else {
+                const {jsPDF: jsPDFClass2} = window.jspdf;
+                const tmpDoc2  = new jsPDFClass2('l', 'mm', 'a4');
+                const dryY2    = drawHtmlInPdf(tmpDoc2, html, innerX, 30, innerW, 9999, 0, innerX);
+                const contentH = dryY2 - 30;
+                const DEFAULT_FS_MM = 9 * 0.352778;
+                const centeredY = Y + (rowH / 2) - (contentH / 2) + DEFAULT_FS_MM * 1.3;
+                drawHtmlInPdf(doc, html, innerX, centeredY, innerW, pageH, 20, innerX);
+            }
+
+            Y += rowH;
         });
 
-        currentY = filaY + 8;
+        Y += GAP;
 
-        // DESCRIPCION DE CAMBIOS DE APLICATIVOS
-        currentY = drawHtmlBlock(doc, 'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS', htmlCambios, currentY, pageWidth, dims.margin, pageHeight);
+        // DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS
+        Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS', htmlCambios, Y, pageW, M, pageH);
 
 
         // DETALLE DE ARCHIVOS
-        doc.addPage(); currentY = 20;
-        const detalleW = pageWidth - dims.margin*2;
-        doc.setFillColor(150,150,150); doc.rect(dims.margin, currentY, detalleW, 9, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.rect(dims.margin, currentY, detalleW, 9, 'S');
-        doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('DETALLE DE ARCHIVOS CON CAMBIOS', dims.margin+6, currentY+6);
-        currentY += 12;
+        doc.addPage(); Y = 15;
+
+        doc.setFillColor(191,191,191); doc.rect(M, Y, fullW, LH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, fullW, LH, 'S');
+        doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('DETALLE DE ARCHIVOS CON CAMBIOS', M + 4, Y + LH/2 + 1, {baseline:'middle'});
+        Y += LH + 2;
 
         doc.autoTable({
-            startY: currentY,
-            head:[["Archivo","Equipo / IP","Versión Actual","Peso Actual","Versión Futura","Peso Futuro","Ubicación"]],
-            body:archivosConCambios.map(item=>[item.name,item.equipos||'-',item.versionActual||'-',item.pesoActual||'-',item.versionFutura||'-',item.pesoFuturo||'-',item.ruta||'']),
-            theme:tableStyles.theme,
-            headStyles:{...tableStyles.headStyles, fillColor:[29,33,28], textColor:[255,255,255], lineColor:[20,20,20], lineWidth:0.4},
-            styles:{...tableStyles.bodyStyles, lineColor:[20,20,20], lineWidth:0.3},
-            columnStyles:{
-                0:{cellWidth:45,fontStyle:'bold'},
-                1:{cellWidth:28,halign:'center',fontSize:7},
-                2:{cellWidth:28,halign:'center',fontSize:7,overflow:'linebreak'},
-                3:{cellWidth:20,halign:'center',fontSize:7},
-                4:{cellWidth:28,halign:'center',fontSize:7,overflow:'linebreak'},
-                5:{cellWidth:20,halign:'center',fontSize:7},
-                6:{cellWidth:'auto',fontSize:7}
+            startY: Y,
+            head: [['Archivo','Equipo / IP','Versión Actual','Peso Actual','Versión Futura','Peso Futuro','Ubicación']],
+            body: archivosConCambios.map(item => [
+                item.name, item.equipos||'-', item.versionActual||'-', item.pesoActual||'-',
+                item.versionFutura||'-', item.pesoFuturo||'-', item.ruta||''
+            ]),
+            theme: 'grid',
+            headStyles: { fillColor:[29,33,28], textColor:[255,255,255], fontSize:8, fontStyle:'bold', halign:'center', valign:'middle', cellPadding:3 },
+            styles: { fontSize:7, cellPadding:2, textColor:[20,20,20], lineColor:[80,80,80], lineWidth:0.2 },
+            columnStyles: {
+                0:{cellWidth:45, fontStyle:'bold'},
+                1:{cellWidth:26, halign:'center'},
+                2:{cellWidth:26, halign:'center'},
+                3:{cellWidth:18, halign:'center'},
+                4:{cellWidth:26, halign:'center'},
+                5:{cellWidth:18, halign:'center'},
+                6:{cellWidth:'auto', fontSize:6.5}
             },
-            alternateRowStyles:tableStyles.alternateRowStyles, margin:{bottom:25},
+            alternateRowStyles: { fillColor:[248,248,248] },
+            margin: { left:M, right:M, bottom:20 },
             didParseCell: data => {
                 if (data.section === 'body') {
                     const r = archivosConCambios[data.row.index];
-                    if (r.changeType === 'has-changes') data.cell.styles.fillColor = [240,240,240];
-                    if ((data.column.index === 2 || data.column.index === 4) && typeof data.cell.raw === 'string' && data.cell.raw.length > 12) {
-                        data.cell.styles.fontSize = 6;
+                    if (r && r.versionMenor && (data.column.index === 4)) {
+                        data.cell.styles.textColor = [180, 0, 0];
+                        data.cell.styles.fontStyle = 'bold';
                     }
                 }
-            },
+            }
         });
 
-        let finalY = doc.lastAutoTable.finalY + 5;
-        const ld=applyColor(footerStyles.line.drawColor);
-        doc.setDrawColor(ld[0],ld[1],ld[2]); doc.setLineWidth(footerStyles.line.lineWidth);
-        doc.line(dims.margin, finalY, pageWidth-dims.margin, finalY);
-        const sc=applyColor(footerStyles.summary.textColor);
-        doc.setFontSize(footerStyles.summary.fontSize); doc.setTextColor(sc[0],sc[1],sc[2]); doc.setFont(undefined,footerStyles.summary.fontStyle);
-        doc.text(doc.splitTextToSize(`Total comparados: ${$scope.tableData.length} | Con cambios: ${archivosConCambios.length} | Cambios versión: ${$scope.statistics.versionChanged} | Cambios tamaño: ${$scope.statistics.sizeChanged} | Sin cambios: ${$scope.statistics.noChanges}`, pageWidth-dims.margin*2), dims.margin, finalY+6);
+        Y = doc.lastAutoTable.finalY + 3;
+
+        // Resumen compacto
+        doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
+        doc.line(M, Y, pageW-M, Y); Y += 3;
+        doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
+        doc.text(
+            `Total comparados: ${$scope.tableData.length} | Con cambios: ${archivosConCambios.length} | Versión: ${$scope.statistics.versionChanged} | Tamaño: ${$scope.statistics.sizeChanged} | Sin cambios: ${$scope.statistics.noChanges}`,
+            M, Y + 3
+        );
 
 
-        // IMAGENES
+        // EVIDENCIAS + SIN COINCIDENCIAS + CAMBIOS BD/ CAMBIOS DE ARCHIVOS DE CONFIG/ OBSERVACIONES + FIRMAS
+        doc.addPage(); Y = 15;
+
+        // EVIDENCIAS 
         if ($scope.imagenesAdjuntas.length > 0) {
-            doc.addPage();
-            let imgY = 25;
-            doc.setFillColor(29,33,28); doc.rect(dims.margin, imgY, pageWidth-dims.margin*2, 12, 'F');
-            doc.setFontSize(12); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-            doc.text('EVIDENCIAS DE PRUEBAS', dims.margin+(pageWidth-dims.margin*2)/2, imgY+8, {align:'center'});
-            imgY += 20;
+            doc.setFillColor(29,33,28); doc.rect(M, Y, fullW, 9, 'F');
+            doc.setFontSize(9); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+            doc.text('EVIDENCIAS DE PRUEBAS', M + fullW/2, Y + 5.5, {align:'center', baseline:'middle'});
+            Y += 12;
 
-            $scope.imagenesAdjuntas.forEach((img,idx)=>{
+            $scope.imagenesAdjuntas.forEach((img, idx) => {
                 try {
-                    const descLines = img.descripcion ? doc.splitTextToSize(img.descripcion, pageWidth-dims.margin*2-130) : [];
-                    const blockH = 11 + 90 + 8;
-                    if (imgY + blockH > pageHeight - 30) { doc.addPage(); imgY = 20; }
-                    const imgW    = 120;
-                    const descX   = dims.margin + imgW + 5;
-                    const descW   = pageWidth - dims.margin - imgW - 5 - dims.margin;
-                    const headerH = 11;
+                    const imgW    = 110;
+                    const descX   = M + imgW + 4;
+                    const descW   = fullW - imgW - 4;
+                    const headerH = 8;
+                    const imgH    = 75;
 
-                    doc.setFillColor(245,245,245); doc.rect(dims.margin, imgY, imgW, headerH, 'F');
-                    doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.rect(dims.margin, imgY, imgW, headerH, 'S');
-                    doc.setFontSize(8); doc.setTextColor(56,56,56); doc.setFont(undefined,'bold');
-                    const nombreLines = doc.splitTextToSize(`${idx+1}.  ${img.nombre}`, imgW-8);
-                    doc.text(nombreLines[0], dims.margin+4, imgY + headerH/2 + 1, {baseline:'middle'});
+                    if (Y + headerH + imgH + 5 > pageH - 20) { doc.addPage(); Y = 15; }
 
-                    doc.setFillColor(20,20,20); doc.rect(descX, imgY, descW, headerH, 'F');
-                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.5); doc.rect(descX, imgY, descW, headerH, 'S');
-                    doc.setFontSize(10); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-                    doc.text('DESCRIPCIÓN', descX+descW/2, imgY + headerH/2, {align:'center', baseline:'middle'});
+                    // Nombre imagen
+                    doc.setFillColor(240,240,240); doc.rect(M, Y, imgW, headerH, 'F');
+                    doc.setDrawColor(180,180,180); doc.setLineWidth(0.2); doc.rect(M, Y, imgW, headerH, 'S');
+                    doc.setFontSize(7); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
+                    doc.text(`${idx+1}. ${img.nombre}`, M+3, Y + headerH/2 + 1, {baseline:'middle'});
 
-                    imgY += headerH;
+                    // Header descripción
+                    doc.setFillColor(20,20,20); doc.rect(descX, Y, descW, headerH, 'F');
+                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(descX, Y, descW, headerH, 'S');
+                    doc.setFontSize(8); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+                    doc.text('DESCRIPCIÓN', descX + descW/2, Y + headerH/2 + 1, {align:'center', baseline:'middle'});
+                    Y += headerH;
 
-                    doc.addImage(img.base64, 'JPEG', dims.margin, imgY, imgW, 90);
-                    doc.setFillColor(252,252,252); doc.setDrawColor(20,20,20); doc.setLineWidth(0.5);
-                    doc.rect(descX, imgY, descW, 90, 'FD');
-                    if (descLines.length > 0) {
-                        doc.setFontSize(9); doc.setFont(undefined,'normal'); doc.setTextColor(0,0,0);
-                        doc.text(descLines, descX+4, imgY+7);
+                    // IMAGEN Y CAJA DE DESCRIPCION
+                    doc.addImage(img.base64, 'JPEG', M, Y, imgW, imgH);
+                    doc.setFillColor(252,252,252); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
+                    doc.rect(descX, Y, descW, imgH, 'FD');
+                    if (img.descripcion) {
+                        doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(0,0,0);
+                        const dLines = doc.splitTextToSize(img.descripcion, descW - 6);
+                        doc.text(dLines, descX+3, Y+5);
                     } else {
-                        doc.setFontSize(9); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
-                        doc.text('N/A', descX+descW/2, imgY+45, {align:'center', baseline:'middle'});
+                        doc.setFontSize(8); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
+                        doc.text('N/A', descX + descW/2, Y + imgH/2, {align:'center', baseline:'middle'});
                     }
-                    imgY += 90;
-                    doc.setDrawColor(220,220,220); doc.setLineWidth(0.2); doc.line(dims.margin, imgY, pageWidth-dims.margin, imgY);
-                    imgY += 8;
-                } catch(e) { console.error(`❌ Error imagen ${idx+1}:`,e); }
+                    Y += imgH + GAP;
+                } catch(e) { console.error('Error imagen:', e); }
             });
+            Y += 2;
         }
 
-
-        // ARCHIVOS SIN COINCIDENCIA
-        doc.addPage();
-        let finalPageY = 25;
-
+        // ARCHIVOS SIN COINCIDENCIAS
         if ($scope.archivosSinCoincidencia.length > 0) {
-            const scW = pageWidth - dims.margin*2;
-            doc.setFillColor(150,150,150); doc.rect(dims.margin,finalPageY,scW,9,'F');
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.rect(dims.margin,finalPageY,scW,9,'S');
-            doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-            doc.text('ARCHIVOS SIN COINCIDENCIAS', dims.margin+6, finalPageY+6);
-            finalPageY += 12;
+            if (Y + 30 > pageH - 20) { doc.addPage(); Y = 15; }
+            doc.setFillColor(191,191,191); doc.rect(M, Y, fullW, LH, 'F');
+            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, fullW, LH, 'S');
+            doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+            doc.text('ARCHIVOS SIN COINCIDENCIAS', M+4, Y + LH/2+1, {baseline:'middle'});
+            Y += LH + 2;
 
             doc.autoTable({
-                startY: finalPageY,
-                head:[["Archivo","Equipo / IP","Versión Actual","Peso Actual","Versión Futura","Peso Futuro","Ubicación"]],
-                body:$scope.archivosSinCoincidencia.map(item=>[item.name,item.equipos||'-','N/A','N/A',item.version||'-',item.peso||'-',item.ubicacionUsuario||'N/A']),
-                theme:tableStyles.theme,
-                headStyles:{...tableStyles.headStyles, fillColor:[29,33,28], textColor:[255,255,255], lineColor:[20,20,20], lineWidth:0.4},
-                styles:{...tableStyles.bodyStyles, lineColor:[20,20,20], lineWidth:0.3},
-                columnStyles:{0:{cellWidth:50,fontStyle:'bold'},1:{cellWidth:28,halign:'center',fontSize:7},2:{cellWidth:24,halign:'center',fontSize:8,textColor:[189,189,189],fontStyle:'italic'},3:{cellWidth:20,halign:'center',fontSize:8,textColor:[189,189,189],fontStyle:'italic'},4:{cellWidth:38,halign:'center',fontSize:8},5:{cellWidth:20,halign:'center',fontSize:8},6:{cellWidth:'auto',fontSize:7,halign:'center'}},
-                alternateRowStyles:tableStyles.alternateRowStyles, margin:{bottom:25},
-                didParseCell: data => {
-                    if (data.section === 'body' && data.column.index === 6 && data.cell.raw === 'N/A') {
-                        data.cell.styles.textColor = [189,189,189];
-                        data.cell.styles.fontStyle = 'italic';
-                    }
-                },
+                startY: Y,
+                head: [['Archivo','Equipo / IP','Versión Actual','Peso Actual','Versión Futura','Peso Futuro','Ubicación']],
+                body: $scope.archivosSinCoincidencia.map(item => [
+                    item.name, item.equipos||'-','N/A','N/A', item.version||'-', item.peso||'-', item.ubicacionUsuario||'N/A'
+                ]),
+                theme: 'grid',
+                headStyles: { fillColor:[29,33,28], textColor:[255,255,255], fontSize:8, fontStyle:'bold', halign:'center', valign:'middle', cellPadding:3 },
+                styles: { fontSize:7, cellPadding:2, textColor:[20,20,20], lineColor:[80,80,80], lineWidth:0.2 },
+                columnStyles: { 0:{cellWidth:45,fontStyle:'bold'}, 1:{cellWidth:26,halign:'center'}, 2:{cellWidth:22,halign:'center',textColor:[160,160,160],fontStyle:'italic'}, 3:{cellWidth:18,halign:'center',textColor:[160,160,160],fontStyle:'italic'}, 4:{cellWidth:30,halign:'center'}, 5:{cellWidth:18,halign:'center'}, 6:{cellWidth:'auto',fontSize:6.5,halign:'center'} },
+                alternateRowStyles: { fillColor:[248,248,248] },
+                margin: { left:M, right:M, bottom:20 }
             });
-            finalPageY = doc.lastAutoTable.finalY + 15;
+            Y = doc.lastAutoTable.finalY + GAP;
         }
 
-        finalPageY = drawHtmlBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',             htmlCambiosBD,  finalPageY, pageWidth, dims.margin, pageHeight);
-        finalPageY = drawHtmlBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN', htmlCambiosCfg, finalPageY, pageWidth, dims.margin, pageHeight);
-                     drawHtmlBlock(doc, 'OBSERVACIONES',                                        htmlObs,        finalPageY, pageWidth, dims.margin, pageHeight);
+        // CAMBIOS BD / CAMBIOS DE AECHIVOS DE CONFIG / OBSERVACIONES 
+        Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',             htmlCambiosBD,  Y, pageW, M, pageH);
+        Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN', htmlCambiosCfg, Y, pageW, M, pageH);
+        Y = drawCompactBlock(doc, 'OBSERVACIONES',                                        htmlObs,        Y, pageW, M, pageH);
+
 
         // FIRMAS
-        doc.addPage();
-        let firmasY = 20;
-        const firmasW = pageWidth - dims.margin*2;
-        const colGap=8, colW=(firmasW-colGap)/2;
-        const cols=[{label:'APROBADO POR',x:dims.margin},{label:'ENTREGADO A',x:dims.margin+colW+colGap}];
+        if (Y + 45 > pageH - 15) { doc.addPage(); Y = 15; }
+        Y += 3;
+        const colGap = 6;
+        const colW   = (fullW - colGap) / 2;
+        const cols   = [
+            { label:'APROBADO POR', x: M },
+            { label:'ENTREGADO A',  x: M + colW + colGap }
+        ];
 
-        cols.forEach(col=>{
-            doc.setFillColor(230,230,230); doc.rect(col.x,firmasY,colW,8,'F');
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(col.x,firmasY,colW,8,'S');
-            doc.setFontSize(7); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-            doc.text(col.label, col.x+colW/2, firmasY+5.5, {align:'center'});
+        cols.forEach(col => {
+            // Header columna
+            doc.setFillColor(210,210,210); doc.rect(col.x, Y, colW, LH, 'F');
+            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(col.x, Y, colW, LH, 'S');
+            doc.setFontSize(7.5); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+            doc.text(col.label, col.x + colW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
         });
-        firmasY += 8;
-        cols.forEach(col=>{
-            const bodyH=60;
+        Y += LH;
+
+        const bodyH  = 45;
+        const iM     = colW * 0.07;
+        const fieldW = colW - iM * 2;
+        cols.forEach(col => {
             doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-            doc.rect(col.x,firmasY,colW,bodyH,'FD');
-            const innerMargin=colW*0.08, fieldW=colW-innerMargin*2;
-            const nombreY=firmasY+12;
-            doc.setFontSize(6.5); doc.setTextColor(100,100,100); doc.setFont(undefined,'bold');
-            doc.text('NOMBRE:', col.x+innerMargin, nombreY);
-            doc.setDrawColor(80,80,80); doc.setLineWidth(0.4);
-            doc.line(col.x+innerMargin, nombreY+5, col.x+innerMargin+fieldW, nombreY+5);
-            const firmaLineY=firmasY+bodyH-14;
-            doc.setFontSize(6.5); doc.setTextColor(100,100,100); doc.setFont(undefined,'bold');
-            doc.text('FIRMA:', col.x+innerMargin, firmaLineY-2);
-            doc.setDrawColor(80,80,80); doc.setLineWidth(0.4);
-            doc.line(col.x+innerMargin, firmaLineY+4, col.x+innerMargin+fieldW, firmaLineY+4);
+            doc.rect(col.x, Y, colW, bodyH, 'FD');
+            // NOMBRE
+            doc.setFontSize(6.5); doc.setTextColor(90,90,90); doc.setFont(undefined,'bold');
+            doc.text('NOMBRE:', col.x + iM, Y + 10);
+            doc.setDrawColor(80,80,80); doc.setLineWidth(0.3);
+            doc.line(col.x + iM, Y + 15, col.x + iM + fieldW, Y + 15);
+            // FIRMA
+            doc.setFontSize(6.5); doc.setTextColor(90,90,90); doc.setFont(undefined,'bold');
+            doc.text('FIRMA:', col.x + iM, Y + bodyH - 14);
+            doc.setDrawColor(80,80,80); doc.setLineWidth(0.3);
+            doc.line(col.x + iM, Y + bodyH - 8, col.x + iM + fieldW, Y + bodyH - 8);
         });
 
+
+        // ── GUARDAR ──
         const nombre = PdfStylesService.generateFileName($scope.directory1Name, $scope.directory2Name);
         doc.save(nombre);
-        $scope.successMessage=`✅ PDF generado: ${nombre}`;
-        $timeout(()=>$scope.successMessage='',4000);
+        $scope.successMessage = `✅ PDF generado: ${nombre}`;
+        $timeout(() => $scope.successMessage = '', 4000);
     };
 }]);

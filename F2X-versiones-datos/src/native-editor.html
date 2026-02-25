@@ -522,30 +522,7 @@
             <!-- Fuente, Color, Alineación -->
             <div class="toolbar-row">
 
-                <!-- Fuente y tamaño -->
-                <div class="tb-group">
-                    <select class="tb-select tb-select-font" id="fontFamilySelect" title="Tipo de fuente">
-                        <option value="Segoe UI">Segoe UI</option>
-                        <option value="Arial">Arial</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="'Courier New'">Courier New</option>
-                        <option value="Verdana">Verdana</option>
-                        <option value="Tahoma">Tahoma</option>
-                        <option value="'Times New Roman'">Times New Roman</option>
-                        <option value="Calibri">Calibri</option>
-                    </select>
-                    <select class="tb-select" id="fontSizeSelect" title="Tamaño de fuente" style="min-width:88px;">
-                        <option value="">Tamaño</option>
-                        <option value="1">8 pt</option>
-                        <option value="2">10 pt</option>
-                        <option value="3">12 pt ✓</option>
-                        <option value="4">14 pt</option>
-                        <option value="5">18 pt</option>
-                        <option value="6">24 pt</option>
-                        <option value="7">36 pt</option>
-                    </select>
-                </div>
-
+                
                 <!-- Formato de texto -->
                 <div class="tb-group">
                     <button class="tb-btn" data-cmd="bold"      title="Negrita (Ctrl+N)"><b>B</b></button>
@@ -690,8 +667,6 @@
         const charCounter    = document.getElementById('charCounter');
         const wordCounter    = document.getElementById('wordCounter');
         const lineCounter    = document.getElementById('lineCounter');
-        const fontSizeSelect = document.getElementById('fontSizeSelect');
-        const fontFamilySelect = document.getElementById('fontFamilySelect');
         const colorInput     = document.getElementById('colorInput');
         const colorBar       = document.getElementById('colorBar');
         const colorLetter    = document.getElementById('colorLetter');
@@ -798,29 +773,6 @@
                 editor.focus();
                 updateToolbarState();
             });
-        });
-
-        
-
-        // TIPO DE FUENTE
-        fontFamilySelect.addEventListener('change', () => {
-            const val = fontFamilySelect.value;
-            if (val) {
-                document.execCommand('fontName', false, val);
-                editor.focus();
-            }
-        });
-
-
-
-        // TAMAÑO DE FUENTE
-        fontSizeSelect.addEventListener('change', () => {
-            const val = fontSizeSelect.value;
-            if (val) {
-                document.execCommand('fontSize', false, val);
-                editor.focus();
-            }
-            setTimeout(() => { fontSizeSelect.value = ''; }, 0);
         });
 
 

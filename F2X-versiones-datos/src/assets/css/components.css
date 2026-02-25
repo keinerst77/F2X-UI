@@ -198,17 +198,107 @@
 }
 
 
+/* Alineación vertical de todas las celdas */
+
 .matrix-table tbody td {
     padding: 14px 15px;
     border-bottom: 1px solid var(--border-subtle);
     color: var(--text-main);
-    vertical-align: top;
+    vertical-align: middle; 
+}
+
+/* Columna nombre */
+.col-nombre {
+    white-space: nowrap;
+    width: auto;
+    vertical-align: middle;
+}
+
+.cell-nombre {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 100%;
+}
+
+/* Columnas de versión y peso */
+.col-version-actual,
+.col-version-futura,
+.col-peso-actual,
+.col-peso-futuro {
+    width: 1%;
+    white-space: nowrap;
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Columna equipos */
+.matrix-table th.col-equipos,
+.matrix-table td.col-equipos {
+    width: 180px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.equipos-container {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    width: 100%;
+    overflow: hidden;
+    height: 100%;
+}
+
+/* Columna ubicación */
+.col-ruta {
+    min-width: 250px;
+    max-width: 500px;
+    vertical-align: middle;  
+}
+
+.ruta-container {
+    white-space: normal;
+    word-break: break-all;
+    display: flex;
+    align-items: center;      
+    line-height: 1.5;
+    color: var(--text-muted);
+    height: 100%;
+}
+
+.ruta-path {
+    font-size: 12px;
+}
+
+/* Badges de versión */
+.version-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+}
+
+/* Peso */
+.peso-value {
+    font-weight: 600;
+    color: var(--text-main);
+    font-family: 'Courier New', monospace;
+    display: inline-block;  
+    white-space: nowrap;
 }
 
 .matrix-table tbody tr:hover { background: #F5F5F5; }
 
 
-/* Informacion organizada del Peso y la Versión */
+/* Informacion del Peso y la Versión */
 .col-version-actual, 
 .col-version-futura,
 .col-peso-actual, 

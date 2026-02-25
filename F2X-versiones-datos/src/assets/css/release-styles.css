@@ -355,3 +355,137 @@
 /* Ocultar elementos legacy */
 .native-textarea-trigger  { display: none !important; }
 .motivo-vigente-container { display: none !important; }
+
+
+
+/* SISTEMA */
+.sistema-body {
+    min-height: 52px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: block;         
+    width: 100%;
+    position: relative;
+}
+
+.sistema-body .release-placeholder,
+.sistema-body .release-text {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* CELDAS DE RELEASE */
+.release-content-cell {
+    padding: 0 !important;
+    vertical-align: top !important;
+    text-align: left !important;
+    cursor: pointer;
+    width: 100%;
+}
+
+.release-content-cell .release-placeholder,
+.release-content-cell .release-text {
+    display: block;
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    box-sizing: border-box;
+}
+
+/* CAMBIOS */
+.cambios-card .cambios-placeholder,
+.cambios-card .cambios-text {
+    display: block;
+    width: 100%;
+    min-height: 70px;
+    box-sizing: border-box;
+}
+
+/* Asegurar que toda la fila de release sea clickeable */
+.release-row--clickable {
+    cursor: pointer;
+}
+
+.release-row--clickable td {
+    cursor: pointer;
+}
+
+
+/* sistema-card y sistema-body */
+
+.sistema-card {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.sistema-header {
+    background: #B0BEC5;
+    color: #1A1A1A;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 10px 20px;
+    text-align: center;
+    border-bottom: 2px solid #90A4AE;
+    flex-shrink: 0;
+}
+
+.sistema-body {
+    flex: 1;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    min-height: 80px;
+    padding: 20px 16px;
+    box-sizing: border-box;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s ease;
+}
+
+.sistema-body .release-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    text-align: center;
+    color: #AEC828;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.sistema-body .release-placeholder::before {
+    content: '✏️';
+    font-size: 12px;
+    opacity: 0.5;
+    margin-right: 6px;
+}
+
+.sistema-body .release-text {
+    width: 100%;
+    text-align: center;
+}
+
+.sistema-body:hover {
+    background: #f7fce8;
+}
+
+.sistema-card:hover .sistema-header {
+    background: #C8DBA5;
+    border-bottom-color: #AEC828;
+    color: #2E3B12;
+}

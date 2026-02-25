@@ -100,11 +100,12 @@
         <!-- SISTEMA -->
         <div class="sistema-card">
             <div class="sistema-header">SISTEMA</div>
+            <!-- área clickeable completa, centrado vertical y horizontal -->
             <div class="sistema-body release-row--clickable"
                  ng-click="abrirEditorCampo('sistema')"
                  title="Haz clic para agregar el nombre del sistema">
-                <div class="release-placeholder" ng-if="!releaseDataRaw.sistema">HAZ CLICK PARA AGREGAR CONTENIDO</div>
-                <div class="release-text"         ng-if="releaseDataRaw.sistema"  ng-bind-html="getHtml('sistema')"></div>
+                <span class="release-placeholder" ng-if="!releaseDataRaw.sistema">HAZ CLICK PARA AGREGAR CONTENIDO</span>
+                <div class="release-text" ng-if="releaseDataRaw.sistema" ng-bind-html="getHtml('sistema')" style="width:100%; text-align:center;"></div>
             </div>
         </div>
 
@@ -124,33 +125,46 @@
             <div class="release-table-title">DESCRIPCIÓN RELEASE</div>
             <table class="release-table">
                 <tbody>
+
+                    <!-- FILA CARACTERÍSTICAS -->
                     <tr class="release-row release-row--clickable"
                         ng-click="abrirEditorCampo('caracteristicas')"
                         title="Haz clic para agregar contenido">
                         <td class="release-label-cell">CARACTERÍSTICAS</td>
-                        <td class="release-content-cell">
-                            <div class="release-placeholder" ng-if="!releaseDataRaw.caracteristicas">HAZ CLICK PARA AGREGAR CONTENIDO</div>
-                            <div class="release-text"         ng-if="releaseDataRaw.caracteristicas"  ng-bind-html="getHtml('caracteristicas')"></div>
+                        <td class="release-content-cell" ng-click="abrirEditorCampo('caracteristicas')" style="cursor:pointer;">
+                            <div style="display:block; width:100%; min-height:52px; padding:14px 16px; box-sizing:border-box;">
+                                <span class="release-placeholder" ng-if="!releaseDataRaw.caracteristicas">HAZ CLICK PARA AGREGAR CONTENIDO</span>
+                                <div class="release-text" ng-if="releaseDataRaw.caracteristicas" ng-bind-html="getHtml('caracteristicas')"></div>
+                            </div>
                         </td>
                     </tr>
+
+                    <!-- FILA EQUIPOS -->
                     <tr class="release-row release-row--clickable"
                         ng-click="abrirEditorCampo('equipos')"
                         title="Haz clic para agregar contenido">
                         <td class="release-label-cell">EQUIPOS</td>
-                        <td class="release-content-cell">
-                            <div class="release-placeholder" ng-if="!releaseDataRaw.equipos">HAZ CLICK PARA AGREGAR CONTENIDO</div>
-                            <div class="release-text"         ng-if="releaseDataRaw.equipos"           ng-bind-html="getHtml('equipos')"></div>
+                        <td class="release-content-cell" ng-click="abrirEditorCampo('equipos')" style="cursor:pointer;">
+                            <div style="display:block; width:100%; min-height:52px; padding:14px 16px; box-sizing:border-box;">
+                                <span class="release-placeholder" ng-if="!releaseDataRaw.equipos">HAZ CLICK PARA AGREGAR CONTENIDO</span>
+                                <div class="release-text" ng-if="releaseDataRaw.equipos" ng-bind-html="getHtml('equipos')"></div>
+                            </div>
                         </td>
                     </tr>
+
+                    <!-- FILA FECHA DE GENERACIÓN DE FICHA -->
                     <tr class="release-row release-row--clickable"
                         ng-click="abrirEditorCampo('fechaFicha')"
                         title="Haz clic para agregar contenido">
                         <td class="release-label-cell">FECHA DE GENERACIÓN DE FICHA</td>
-                        <td class="release-content-cell">
-                            <div class="release-placeholder" ng-if="!releaseDataRaw.fechaFicha">HAZ CLICK PARA AGREGAR CONTENIDO</div>
-                            <div class="release-text"         ng-if="releaseDataRaw.fechaFicha"        ng-bind-html="getHtml('fechaFicha')"></div>
+                        <td class="release-content-cell" ng-click="abrirEditorCampo('fechaFicha')" style="cursor:pointer;">
+                            <div style="display:block; width:100%; min-height:52px; padding:14px 16px; box-sizing:border-box;">
+                                <span class="release-placeholder" ng-if="!releaseDataRaw.fechaFicha">HAZ CLICK PARA AGREGAR CONTENIDO</span>
+                                <div class="release-text" ng-if="releaseDataRaw.fechaFicha" ng-bind-html="getHtml('fechaFicha')"></div>
+                            </div>
                         </td>
                     </tr>
+
                 </tbody>
             </table>
         </div>
@@ -160,10 +174,12 @@
     <div class="cambios-section" ng-show="showTable">
         <div class="cambios-card" ng-click="abrirEditorCampo('cambiosAplicativos')" title="Haz clic para agregar la descripción de los cambios">
             <div class="cambios-title">DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS</div>
-            <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosAplicativos">
-                Haz click para agregar la descripción de los cambios
+            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+                <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosAplicativos">
+                    Haz click para agregar la descripción de los cambios
+                </div>
+                <div class="cambios-text" ng-if="releaseDataRaw.cambiosAplicativos" ng-bind-html="getHtml('cambiosAplicativos')"></div>
             </div>
-            <div class="cambios-text" ng-if="releaseDataRaw.cambiosAplicativos" ng-bind-html="getHtml('cambiosAplicativos')"></div>
         </div>
     </div>
 
@@ -360,10 +376,12 @@
     <div class="cambios-section cambios-bd-section">
         <div class="cambios-card cambios-bd-card" ng-click="abrirEditorCampo('cambiosBaseDatos')" title="Haz clic para agregar la descripción de cambios en base de datos">
             <div class="cambios-title cambios-bd-title">DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS</div>
-            <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosBaseDatos">
-                Haz click para agregar la descripción de los cambios
+            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+                <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosBaseDatos">
+                    Haz click para agregar la descripción de los cambios
+                </div>
+                <div class="cambios-text" ng-if="releaseDataRaw.cambiosBaseDatos" ng-bind-html="getHtml('cambiosBaseDatos')"></div>
             </div>
-            <div class="cambios-text" ng-if="releaseDataRaw.cambiosBaseDatos" ng-bind-html="getHtml('cambiosBaseDatos')"></div>
         </div>
     </div>
 
@@ -371,10 +389,12 @@
     <div class="cambios-section cambios-cfg-section">
         <div class="cambios-card cambios-cfg-card" ng-click="abrirEditorCampo('cambiosConfiguracion')" title="Haz clic para agregar la descripción de cambios en archivos de configuración">
             <div class="cambios-title cambios-cfg-title">DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN</div>
-            <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosConfiguracion">
-                Haz click para agregar la descripción de los cambios
+            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+                <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosConfiguracion">
+                    Haz click para agregar la descripción de los cambios
+                </div>
+                <div class="cambios-text" ng-if="releaseDataRaw.cambiosConfiguracion" ng-bind-html="getHtml('cambiosConfiguracion')"></div>
             </div>
-            <div class="cambios-text" ng-if="releaseDataRaw.cambiosConfiguracion" ng-bind-html="getHtml('cambiosConfiguracion')"></div>
         </div>
     </div>
 
@@ -382,10 +402,12 @@
     <div class="cambios-section cambios-obs-section">
         <div class="cambios-card cambios-obs-card" ng-click="abrirEditorCampo('observaciones')" title="Haz clic para agregar observaciones">
             <div class="cambios-title cambios-obs-title">OBSERVACIONES</div>
-            <div class="cambios-placeholder" ng-if="!releaseDataRaw.observaciones">
-                Haz click para agregar la descripción de los cambios
+            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+                <div class="cambios-placeholder" ng-if="!releaseDataRaw.observaciones">
+                    Haz click para agregar la descripción de los cambios
+                </div>
+                <div class="cambios-text" ng-if="releaseDataRaw.observaciones" ng-bind-html="getHtml('observaciones')"></div>
             </div>
-            <div class="cambios-text" ng-if="releaseDataRaw.observaciones" ng-bind-html="getHtml('observaciones')"></div>
         </div>
     </div>
 
