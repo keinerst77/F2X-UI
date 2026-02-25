@@ -571,7 +571,7 @@ body {
     border-bottom: none;
 }
 
-/* Celda etiqueta (izquierda) */
+/* Celda etiqueta */
 .release-label-cell {
     width: 210px;
     min-width: 180px;
@@ -588,7 +588,7 @@ body {
     word-break: break-word;
 }
 
-/* Celda de contenido (derecha) */
+/* Celda de contenido */
 .release-content-cell {
     padding: 0;
     vertical-align: top;
@@ -605,7 +605,7 @@ body {
     flex: 1;
 }
 
-/* ── Editor de texto enriquecido (contenteditable) ── */
+/* Editor de texto con contend editable */
 .rich-editor {
     width: 100%;
     min-height: 52px;

@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════════════════
-   BOTÓN DE VALIDACIÓN DE CONEXIÓN
-   ═══════════════════════════════════════════════ */
+/* BOTÓN DE VALIDACIÓN DE CONEXIÓN */
 
 .btn-validate-connection {
     width: 100%;
@@ -78,9 +76,7 @@
     transform: translateY(-2px);
 }
 
-/* ═══════════════════════════════════════════════
-   MENSAJE DE CONFIRMACIÓN DE CONEXIÓN EXITOSA
-   ═══════════════════════════════════════════════ */
+/* MENSAJE DE CONFIRMACIÓN DE CONEXIÓN EXITOSA */
 
 .connection-success-message {
     display: flex;
@@ -177,9 +173,7 @@
     font-weight: 700;
 }
 
-/* ═══════════════════════════════════════════════
-   ANIMACIÓN DE PULSO PARA CONEXIÓN EXITOSA
-   ═══════════════════════════════════════════════ */
+/* ANIMACIÓN DE PULSO PARA CONEXIÓN EXITOSA */
 
 .connection-status.connected {
     background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
