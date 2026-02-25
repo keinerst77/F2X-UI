@@ -2,384 +2,1004 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editor</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --f2x-green:    #BED62F;
-            --f2x-green-dk: #AEC828;
-            --f2x-dark:     #383838;
-            --bg-app:       #EEF2F6;
-            --bg-card:      #FFFFFF;
-            --bg-table-hd:  #F8F9FA;
-            --text-main:    #333333;
-            --text-muted:   #666666;
-            --border:       #E0E0E0;
+            --f2x-yellow:   #DDF434;
+            --f2x-dark:     #1D211C;
+            --f2x-green:    #8DB600;
+            --toolbar-bg:   #F2F4F0;
+            --toolbar-border: #D8DDD0;
+            --btn-bg:       #FFFFFF;
+            --btn-hover:    #EBF5D0;
+            --btn-active:   #DDF434;
+            --btn-border:   #C8CFC0;
+            --text-main:    #1A1E19;
+            --text-muted:   #6B7560;
+            --editor-bg:    #FAFFF4;
+            --card-bg:      #FFFFFF;
+            --separator:    #C5CCC0;
         }
 
         body {
-            font-family: 'Segoe UI', 'Inter', -apple-system, sans-serif;
-            background: var(--bg-app);
-            color: var(--text-main);
-            height: 100vh;
+            font-family: 'Syne', 'Segoe UI', sans-serif;
+            background: #E8EDE4;
             display: flex;
             flex-direction: column;
+            height: 100vh;
             overflow: hidden;
+            user-select: none;
         }
 
-        /* Barra superior F2X */
-        .titlebar {
+        /* HEADER */
+        .editor-header {
             background: var(--f2x-dark);
-            color: #fff;
-            padding: 12px 20px;
+            padding: 12px 20px 11px 20px;
+            flex-shrink: 0;
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 3px solid var(--f2x-green);
-            flex-shrink: 0;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--f2x-yellow);
         }
-        .titlebar-icon { font-size: 16px; }
-        .titlebar-label {
+
+        .header-left { display: flex; flex-direction: column; gap: 1px; }
+
+        .editor-subtitle {
             font-size: 9px;
             font-weight: 700;
-            color: var(--f2x-green);
+            color: var(--f2x-yellow);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
         }
-        .titlebar-text {
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
+
+        .editor-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: #FFFFFF;
             text-transform: uppercase;
-            color: #fff;
+            letter-spacing: 0.3px;
         }
 
-        /* Cuerpo */
-        .main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            padding: 16px;
-            gap: 12px;
-            overflow: hidden;
-        }
-
-        /* Tarjeta del editor */
-        .editor-card {
-            flex: 1;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
-
-        .editor-card-title {
-            background: #ECEFF1;
-            color: var(--text-main);
+        .header-badge {
+            background: rgba(221, 244, 52, 0.12);
+            border: 1px solid rgba(221, 244, 52, 0.3);
+            border-radius: 6px;
+            padding: 5px 12px;
             font-size: 10px;
             font-weight: 700;
-            text-transform: uppercase;
+            color: var(--f2x-yellow);
+            font-family: 'JetBrains Mono', monospace;
             letter-spacing: 1px;
-            padding: 10px 16px;
-            text-align: center;
-            border-bottom: 2px solid var(--border);
+        }
+
+        /* CARD PRINCIPAL */
+        .editor-card {
+            background: var(--card-bg);
+            border: 1px solid #C5CCC0;
+            border-radius: 8px;
+            margin: 10px 12px 0 12px;
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        /* Etiqueta del campo */
+        .field-label-bar {
+            background: linear-gradient(90deg, #B8C4A8, #C8D0BC);
+            color: #2A2E29;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            padding: 7px 16px;
+            border-bottom: 1px solid #A8B49A;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .field-label-bar::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--f2x-green);
             flex-shrink: 0;
         }
 
-        /* Barra de formato */
-        .rich-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            padding: 8px 12px;
-            background: var(--bg-table-hd);
-            border-bottom: 1px solid var(--border);
+        /* TOOLBAR DISEÑO EN 2 FILAS*/
+        .toolbar-wrapper {
+            background: var(--toolbar-bg);
+            border-bottom: 1px solid var(--toolbar-border);
             flex-shrink: 0;
         }
-        .rich-btn {
-            width: 30px;
+
+        /* formato de texto */
+        .toolbar-row {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-row + .toolbar-row {
+            border-top: 1px solid #E0E6D8;
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
+
+        /* Grupo de botones */
+        .tb-group {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            padding: 0 4px;
+            position: relative;
+        }
+
+        .tb-group + .tb-group::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 15%;
+            height: 70%;
+            width: 1px;
+            background: var(--separator);
+        }
+
+        /* Etiqueta de grupo */
+        .tb-group-label {
+            font-size: 8px;
+            font-weight: 700;
+            color: #8A9580;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 1px;
+            padding: 0 2px;
+            white-space: nowrap;
+        }
+
+        .tb-group-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .tb-group-col .tb-group {
+            padding: 0;
+        }
+
+        .tb-group-col .tb-group + .tb-group::before {
+            display: none;
+        }
+
+        /* Botón base */
+        .tb-btn {
+            min-width: 30px;
             height: 30px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: #fff;
+            padding: 0 7px;
+            border: 1px solid var(--btn-border);
+            border-radius: 5px;
+            background: var(--btn-bg);
             cursor: pointer;
-            font-size: 13px;
+            font-size: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.15s;
+            gap: 4px;
+            transition: all 0.12s ease;
+            color: var(--text-main);
+            flex-shrink: 0;
+            font-family: 'Syne', 'Segoe UI', sans-serif;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        .tb-btn:hover {
+            background: var(--btn-hover);
+            border-color: var(--f2x-green);
             color: var(--text-main);
         }
-        .rich-btn:hover  { background: #F9FBE7; border-color: var(--f2x-green); }
-        .rich-btn:active { background: #F0F4D4; transform: scale(0.93); }
-        .rich-separator  { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
 
-        /* etiqueta + editor */
-        .editor-row {
+        .tb-btn:active {
+            background: #D0E880;
+            transform: scale(0.94);
+        }
+
+        .tb-btn.active {
+            background: var(--btn-active);
+            border-color: var(--f2x-green);
+            color: var(--f2x-dark);
+            font-weight: 700;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* Variantes de tamaño */
+        .tb-btn.sm { min-width: 26px; height: 26px; font-size: 11px; }
+        .tb-btn.wide { min-width: 44px; padding: 0 10px; }
+        .tb-btn.icon-lg { font-size: 15px; }
+
+        /* Formato especial */
+        .tb-btn[data-cmd="bold"]          { font-weight: 900; font-size: 13px; }
+        .tb-btn[data-cmd="italic"]        { font-style: italic; font-size: 13px; }
+        .tb-btn[data-cmd="underline"]     { text-decoration: underline; }
+        .tb-btn[data-cmd="strikeThrough"] { text-decoration: line-through; }
+
+        /* Select de tamaño */
+        .tb-select {
+            height: 30px;
+            padding: 0 6px;
+            border: 1px solid var(--btn-border);
+            border-radius: 5px;
+            background: var(--btn-bg);
+            font-size: 12px;
+            font-family: 'Syne', 'Segoe UI', sans-serif;
+            color: var(--text-main);
+            cursor: pointer;
+            outline: none;
+            min-width: 110px;
+            transition: border-color 0.12s;
+        }
+
+        .tb-select:hover, .tb-select:focus { border-color: var(--f2x-green); }
+
+        /* Selector de fuente */
+        .tb-select-font {
+            min-width: 130px;
+        }
+
+        /* Color picker */
+        .tb-color-wrap {
+            position: relative;
             display: flex;
-            flex: 1;
-            min-height: 0;
+            align-items: center;
+        }
+
+        .tb-color-btn {
+            width: 30px;
+            height: 30px;
+            border: 1px solid var(--btn-border);
+            border-radius: 5px;
+            background: var(--btn-bg);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2px;
+            padding: 4px 6px;
+            transition: all 0.12s;
+            position: relative;
             overflow: hidden;
         }
 
-        .editor-label {
-            width: 200px;
-            min-width: 170px;
-            background: var(--bg-table-hd);
-            border-right: 1px solid var(--border);
-            padding: 16px 12px;
-            font-size: 11px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-            text-align: center;
-            word-break: break-word;
-            flex-shrink: 0;
+        .tb-color-btn:hover { border-color: var(--f2x-green); background: var(--btn-hover); }
+
+        .tb-color-letter {
+            font-size: 13px;
+            font-weight: 900;
+            line-height: 1;
+            color: #222;
         }
 
-        #editor {
+        .tb-color-bar {
+            width: 16px;
+            height: 3px;
+            border-radius: 2px;
+            background: #FF0000;
+        }
+
+        .tb-color-input {
+            position: absolute;
+            width: 0; height: 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* TOOLTIP REAL*/
+        #tb-tooltip {
+            position: fixed;
+            background: var(--f2x-dark);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 5px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 99999;
+            font-family: 'JetBrains Mono', monospace;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            display: none;
+            transition: opacity 0.1s;
+        }
+
+        /* DIVISOR VISUAL ENTRE TOOLBAR Y EDITOR */
+        .toolbar-footer {
+            height: 3px;
+            background: linear-gradient(90deg, var(--f2x-yellow) 0%, var(--f2x-green) 100%);
+        }
+
+        /* ÁREA DE EDICIÓN */
+        .rich-editor-area {
             flex: 1;
-            padding: 14px 16px;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .rich-editor {
+            width: 100%;
+            min-height: 100%;
+            padding: 16px 20px;
             font-size: 13px;
             font-family: 'Segoe UI', sans-serif;
-            color: var(--text-main);
-            line-height: 1.7;
+            color: #222;
+            line-height: 1.75;
             outline: none;
-            background: #fff;
-            overflow-y: auto;
+            background: var(--editor-bg);
             word-break: break-word;
             cursor: text;
-            text-align: left;
-            direction: ltr;
+            user-select: text;
+            -webkit-user-select: text;
+            box-sizing: border-box;
+            caret-color: var(--f2x-green);
         }
-        #editor:focus {
-            background: #FAFFF0;
-            box-shadow: inset 0 0 0 2px rgba(190,214,47,0.25);
-        }
-        #editor p { margin: 0 0 10px 0; }
-        #editor p:last-child { margin-bottom: 0; }
-        #editor.empty::before {
+
+        .rich-editor:empty::before {
             content: attr(data-placeholder);
             color: #BDBDBD;
             font-style: italic;
             pointer-events: none;
         }
-        #editor::-webkit-scrollbar { width: 8px; }
-        #editor::-webkit-scrollbar-track { background: var(--bg-app); }
-        #editor::-webkit-scrollbar-thumb { background: #BDBDBD; border-radius: 8px; }
-        #editor::-webkit-scrollbar-thumb:hover { background: var(--f2x-green); }
 
-        /* Área de botones */
-        .actions {
+        .rich-editor ul { padding-left: 24px; }
+        .rich-editor ol { padding-left: 24px; }
+        .rich-editor blockquote {
+            border-left: 3px solid var(--f2x-green);
+            padding-left: 12px;
+            color: #555;
+            font-style: italic;
+            margin: 6px 0;
+        }
+
+        /*  STATUS BAR */
+        .status-bar {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            padding: 3px 14px;
+            background: #EDEEE8;
+            border-top: 1px solid var(--toolbar-border);
             flex-shrink: 0;
         }
 
-        .keyboard-tip {
-            font-size: 10px;
-            color: var(--text-muted);
-            margin-right: auto;
-            letter-spacing: 0.3px;
-        }
-        .keyboard-tip kbd {
-            display: inline-block;
-            padding: 1px 5px;
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            background: var(--bg-table-hd);
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 10px;
-        }
-
-        #apiStatus {
-            display: none;
-            font-size: 11px;
-            color: #C62828;
-            padding: 5px 10px;
-            background: #FFEBEE;
-            border-radius: 8px;
-            border-left: 3px solid #FF5252;
-        }
-        #apiStatus.visible { display: block; }
-
-        .btn {
-            padding: 10px 28px;
-            border: none;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.8px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: inline-flex;
+        .status-info {
+            display: flex;
+            gap: 16px;
             align-items: center;
-            justify-content: center;
         }
-        .btn-cancel {
-            background: #FFFFFF;
+
+        .status-item {
+            font-size: 10px;
             color: var(--text-muted);
-            border: 1px solid var(--border);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
-        .btn-cancel:hover { background: #F5F5F5; border-color: #BDBDBD; }
-        .btn-save {
+
+        .status-item .dot {
+            width: 5px; height: 5px;
+            border-radius: 50%;
             background: var(--f2x-green);
+        }
+
+        .char-counter {
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .char-counter.limit { color: #E53935; font-weight: 700; }
+
+        /* FOOTER CON BOTONES */
+        .editor-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 9px 14px;
+            background: #E4E8DF;
+            border-top: 1px solid #C5CCC0;
+            flex-shrink: 0;
+        }
+
+        .shortcuts-hint {
+            font-size: 10px;
+            color: #8A9580;
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            gap: 16px;
+        }
+
+        .shortcuts-hint .key {
+            background: #D0D8C8;
+            border: 1px solid #B8C4B0;
+            border-radius: 3px;
+            padding: 1px 5px;
+            font-weight: 700;
             color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(190,214,47,0.3);
         }
-        .btn-save:hover {
-            background: var(--f2x-green-dk);
+
+        .btn-actions { display: flex; gap: 8px; }
+
+        .btn-cancelar {
+            padding: 8px 22px;
+            background: #FFFFFF;
+            border: 1.5px solid #C0C8B8;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #5A6455;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: all 0.18s;
+            font-family: 'Syne', sans-serif;
+        }
+
+        .btn-cancelar:hover {
+            border-color: #8A9580;
+            background: #F5F5F0;
+            color: var(--text-main);
+        }
+
+        .btn-guardar {
+            padding: 8px 28px;
+            background: var(--f2x-yellow);
+            border: none;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 800;
+            color: var(--f2x-dark);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: all 0.18s;
+            box-shadow: 0 2px 8px rgba(141, 182, 0, 0.35);
+            font-family: 'Syne', sans-serif;
+        }
+
+        .btn-guardar:hover {
+            background: #C8E020;
             transform: translateY(-1px);
-            box-shadow: 0 6px 15px rgba(190,214,47,0.4);
+            box-shadow: 0 4px 14px rgba(141, 182, 0, 0.5);
         }
-        .btn-save:active   { transform: translateY(0); }
-        .btn-save:disabled { background: #C8D860; cursor: wait; transform: none; box-shadow: none; }
+
+        .btn-guardar:active { transform: translateY(0); }
+
+        /* Scrollbar */
+        .rich-editor-area::-webkit-scrollbar { width: 6px; }
+        .rich-editor-area::-webkit-scrollbar-track { background: #F0F4EC; }
+        .rich-editor-area::-webkit-scrollbar-thumb { background: #C0CCB8; border-radius: 6px; }
+        .rich-editor-area::-webkit-scrollbar-thumb:hover { background: var(--f2x-green); }
     </style>
 </head>
 <body>
 
-    <div class="titlebar">
-        <span class="titlebar-icon">📋</span>
-        <div>
-            <div class="titlebar-label">F2X · Descripción Release</div>
-            <div class="titlebar-text" id="titlebarText">CAMPO</div>
+    <!-- TOOLTIP GLOBAL -->
+    <div id="tb-tooltip"></div>
+
+    <!-- HEADER -->
+    <div class="editor-header">
+        <div class="header-left">
+            <div class="editor-subtitle">F2X · Descripción Release</div>
+            <div class="editor-title" id="editorTitle">EDITOR</div>
         </div>
+        <div class="header-badge" style="display:none;">RICH TEXT</div>
     </div>
 
-    <div class="main">
-        <div class="editor-card">
-            <div class="editor-card-title">DESCRIPCIÓN RELEASE</div>
+    <!-- CARD PRINCIPAL -->
+    <div class="editor-card">
 
-            <div class="rich-toolbar">
-                <button class="rich-btn" id="btnBold"      title="Negrita (Ctrl+B)"><strong>B</strong></button>
-                <button class="rich-btn" id="btnItalic"    title="Cursiva (Ctrl+I)"><em>I</em></button>
-                <button class="rich-btn" id="btnUnderline" title="Subrayado (Ctrl+U)"><u>U</u></button>
-                <div class="rich-separator"></div>
-                <button class="rich-btn" id="btnList"      title="Lista con viñetas">☰</button>
-            </div>
+        <div class="field-label-bar" id="fieldLabel">CAMPO</div>
 
-            <div class="editor-row">
-                <div class="editor-label" id="labelCell">CAMPO</div>
-                <div id="editor"
-                     contenteditable="true"
-                     class="empty"
-                     data-placeholder="Ingrese el contenido aquí...">
+        <!-- TOOLBAR -->
+        <div class="toolbar-wrapper">
+
+            <!-- Fuente, Color, Alineación -->
+            <div class="toolbar-row">
+
+                <!-- Fuente y tamaño -->
+                <div class="tb-group">
+                    <select class="tb-select tb-select-font" id="fontFamilySelect" title="Tipo de fuente">
+                        <option value="Segoe UI">Segoe UI</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="'Courier New'">Courier New</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Tahoma">Tahoma</option>
+                        <option value="'Times New Roman'">Times New Roman</option>
+                        <option value="Calibri">Calibri</option>
+                    </select>
+                    <select class="tb-select" id="fontSizeSelect" title="Tamaño de fuente" style="min-width:88px;">
+                        <option value="">Tamaño</option>
+                        <option value="1">8 pt</option>
+                        <option value="2">10 pt</option>
+                        <option value="3">12 pt ✓</option>
+                        <option value="4">14 pt</option>
+                        <option value="5">18 pt</option>
+                        <option value="6">24 pt</option>
+                        <option value="7">36 pt</option>
+                    </select>
                 </div>
+
+                <!-- Formato de texto -->
+                <div class="tb-group">
+                    <button class="tb-btn" data-cmd="bold"      title="Negrita (Ctrl+N)"><b>B</b></button>
+                    <button class="tb-btn" data-cmd="italic"    title="Cursiva (Ctrl+K)"><i>I</i></button>
+                    <button class="tb-btn" data-cmd="underline" title="Subrayado (Ctrl+S)"><u>U</u></button>
+                </div>
+
+                <!-- Color -->
+                <div class="tb-group">
+                    <div class="tb-color-wrap" title="Color del texto (Ctrl+F)">
+                        <div class="tb-color-btn" id="colorPickerBtn">
+                            <span class="tb-color-letter" id="colorLetter">A</span>
+                            <div class="tb-color-bar" id="colorBar"></div>
+                        </div>
+                        <input class="tb-color-input" type="color" id="colorInput" value="#FF0000">
+                    </div>
+                    <div class="tb-color-wrap" title="Color de resaltado (Ctrl+H)">
+                        <div class="tb-color-btn" id="bgColorPickerBtn" style="background:linear-gradient(135deg,#fff 60%,#FFE066 100%)">
+                            <span style="font-size:12px; line-height:1; color:#333;">🖍</span>
+                        </div>
+                        <input class="tb-color-input" type="color" id="bgColorInput" value="#FFFF00">
+                    </div>
+                    <button class="tb-btn" id="btnClearFormat" title="Limpiar formato (Ctrl+M)" style="font-size:10px; min-width:44px; color:#888;">✕ fmt</button>
+                </div>
+
+                <!-- Alineación -->
+                <div class="tb-group">
+                    <button class="tb-btn" data-cmd="justifyLeft"   title="Alinear izquierda (Ctrl+L)">
+                        <svg width="14" height="12" viewBox="0 0 14 12" fill="currentColor">
+                            <rect x="0" y="0"  width="14" height="2" rx="1"/>
+                            <rect x="0" y="5"  width="9"  height="2" rx="1"/>
+                            <rect x="0" y="10" width="12" height="2" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="tb-btn" data-cmd="justifyCenter" title="Centrar (Ctrl+E)">
+                        <svg width="14" height="12" viewBox="0 0 14 12" fill="currentColor">
+                            <rect x="0" y="0"  width="14" height="2" rx="1"/>
+                            <rect x="2" y="5"  width="10" height="2" rx="1"/>
+                            <rect x="1" y="10" width="12" height="2" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="tb-btn" data-cmd="justifyRight"  title="Alinear derecha (Ctrl+R)">
+                        <svg width="14" height="12" viewBox="0 0 14 12" fill="currentColor">
+                            <rect x="0" y="0"  width="14" height="2" rx="1"/>
+                            <rect x="5" y="5"  width="9"  height="2" rx="1"/>
+                            <rect x="2" y="10" width="12" height="2" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="tb-btn" data-cmd="justifyFull"   title="Justificar (Ctrl+J)">
+                        <svg width="14" height="12" viewBox="0 0 14 12" fill="currentColor">
+                            <rect x="0" y="0"  width="14" height="2" rx="1"/>
+                            <rect x="0" y="5"  width="14" height="2" rx="1"/>
+                            <rect x="0" y="10" width="14" height="2" rx="1"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Listas e indentación -->
+                <div class="tb-group">
+                    <button class="tb-btn" data-cmd="insertUnorderedList" title="Lista con viñetas (Ctrl+Shift+L)">
+                        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+                            <circle cx="1.5" cy="2"  r="1.5"/>
+                            <rect   x="5"    y="1"  width="11" height="2" rx="1"/>
+                            <circle cx="1.5" cy="6.5"  r="1.5"/>
+                            <rect   x="5"    y="5.5"  width="11" height="2" rx="1"/>
+                            <circle cx="1.5" cy="11"  r="1.5"/>
+                            <rect   x="5"    y="10"  width="8"  height="2" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="tb-btn" data-cmd="insertOrderedList"   title="Lista numerada (Ctrl+Shift+O)">
+                        <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor">
+                            <text x="0" y="3"  font-size="4" font-weight="700">1.</text>
+                            <rect x="5" y="1"  width="11" height="2" rx="1"/>
+                            <text x="0" y="8"  font-size="4" font-weight="700">2.</text>
+                            <rect x="5" y="6"  width="11" height="2" rx="1"/>
+                            <text x="0" y="13" font-size="4" font-weight="700">3.</text>
+                            <rect x="5" y="11" width="8"  height="2" rx="1"/>
+                        </svg>
+                    </button>
+                    <button class="tb-btn" data-cmd="outdent"  title="Disminuir sangría (Shift+Tab)">⇤</button>
+                    <button class="tb-btn" data-cmd="indent"   title="Aumentar sangría (Tab)">⇥</button>
+                </div>
+
+
+
+                <!-- Historial -->
+                <div class="tb-group" style="margin-left: auto;">
+                    <button class="tb-btn wide" data-cmd="undo" title="Deshacer (Ctrl+Z)">↩ Des</button>
+                    <button class="tb-btn wide" data-cmd="redo" title="Rehacer (Ctrl+Y)">↪ Reh</button>
+                </div>
+
+            </div>
+            <!-- fin FILA 1 -->
+
+        </div>
+        <!-- fin toolbar-wrapper -->
+
+        <div class="toolbar-footer"></div>
+
+        <!-- EDITOR -->
+        <div class="rich-editor-area">
+            <div
+                class="rich-editor"
+                id="richEditor"
+                contenteditable="true"
+                data-placeholder="Ingrese el contenido aquí...">
             </div>
         </div>
 
-        <div class="actions">
-            <span class="keyboard-tip"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> guardar · <kbd>Esc</kbd> cancelar</span>
-            <span id="apiStatus">⚠ Error de comunicación</span>
-            <button class="btn btn-cancel" id="btnCancel">CANCELAR</button>
-            <button class="btn btn-save"   id="btnSave">GUARDAR</button>
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+            <div class="status-info">
+                <div class="status-item"><span class="dot"></span><span id="wordCounter">0 palabras</span></div>
+                <div class="status-item"><span id="lineCounter">1 línea</span></div>
+            </div>
+            <span class="char-counter" id="charCounter">0 caracteres</span>
+        </div>
+
+    </div>
+    <!-- fin editor-card -->
+
+    <!-- ── FOOTER ── -->
+    <div class="editor-footer">
+        <div class="shortcuts-hint">
+            <span><kbd class="key">Ctrl+Enter</kbd> guardar</span>
+            <span><kbd class="key">Esc</kbd> cancelar</span>
+            <span><kbd class="key">Ctrl+M</kbd> limpiar formato</span>
+        </div>
+        <div class="btn-actions">
+            <button class="btn-cancelar" id="btnCancelar">Cancelar</button>
+            <button class="btn-guardar"  id="btnGuardar">Guardar</button>
         </div>
     </div>
 
     <script>
-        const editor      = document.getElementById('editor');
-        const btnSave     = document.getElementById('btnSave');
-        const btnCancel   = document.getElementById('btnCancel');
-        const labelCell   = document.getElementById('labelCell');
-        const titlebarTxt = document.getElementById('titlebarText');
-        const apiStatus   = document.getElementById('apiStatus');
+        // REFERENCIAS
+        const editor         = document.getElementById('richEditor');
+        const editorTitle    = document.getElementById('editorTitle');
+        const fieldLabelEl   = document.getElementById('fieldLabel');
+        const btnGuardar     = document.getElementById('btnGuardar');
+        const btnCancelar    = document.getElementById('btnCancelar');
+        const charCounter    = document.getElementById('charCounter');
+        const wordCounter    = document.getElementById('wordCounter');
+        const lineCounter    = document.getElementById('lineCounter');
+        const fontSizeSelect = document.getElementById('fontSizeSelect');
+        const fontFamilySelect = document.getElementById('fontFamilySelect');
+        const colorInput     = document.getElementById('colorInput');
+        const colorBar       = document.getElementById('colorBar');
+        const colorLetter    = document.getElementById('colorLetter');
+        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        const bgColorInput   = document.getElementById('bgColorInput');
+        const bgColorPickerBtn = document.getElementById('bgColorPickerBtn');
+        const btnClearFmt    = document.getElementById('btnClearFormat');
 
-        let apiDisponible = false;
 
-        function verificarAPI() {
-            if (window.editorAPI) { apiDisponible = true; inicializarEditor(); return; }
-            let intentos = 0;
-            const interval = setInterval(() => {
-                intentos++;
-                if (window.editorAPI) {
-                    clearInterval(interval);
-                    apiDisponible = true;
-                    inicializarEditor();
-                } else if (intentos >= 10) {
-                    clearInterval(interval);
-                    apiStatus.classList.add('visible');
+
+
+        // INICIALIZACIÓN DESDE ELECTRON
+        if (window.editorAPI) {
+            window.editorAPI.onInit((data) => {
+                if (data.title)       editorTitle.textContent    = data.title;
+                if (data.fieldLabel)  fieldLabelEl.textContent   = data.fieldLabel;
+                if (data.placeholder) editor.dataset.placeholder = data.placeholder;
+
+                if (data.defaultValue) {
+                    const hasHtml = /<[a-z][\s\S]*>/i.test(data.defaultValue);
+                    editor[hasHtml ? 'innerHTML' : 'innerText'] = data.defaultValue;
                 }
-            }, 100);
-        }
 
-        function inicializarEditor() {
-            window.editorAPI.onInit(function(data) {
-                if (data.fieldLabel) { labelCell.textContent = titlebarTxt.textContent = data.fieldLabel; }
-                if (data.placeholder) editor.setAttribute('data-placeholder', data.placeholder);
-                if (data.defaultValue && data.defaultValue.trim() !== '') {
-                    editor.innerHTML = textoAParagrafos(data.defaultValue);
-                    editor.classList.remove('empty');
-                }
+                updateCounters();
                 setTimeout(() => {
                     editor.focus();
-                    try {
-                        const r = document.createRange(), s = window.getSelection();
-                        r.selectNodeContents(editor); r.collapse(false);
-                        s.removeAllRanges(); s.addRange(r);
-                    } catch(e) {}
+                    placeCaretAtEnd(editor);
                 }, 80);
             });
         }
 
-        verificarAPI();
+        function placeCaretAtEnd(el) {
+            const range = document.createRange();
+            const sel   = window.getSelection();
+            range.selectNodeContents(el);
+            range.collapse(false);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
 
-        editor.addEventListener('input', () => {
-            editor.classList.toggle('empty', editor.textContent.trim() === '');
+
+
+        // TOOLTIP GLOBAL
+        const tooltip = document.getElementById('tb-tooltip');
+        let tooltipTimeout;
+
+
+        function convertTitles() {
+            document.querySelectorAll('.toolbar-wrapper [title], #colorPickerBtn[title], #bgColorPickerBtn[title], #btnClearFormat[title]').forEach(el => {
+                el.dataset.tooltip = el.getAttribute('title');
+                el.removeAttribute('title');
+            });
+        }
+
+        function showTooltip(el) {
+            if (!el.dataset.tooltip) return;
+            clearTimeout(tooltipTimeout);
+            tooltipTimeout = setTimeout(() => {
+                tooltip.textContent = el.dataset.tooltip;
+                tooltip.style.display = 'block';
+
+                const rect = el.getBoundingClientRect();
+                const tipW = tooltip.offsetWidth;
+                const tipH = tooltip.offsetHeight;
+
+                let top = (window.innerHeight - rect.bottom >= tipH + 10)
+                    ? rect.bottom + 8
+                    : rect.top - tipH - 8;
+
+                let left = rect.left + rect.width / 2 - tipW / 2;
+                left = Math.max(6, Math.min(left, window.innerWidth - tipW - 6));
+
+                tooltip.style.top  = top  + 'px';
+                tooltip.style.left = left + 'px';
+            }, 600);
+        }
+
+        function hideTooltip() {
+            clearTimeout(tooltipTimeout);
+            tooltip.style.display = 'none';
+        }
+
+
+        // DELECGACIÓN SOBRE DOCUMENT
+        document.addEventListener('mouseover', (e) => {
+            const el = e.target.closest('[data-tooltip]');
+            if (el) showTooltip(el);
+            else hideTooltip();
         });
 
-        function textoAParagrafos(texto) {
-            if (!texto || texto.trim() === '') return '';
-            return texto.split(/\n\n+/).map(p => '<p>' + p.trim().replace(/\n/g, '<br>') + '</p>').join('');
-        }
+        document.addEventListener('mouseout', (e) => {
+            if (!e.relatedTarget || !e.relatedTarget.closest('[data-tooltip]')) hideTooltip();
+        });
 
-        document.execCommand('defaultParagraphSeparator', false, 'p');
+        document.addEventListener('mousedown', hideTooltip);
 
-        function fmt(cmd) { editor.focus(); document.execCommand(cmd, false, null); }
-        document.getElementById('btnBold').addEventListener('click',      () => fmt('bold'));
-        document.getElementById('btnItalic').addEventListener('click',    () => fmt('italic'));
-        document.getElementById('btnUnderline').addEventListener('click', () => fmt('underline'));
-        document.getElementById('btnList').addEventListener('click',      () => fmt('insertUnorderedList'));
 
-        function extraerTexto() {
-            let r = '';
-            Array.from(editor.childNodes).forEach((n, i, arr) => {
-                if (n.nodeType === Node.TEXT_NODE) { r += n.textContent; }
-                else if (n.nodeName === 'P' || n.nodeName === 'DIV') {
-                    const c = n.cloneNode(true);
-                    c.querySelectorAll('br').forEach(b => b.replaceWith('\n'));
-                    r += c.textContent;
-                    if (i < arr.length - 1) r += '\n\n';
-                } else if (n.nodeName === 'BR') { r += '\n'; }
-                else { r += n.textContent; }
+        // EJECUTAR CONVERSION DE TITULOS
+        convertTitles();
+        document.querySelectorAll('.tb-btn[data-cmd]').forEach(btn => {
+            btn.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                document.execCommand(btn.dataset.cmd, false, null);
+                editor.focus();
+                updateToolbarState();
             });
-            return r.trim();
+        });
+
+        
+
+        // TIPO DE FUENTE
+        fontFamilySelect.addEventListener('change', () => {
+            const val = fontFamilySelect.value;
+            if (val) {
+                document.execCommand('fontName', false, val);
+                editor.focus();
+            }
+        });
+
+
+
+        // TAMAÑO DE FUENTE
+        fontSizeSelect.addEventListener('change', () => {
+            const val = fontSizeSelect.value;
+            if (val) {
+                document.execCommand('fontSize', false, val);
+                editor.focus();
+            }
+            setTimeout(() => { fontSizeSelect.value = ''; }, 0);
+        });
+
+
+
+        // COLOR DE TEXTO
+        colorPickerBtn.addEventListener('click', () => colorInput.click());
+        colorInput.addEventListener('input', () => {
+            colorBar.style.background   = colorInput.value;
+            colorLetter.style.color     = colorInput.value;
+        });
+        colorInput.addEventListener('change', () => {
+            document.execCommand('foreColor', false, colorInput.value);
+            editor.focus();
+            updateToolbarState();
+        });
+
+
+        // COLOR DE RESALTADO
+        bgColorPickerBtn.addEventListener('click', () => bgColorInput.click());
+        bgColorInput.addEventListener('change', () => {
+            document.execCommand('hiliteColor', false, bgColorInput.value);
+            editor.focus();
+        });
+
+
+
+        // LIMPIAR FORMATO
+        btnClearFmt.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            document.execCommand('removeFormat', false, null);
+            ['insertUnorderedList','insertOrderedList'].forEach(cmd => {
+                if (document.queryCommandState(cmd))
+                    document.execCommand(cmd, false, null);
+            });
+            editor.focus();
+            updateToolbarState();
+        });
+
+
+        // ESTADO DE BOTONES
+        function updateToolbarState() {
+            document.querySelectorAll('.tb-btn[data-cmd]').forEach(btn => {
+                try {
+                    btn.classList.toggle('active', document.queryCommandState(btn.dataset.cmd));
+                } catch(e) {}
+            });
         }
 
+
+
+        // CONTADORES
+        function updateCounters() {
+            const text = editor.innerText || '';
+            const cleanText = text.replace(/\n$/, '');
+
+            // Caracteres
+            charCounter.textContent = `${cleanText.length.toLocaleString('es-CO')} caracteres${cleanText.length !== 1 ? 's' : ''}`;
+            charCounter.classList.toggle('limit', cleanText.length > 2000);
+
+            // Palabras
+            const words = cleanText.trim() === '' ? 0 : cleanText.trim().split(/\s+/).filter(w => w.length > 0).length;
+            wordCounter.textContent = `${words} palabra${words !== 1 ? 's' : ''}`;
+
+            // Líneas
+            const lines = text === '' ? 1 : text.split('\n').length;
+            lineCounter.textContent = `${lines} línea${lines !== 1 ? 's' : ''}`;
+        }
+
+        editor.addEventListener('input',   updateCounters);
+        editor.addEventListener('keyup',   () => { updateCounters(); updateToolbarState(); });
+        editor.addEventListener('mouseup', updateToolbarState);
+        document.addEventListener('selectionchange', updateToolbarState);
+
+
+        // GUARDAR / CANCELAR
         function guardar() {
-            if (!apiDisponible || !window.editorAPI) { apiStatus.classList.add('visible'); return; }
-            btnSave.disabled = true; btnSave.textContent = 'GUARDANDO...';
-            try { window.editorAPI.sendResult(extraerTexto()); }
-            catch(e) { btnSave.disabled = false; btnSave.textContent = 'GUARDAR'; apiStatus.classList.add('visible'); }
+            const html    = editor.innerHTML.trim();
+            const isEmpty = html === '' || html === '<br>' || html === '<div><br></div>';
+            if (window.editorAPI) {
+                window.editorAPI.sendResult(isEmpty ? '' : html);
+            }
         }
 
-        function cancelar() { if (window.editorAPI) window.editorAPI.sendCancel(); }
+        function cancelar() {
+            if (window.editorAPI) {
+                window.editorAPI.sendCancel();
+            }
+        }
 
-        btnSave.addEventListener('click',   guardar);
-        btnCancel.addEventListener('click', cancelar);
+        btnGuardar.addEventListener('click',  guardar);
+        btnCancelar.addEventListener('click', cancelar);
+
+
+
+        // ATAJOS DE TECLADO
         document.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); guardar(); }
-            if (e.key === 'Escape') { e.preventDefault(); cancelar(); }
+            // Guardar / Cancelar
+            if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); guardar(); return; }
+            if (e.key === 'Escape')             { e.preventDefault(); cancelar(); return; }
+
+            const inEditor = document.activeElement === editor || document.activeElement === document.body;
+
+            if (e.ctrlKey && !e.shiftKey && !e.altKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'n': // Negrita
+                        e.preventDefault();
+                        document.execCommand('bold', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'k': // Cursiva
+                        e.preventDefault();
+                        document.execCommand('italic', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 's': // Subrayado
+                        e.preventDefault();
+                        document.execCommand('underline', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'l': // Alinear izquierda
+                        e.preventDefault();
+                        document.execCommand('justifyLeft', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'e': // Centrar
+                        e.preventDefault();
+                        document.execCommand('justifyCenter', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'r': // Alinear derecha
+                        e.preventDefault();
+                        document.execCommand('justifyRight', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'j': // Justificar
+                        e.preventDefault();
+                        document.execCommand('justifyFull', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'f': // Color de texto
+                        e.preventDefault();
+                        colorInput.click(); break;
+                    case 'h': // Color de resaltado
+                        e.preventDefault();
+                        bgColorInput.click(); break;
+                    case 'm': // Limpiar formato
+                        e.preventDefault();
+                        btnClearFmt.dispatchEvent(new MouseEvent('mousedown', { bubbles: true })); break;
+                    case 'z': // Deshacer
+                        editor.focus(); break;
+                    case 'y': // Rehacer
+                        e.preventDefault();
+                        document.execCommand('redo', false, null);
+                        editor.focus(); break;
+                }
+            }
+
+            // Ctrl+Shift atajos
+            if (e.ctrlKey && e.shiftKey) {
+                switch (e.key.toLowerCase()) {
+                    case 'l': // Lista con viñetas
+                        e.preventDefault();
+                        document.execCommand('insertUnorderedList', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'o': // Lista numerada
+                        e.preventDefault();
+                        document.execCommand('insertOrderedList', false, null);
+                        editor.focus(); updateToolbarState(); break;
+                    case 'tab': // Disminuir sangría
+                        e.preventDefault();
+                        document.execCommand('outdent', false, null);
+                        editor.focus(); break;
+                }
+            }
+
+            // Tab para aumentar sangría (solo en el editor)
+            if (e.key === 'Tab' && !e.shiftKey && document.activeElement === editor) {
+                e.preventDefault();
+                document.execCommand('indent', false, null);
+            }
+            if (e.key === 'Tab' && e.shiftKey && document.activeElement === editor) {
+                e.preventDefault();
+                document.execCommand('outdent', false, null);
+            }
         });
     </script>
+
 </body>
 </html>

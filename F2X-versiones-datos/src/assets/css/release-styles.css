@@ -1,19 +1,83 @@
-/* Descripción Release y Vigente a partir de */
+/* ════════════════════════════════════════
+   SECCIÓN SISTEMA + VIGENTE A PARTIR DE
+   ════════════════════════════════════════ */
 
-.release-section {
+.sistema-vigente-section {
     display: flex;
-    gap: 16px;
-    margin: 24px 0 32px 0;
-    align-items: flex-start;
+    gap: 10px;
+    margin: 24px 0 12px 0;
+    align-items: stretch;
 }
 
-.release-table-card {
+/* Tarjeta SISTEMA */
+.sistema-card {
     flex: 1;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.sistema-header {
+    background: #B0BEC5;
+    color: #1A1A1A;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    padding: 10px 20px;
+    text-align: center;
+    border-bottom: 2px solid #90A4AE;
+}
+
+.sistema-body {
+    min-height: 52px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.sistema-body .release-text,
+.sistema-body .release-placeholder {
+    text-align: center !important;
+    justify-content: center !important;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.sistema-body .release-text * {
+    text-align: center !important;
+}
+
+.sistema-body:hover {
+    background: #f7fce8;
+}
+
+.sistema-card:hover .sistema-header {
+    background: #C8DBA5;
+    border-bottom-color: #AEC828;
+    color: #2E3B12;
+}
+
+/* SECCIÓN DESCRIPCIÓN RELEASE */
+
+.release-section {
+    margin: 0 0 24px 0;
+}
+
+.release-table-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    width: 100%;
 }
 
 .release-table-title {
@@ -23,7 +87,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    padding: 12px 20px;
+    padding: 10px 20px;
     text-align: center;
     border-bottom: 2px solid #90A4AE;
 }
@@ -42,12 +106,13 @@
     border-bottom: none;
 }
 
+/* Celda etiqueta */
 .release-label-cell {
     width: 210px;
     min-width: 180px;
     background: #DDEAEF;
     border-right: 1px solid var(--border-subtle);
-    padding: 16px 14px;
+    padding: 14px 14px;
     font-size: 11px;
     font-weight: 800;
     color: #37474F;
@@ -58,15 +123,17 @@
     word-break: break-word;
 }
 
+/* Celda de contenido */
 .release-content-cell {
     padding: 0 !important;
     vertical-align: top !important;
     text-align: left !important;
 }
 
+/* Filas clicables */
 .release-row--clickable {
     cursor: pointer;
-    transition: background 0.2s ease;
+    transition: background 0.15s ease;
 }
 
 .release-row--clickable:hover {
@@ -82,9 +149,10 @@
     background: #FAFFF0;
 }
 
+/* Placeholder */
 .release-placeholder {
     width: 100%;
-    min-height: 56px;
+    min-height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -94,7 +162,7 @@
     color: #BDBDBD;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-    padding: 16px 20px;
+    padding: 14px 20px;
     text-align: center;
     user-select: none;
     transition: color 0.2s;
@@ -102,7 +170,7 @@
 
 .release-placeholder::before {
     content: '✏️';
-    font-size: 13px;
+    font-size: 12px;
     opacity: 0.5;
 }
 
@@ -110,8 +178,15 @@
     color: #AEC828;
 }
 
+.sistema-body .release-placeholder {
+    min-height: 52px;
+    width: 100%;
+    justify-content: center;
+}
+
+/* Texto renderizado */
 .release-text {
-    padding: 14px 18px;
+    padding: 12px 16px;
     font-size: 13px;
     font-family: 'Segoe UI', sans-serif;
     color: var(--text-main);
@@ -124,14 +199,18 @@
     text-indent: 0 !important;
 }
 
+/* VIGENTE A PARTIR DE (standalone card) */
+
 .vigente-card {
     width: 195px;
     min-width: 175px;
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
 }
 
 .vigente-header {
@@ -141,7 +220,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    padding: 12px 14px;
+    padding: 10px 14px;
     text-align: center;
     border-bottom: 2px solid #90A4AE;
 }
@@ -149,15 +228,17 @@
 .vigente-body {
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    flex: 1;
     gap: 8px;
-    padding: 16px 14px;
+    padding: 14px 14px;
 }
 
 .vigente-input {
     width: 100%;
     background: #F5F7FA;
     border: 1px solid var(--border-subtle);
-    border-radius: 10px;
+    border-radius: 8px;
     padding: 10px 12px;
     font-size: 13px;
     font-family: 'Segoe UI', sans-serif;
@@ -175,22 +256,16 @@
     box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.2);
 }
 
-@media (max-width: 768px) {
-    .release-section { flex-direction: column; }
-    .vigente-card { width: 100%; }
-    .release-label-cell { width: 130px; min-width: 110px; font-size: 10px; }
-}
-
-/* DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS */
+/* DESCRIPCIÓN DE CAMBIOS */
 
 .cambios-section {
-    margin: 0 0 24px 0;
+    margin: 0 0 16px 0;
 }
 
 .cambios-card {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
-    border-radius: 16px;
+    border-radius: 4px;
     overflow: hidden;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     cursor: pointer;
@@ -209,7 +284,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 1.2px;
-    padding: 12px 20px;
+    padding: 10px 20px;
     text-align: left;
     border-bottom: 2px solid #90A4AE;
     transition: background 0.2s ease;
@@ -222,14 +297,14 @@
 }
 
 .cambios-placeholder {
-    min-height: 80px;
+    min-height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 13px;
     font-weight: 500;
     color: #BDBDBD;
-    padding: 28px 40px;
+    padding: 24px 40px;
     text-align: center;
     user-select: none;
     transition: color 0.2s;
@@ -241,7 +316,7 @@
 }
 
 .cambios-text {
-    padding: 20px 28px;
+    padding: 18px 24px;
     font-size: 13px;
     font-family: 'Segoe UI', sans-serif;
     color: var(--text-main);
@@ -251,3 +326,32 @@
     text-align: left;
     display: block;
 }
+
+/* BD */
+.cambios-bd-section  { margin-top: 16px; }
+.cambios-bd-title    { background: #B0BEC5 !important; border-bottom-color: #90A4AE !important; }
+.cambios-bd-card:hover { border-color: var(--f2x-green) !important; box-shadow: 0 4px 20px rgba(190,214,47,0.18) !important; }
+.cambios-bd-card:hover .cambios-bd-title { background: #C8DBA5 !important; border-bottom-color: #AEC828 !important; color: #2E3B12 !important; }
+
+/* CFG */
+.cambios-cfg-section { margin-top: 16px; }
+.cambios-cfg-title   { background: #B0BEC5 !important; border-bottom-color: #90A4AE !important; }
+.cambios-cfg-card:hover { border-color: var(--f2x-green) !important; box-shadow: 0 4px 20px rgba(190,214,47,0.18) !important; }
+.cambios-cfg-card:hover .cambios-cfg-title { background: #C8DBA5 !important; border-bottom-color: #AEC828 !important; color: #2E3B12 !important; }
+
+/* OBS */
+.cambios-obs-section { margin-top: 16px; }
+.cambios-obs-title   { background: #B0BEC5 !important; border-bottom-color: #90A4AE !important; }
+.cambios-obs-card:hover { border-color: var(--f2x-green) !important; box-shadow: 0 4px 20px rgba(190,214,47,0.18) !important; }
+.cambios-obs-card:hover .cambios-obs-title { background: #C8DBA5 !important; border-bottom-color: #AEC828 !important; color: #2E3B12 !important; }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sistema-vigente-section { flex-direction: column; }
+    .vigente-card { width: 100%; }
+    .release-label-cell { width: 130px; min-width: 110px; font-size: 10px; }
+}
+
+/* Ocultar elementos legacy */
+.native-textarea-trigger  { display: none !important; }
+.motivo-vigente-container { display: none !important; }

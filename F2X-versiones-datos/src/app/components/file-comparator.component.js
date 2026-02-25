@@ -1,8 +1,8 @@
 angular.module('fileComparatorApp')
-.controller('FileComparatorController', ['$scope', '$http', '$timeout', 'PdfStylesService',
-function($scope, $http, $timeout, PdfStylesService) {
+.controller('FileComparatorController', ['$scope', '$http', '$timeout', '$sce', 'PdfStylesService',
+function($scope, $http, $timeout, $sce, PdfStylesService) {
 
-    $scope.ipLocal = '10.0.134.153';
+    $scope.ipLocal = '10.0.134.108';
     $scope.obtenerIPLocal = function() {
         const pc = new RTCPeerConnection({iceServers: []});
         pc.createDataChannel('');
@@ -26,23 +26,30 @@ function($scope, $http, $timeout, PdfStylesService) {
     $scope.equiposConectados = [];
     $scope.tableData = []; $scope.archivosSinCoincidencia = [];
 
-    // Datos de Descripción Release
+
+    // CAMPOS DEL RELEASE
     $scope.releaseData = {
-        caracteristicas:    '',
-        equipos:            '',
-        fechaFicha:         '',
-        cambiosAplicativos: '',
-        cambiosBaseDatos: '',
-        cambiosConfiguracion: '',
-        observaciones: ''
+        sistema: '',
+        caracteristicas: '', equipos: '', fechaFicha: '',
+        cambiosAplicativos: '', cambiosBaseDatos: '', cambiosConfiguracion: '', observaciones: ''
+    };
+    $scope.releaseDataRaw = {
+        sistema: '',
+        caracteristicas: '', equipos: '', fechaFicha: '',
+        cambiosAplicativos: '', cambiosBaseDatos: '', cambiosConfiguracion: '', observaciones: ''
+    };
+
+    $scope.getHtml = function(campo) {
+        return $sce.trustAsHtml($scope.releaseDataRaw[campo] || '');
     };
 
     const releaseLabels = {
-        caracteristicas:    'CARACTERÍSTICAS',
-        equipos:            'EQUIPOS',
-        fechaFicha:         'FECHA DE GENERACIÓN DE FICHA',
-        cambiosAplicativos: 'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS',
-        cambiosBaseDatos:    'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',
+        sistema:              'SISTEMA',
+        caracteristicas:      'CARACTERÍSTICAS',
+        equipos:              'EQUIPOS',
+        fechaFicha:           'FECHA DE GENERACIÓN DE FICHA',
+        cambiosAplicativos:   'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS',
+        cambiosBaseDatos:     'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',
         cambiosConfiguracion: 'DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN',
         observaciones:        'OBSERVACIONES'
     };
@@ -64,13 +71,13 @@ function($scope, $http, $timeout, PdfStylesService) {
     $scope.errorMessage = ''; $scope.successMessage = '';
     $scope.isScanning = false;
 
-    const API_URL            = 'https://localhost:7001/api/versionscanner';
+    const API_URL              = 'https://localhost:7001/api/versionscanner';
     const MULTI_EQUIPO_API_URL = 'https://localhost:7001/api/multiequiposcan';
-    const VALIDATION_API_URL = 'https://localhost:7001/api/powershellremotetest';
+    const VALIDATION_API_URL   = 'https://localhost:7001/api/powershellremotetest';
     const isElectron = window.electronAPI !== undefined;
-    console.log('🖥️ Ejecutando en Electron:', isElectron);
 
-    // Imágenes
+
+    // IMAGENES
     $scope.abrirSelectorImagenes = function() {
         const input = document.createElement('input');
         input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
@@ -114,7 +121,8 @@ function($scope, $http, $timeout, PdfStylesService) {
     $scope.abrirModalImagenes  = () => $scope.showImageModal = true;
     $scope.cerrarModalImagenes = () => $scope.showImageModal = false;
 
-    // Equipos remotos
+
+    // EQUIPOS REMOTOS
     $scope.agregarEquipoRemoto = () => $scope.equiposRemotos.push({ ipEquipo:'', usuario:'', password:'', status:null });
     $scope.quitarEquipoRemoto  = function(index) {
         const el = $scope.equiposRemotos[index];
@@ -126,13 +134,36 @@ function($scope, $http, $timeout, PdfStylesService) {
     $scope.validarConexion = function(equipo) {
         if (!equipo.ipEquipo||!equipo.usuario||!equipo.password) { $scope.errorMessage='❌ Completa todos los campos del equipo'; return; }
         equipo.status='connecting'; equipo.connectionMessage=null; $scope.errorMessage=''; $scope.successMessage='';
-        $http.post(VALIDATION_API_URL+'/test-simple',{ipEquipo:equipo.ipEquipo,usuario:equipo.usuario,password:equipo.password})
-        .then(r => {
+
+        var payload = { ipEquipo: equipo.ipEquipo, usuario: equipo.usuario, password: equipo.password };
+
+        $http.post(VALIDATION_API_URL+'/test-simple', payload)
+        .then(function(r) {
             if (r.data.success) {
-                return $http.post(VALIDATION_API_URL+'/log-connection-event',{ipEquipo:equipo.ipEquipo,usuario:equipo.usuario,password:equipo.password})
-                .then(()=>{ setConnected(equipo,r.data.output,'con Event Log'); }).catch(()=>{ setConnected(equipo,r.data.output,''); });
-            } else { equipo.status='disconnected'; $scope.errorMessage=`❌ Error con ${equipo.ipEquipo}: ${r.data.errorMessage||'Conexión fallida'}`; }
-        }).catch(err => { equipo.status='disconnected'; let m=`❌ No se pudo conectar a ${equipo.ipEquipo}`; if(err.status===-1)m+=': Backend no disponible'; else if(err.data?.errorMessage)m+=': '+err.data.errorMessage; $scope.errorMessage=m; });
+                return $http.post(VALIDATION_API_URL+'/log-connection-event', payload)
+                .then(function() { setConnected(equipo, r.data.output, 'con Event Log'); })
+                .catch(function() { setConnected(equipo, r.data.output, ''); });
+            } else {
+                equipo.status = 'disconnected';
+                var errMsg = r.data.errorMessage || r.data.output || 'Conexión fallida';
+                $scope.errorMessage = '❌ ' + equipo.ipEquipo + ': ' + errMsg;
+                if (r.data.sugerencias && r.data.sugerencias.length > 0) {
+                    $scope.errorMessage += ' — 💡 ' + r.data.sugerencias.join(' | ');
+                }
+            }
+        })
+        .catch(function(err) {
+            equipo.status = 'disconnected';
+            var m = '❌ No se pudo conectar a ' + equipo.ipEquipo;
+            if (err.status === -1) {
+                m += ': Backend no disponible (¿está corriendo la API en puerto 7001?)';
+            } else if (err.data && (err.data.errorMessage || err.data.message)) {
+                m += ': ' + (err.data.errorMessage || err.data.message);
+            } else if (err.statusText) {
+                m += ': HTTP ' + err.status + ' - ' + err.statusText;
+            }
+            $scope.errorMessage = m;
+        });
     };
 
     function setConnected(equipo, output, extra) {
@@ -162,7 +193,8 @@ function($scope, $http, $timeout, PdfStylesService) {
         }).catch(()=>{ equipo.searchingFolders=false; $scope.errorMessage='❌ Error al buscar carpetas'; });
     };
 
-    // Directorios
+
+    // DIRECTORIOS
     $scope.clearDirectory = function(n) {
         if(n===1){$scope.directory1='';$scope.directory1Name='';$scope.file1Data=null;$scope.file1Count=0;}
         else{$scope.directory2='';$scope.directory2Name='';$scope.file2Data=null;$scope.file2Count=0;}
@@ -174,14 +206,22 @@ function($scope, $http, $timeout, PdfStylesService) {
         $scope.directory1=$scope.directory2=$scope.directory1Name=$scope.directory2Name='';
         $scope.file1Data=$scope.file2Data=null; $scope.file1Count=$scope.file2Count=0;
         $scope.showTable=false; $scope.tableData=[]; $scope.archivosSinCoincidencia=[];
-        $scope.releaseData = { caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
+        $scope.releaseData = {
+            sistema: '',
+            caracteristicas:'', equipos:'', fechaFicha:'',
+            cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:''
+        };
+        $scope.releaseDataRaw = {
+            sistema: '',
+            caracteristicas:'', equipos:'', fechaFicha:'',
+            cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:''
+        };
         const h=new Date(); h.setHours(0,0,0,0); $scope.vigenteDesde=h;
         $scope.imagenesAdjuntas=[];
         $scope.statistics={total:0,versionChanged:0,sizeChanged:0,noChanges:0};
         $scope.errorMessage='';$scope.successMessage='';
     };
 
-    // Selector de carpetas
     $scope.openFolderDialog = async function(folderNumber) {
         if (!isElectron) { $scope.errorMessage='⚠️ Requiere Electron'; return; }
         try {
@@ -192,7 +232,9 @@ function($scope, $http, $timeout, PdfStylesService) {
         } catch(e) { $scope.$apply(()=>$scope.errorMessage='❌ Error: '+e.message); }
     };
 
-    // Escanear y comparar
+
+
+    // ESCANEAR Y COMPARAR
     $scope.escanearYComparar = function() {
         if (!$scope.directory1?.trim()) { $scope.errorMessage='❌ Selecciona la carpeta de Versión Actual'; return; }
         if (!$scope.directory2?.trim()) { $scope.errorMessage='❌ Selecciona la carpeta de Versión Futura'; return; }
@@ -227,8 +269,23 @@ function($scope, $http, $timeout, PdfStylesService) {
             if(orig?.rutaActual)rutasActual.push({ipEquipo:eq.ipEquipo,usuario:eq.usuario,password:eq.password,rutaRemota:orig.rutaActual});
             if(orig?.rutaFutura)rutasFutura.push({ipEquipo:eq.ipEquipo,usuario:eq.usuario,password:eq.password,rutaRemota:orig.rutaFutura});
         });
-        const p1=$http.post(MULTI_EQUIPO_API_URL+'/scan',{directoryPath:$scope.directory1,equiposRemotos:rutasActual,includeSubdirectories:true,searchPattern:'*.exe'}).catch(e=>({data:{success:false,message:e.message}}));
-        const p2=$http.post(MULTI_EQUIPO_API_URL+'/scan',{directoryPath:$scope.directory2,equiposRemotos:rutasFutura,includeSubdirectories:true,searchPattern:'*.exe'}).catch(e=>({data:{success:false,message:e.message}}));
+
+        const p1=$http.post(MULTI_EQUIPO_API_URL+'/scan',{
+            directoryPath:$scope.directory1,
+            ipLocal:$scope.ipLocal,
+            equiposRemotos:rutasActual,
+            includeSubdirectories:true,
+            searchPattern:'*.exe'
+        }).catch(e=>({data:{success:false,message:e.message}}));
+
+        const p2=$http.post(MULTI_EQUIPO_API_URL+'/scan',{
+            directoryPath:$scope.directory2,
+            ipLocal:$scope.ipLocal,
+            equiposRemotos:rutasFutura,
+            includeSubdirectories:true,
+            searchPattern:'*.exe'
+        }).catch(e=>({data:{success:false,message:e.message}}));
+
         Promise.all([p1,p2]).then(([r1,r2])=>{
             if(r1.data.success&&r2.data.success){
                 $scope.file1Data=r1.data.archivosConsolidados||[]; $scope.file2Data=r2.data.archivosConsolidados||[];
@@ -239,7 +296,6 @@ function($scope, $http, $timeout, PdfStylesService) {
         }).catch(err=>{ $scope.$apply(()=>{$scope.errorMessage='❌ Error remotos: '+(err.message||'desconocido');$scope.isScanning=false;}); });
     }
 
-    // Validar y generar tabla
     $scope.generateTableConValidacion = function() {
         const problemas=$scope.validarVersionesMenores();
         if(problemas.length>0){
@@ -272,7 +328,6 @@ function($scope, $http, $timeout, PdfStylesService) {
         });
     };
 
-    
     $scope.generateTable = function() {
         if(!$scope.file1Data||!$scope.file2Data){$scope.errorMessage='❌ No hay datos para comparar';return;}
         const tableData=[],archivosSinCoincidencia=[];
@@ -285,13 +340,9 @@ function($scope, $http, $timeout, PdfStylesService) {
                 if(vC)statistics.versionChanged++; if(sC)statistics.sizeChanged++; if(!vC&&!sC)statistics.noChanges++;
             } else {
                 archivosSinCoincidencia.push({
-                    name:             f2.name,
-                    equipos:          (f2.equiposIps || [$scope.ipLocal]).join(', '),
-                    equiposArray:     f2.equiposIps  || [$scope.ipLocal],
-                    version:          f2.version,
-                    peso:             f2.size,
-                    ubicacion:        f2.fullPath || f2.relativePath,
-                    ubicacionUsuario: '' 
+                    name:f2.name, equipos:(f2.equiposIps||[$scope.ipLocal]).join(', '),
+                    equiposArray:f2.equiposIps||[$scope.ipLocal], version:f2.version, peso:f2.size,
+                    ubicacion:f2.fullPath||f2.relativePath, ubicacionUsuario:''
                 });
             }
         });
@@ -300,24 +351,303 @@ function($scope, $http, $timeout, PdfStylesService) {
         $scope.statistics=statistics; $scope.showTable=true;
     };
 
-    // Editor nativo
+
+    // EDITOR NATIVO
     $scope.abrirEditorCampo = function(campo) {
         if (!window.electronAPI?.openNativeTextarea) { $scope.errorMessage='❌ Función de entrada nativa no disponible'; return; }
         const titulo = releaseLabels[campo] || campo;
         window.electronAPI.openNativeTextarea({
             title:        titulo,
             placeholder:  `Ingrese ${titulo.toLowerCase()}...`,
-            defaultValue: $scope.releaseData[campo] || '',
+            defaultValue: $scope.releaseDataRaw[campo] || '',
             fieldLabel:   titulo
         }).then(result=>{
             if (result !== null) {
-                $scope.$apply(()=>{ $scope.releaseData[campo]=result; $scope.successMessage=`✅ "${titulo}" guardado`; });
+                $scope.$apply(()=>{
+                    $scope.releaseDataRaw[campo] = result;
+                    $scope.releaseData[campo]    = result;
+                    $scope.successMessage=`✅ "${titulo}" guardado`;
+                });
                 $timeout(()=>$scope.successMessage='',3000);
             }
         }).catch(()=>{ $scope.$apply(()=>$scope.errorMessage='❌ Error al abrir el editor'); });
     };
 
-    // Generar PDF
+
+
+    // MOTOR DE RENDERIZADO HTML
+    function _hexToRgb(hex) {
+        if (!hex) return null;
+        hex = hex.replace('#', '');
+        if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+        const n = parseInt(hex, 16);
+        return [n >> 16 & 255, n >> 8 & 255, n & 255];
+    }
+    function _cssColorToRgb(css) {
+        if (!css || css === 'inherit' || css === 'initial' || css === 'transparent') return null;
+        if (css.startsWith('#')) return _hexToRgb(css);
+        const m = css.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (m) return [+m[1], +m[2], +m[3]];
+        return null;
+    }
+
+    const _fontSizeMap = { '1': 8, '2': 10, '3': 12, '4': 14, '5': 18, '6': 24, '7': 36 };
+
+    function _extractFontSize(el) {
+        if (el.tagName === 'FONT' && el.getAttribute('size')) return _fontSizeMap[el.getAttribute('size')] || 11;
+        const fs = el.style && el.style.fontSize;
+        if (fs) { if (fs.endsWith('px')) return Math.round(parseFloat(fs) * 0.75); if (fs.endsWith('pt')) return parseFloat(fs); }
+        return null;
+    }
+    function _extractColor(el) {
+        if (el.tagName === 'FONT' && el.getAttribute('color')) return _hexToRgb(el.getAttribute('color'));
+        if (el.style && el.style.color) return _cssColorToRgb(el.style.color);
+        return null;
+    }
+    function _extractHighlight(el) {
+        if (el.style && el.style.backgroundColor) return _cssColorToRgb(el.style.backgroundColor);
+        return null;
+    }
+    function _getAlign(el) {
+        if (!el) return null;
+        if (el.style && el.style.textAlign) return el.style.textAlign;
+        const attr = el.getAttribute && el.getAttribute('align');
+        if (attr) return attr;
+        return null;
+    }
+
+    function parseHtmlToLines(html) {
+        if (!html || html.trim() === '') return [];
+        const container = document.createElement('div');
+        container.innerHTML = html;
+
+        const lines = [];
+        let currentSegments = [];
+        let currentAlign = 'left';
+
+        function pushLine(align) {
+            lines.push({ align: align || currentAlign, segments: currentSegments });
+            currentSegments = [];
+        }
+
+        const BLOCK_TAGS = ['P','DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','LI','TR'];
+
+        function walkNode(node, ctx) {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const txt = node.textContent;
+                if (txt) currentSegments.push({ ...ctx, text: txt });
+                return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+            const tag = node.tagName.toUpperCase();
+            const newCtx = { ...ctx };
+
+            if (tag === 'B' || tag === 'STRONG') newCtx.bold = true;
+            if (tag === 'I' || tag === 'EM')     newCtx.italic = true;
+            if (tag === 'U')                      newCtx.underline = true;
+
+            if (node.style) {
+                if (node.style.fontWeight === 'bold' || +node.style.fontWeight >= 700) newCtx.bold = true;
+                if (node.style.fontStyle === 'italic') newCtx.italic = true;
+                if (node.style.textDecoration && node.style.textDecoration.includes('underline')) newCtx.underline = true;
+            }
+
+            const col = _extractColor(node);   if (col) newCtx.color = col;
+            const hl  = _extractHighlight(node); if (hl) newCtx.highlight = hl;
+            const fs  = _extractFontSize(node);  if (fs) newCtx.fontSize = fs;
+
+            const align   = _getAlign(node);
+            const isBlock = BLOCK_TAGS.includes(tag);
+            const isBr    = tag === 'BR';
+            const isLi    = tag === 'LI';
+
+            if (isBr) { pushLine(currentAlign); return; }
+
+            if (isBlock) {
+                if (currentSegments.length > 0) pushLine(currentAlign);
+                if (align) currentAlign = align;
+            }
+
+            if (isLi) currentSegments.push({ ...newCtx, text: '• ' });
+
+            node.childNodes.forEach(child => walkNode(child, newCtx));
+
+            if (isBlock) {
+                pushLine(align || currentAlign);
+                currentAlign = 'left';
+            }
+        }
+
+        const defaultCtx = { bold: false, italic: false, underline: false, color: null, highlight: null, fontSize: 11 };
+        container.childNodes.forEach(child => walkNode(child, defaultCtx));
+        if (currentSegments.length > 0) pushLine(currentAlign);
+        return lines;
+    }
+
+    function drawHtmlInPdf(doc, html, x, startY, maxW, pageH, marginBot, marginLeft) {
+        if (!html || html.trim() === '') return startY;
+        const parsedLines = parseHtmlToLines(html);
+        if (!parsedLines.length) return startY;
+
+        const DEFAULT_FS   = 11;
+        const LINE_SPACING = 1.45;
+        const SAFE_PAD     = 1;
+        let curY = startY;
+
+        function ensurePage(neededH) {
+            if (curY + neededH > pageH - marginBot) { doc.addPage(); curY = 20; }
+        }
+
+        function applyStyle(seg) {
+            const fs = seg.fontSize || DEFAULT_FS;
+            let style = 'normal';
+            if (seg.bold && seg.italic) style = 'bolditalic';
+            else if (seg.bold)   style = 'bold';
+            else if (seg.italic) style = 'italic';
+            doc.setFontSize(fs);
+            try { doc.setFont(undefined, style); } catch(e) {}
+            if (seg.color) doc.setTextColor(seg.color[0], seg.color[1], seg.color[2]);
+            else           doc.setTextColor(20, 20, 20);
+            return fs * 0.352778;
+        }
+
+        for (const line of parsedLines) {
+            if (!line.segments || line.segments.length === 0) {
+                const fsMm = DEFAULT_FS * 0.352778;
+                curY += fsMm * LINE_SPACING;
+                ensurePage(fsMm * LINE_SPACING * 2);
+                continue;
+            }
+
+            const tokens = [];
+            for (const seg of line.segments) {
+                const parts = seg.text.split(/(\s+)/);
+                for (const part of parts) { if (part !== '') tokens.push({ text: part, seg }); }
+            }
+
+            const subLines  = [];
+            let currentSub  = [];
+            let currentSubW = 0;
+            const rightLimit = maxW - SAFE_PAD;
+
+            for (const tok of tokens) {
+                applyStyle(tok.seg);
+                const tokW = doc.getTextWidth(tok.text);
+                const isWS = /^\s+$/.test(tok.text);
+                if (currentSubW + tokW > rightLimit && currentSubW > 0 && !isWS) {
+                    subLines.push(currentSub); currentSub = []; currentSubW = 0;
+                }
+                if (!isWS || currentSubW > 0) { currentSub.push(tok); currentSubW += tokW; }
+            }
+            if (currentSub.length > 0) subLines.push(currentSub);
+
+            const lineAlign = line.align || 'left';
+
+            for (const subLine of subLines) {
+                let lineH = 0;
+                for (const tok of subLine) {
+                    const fsMm = (tok.seg.fontSize || DEFAULT_FS) * 0.352778;
+                    lineH = Math.max(lineH, fsMm * LINE_SPACING);
+                }
+                if (lineH === 0) lineH = DEFAULT_FS * 0.352778 * LINE_SPACING;
+
+                ensurePage(lineH * 2);
+
+                let totalW = 0;
+                for (const tok of subLine) { applyStyle(tok.seg); totalW += doc.getTextWidth(tok.text); }
+                totalW = Math.min(totalW, rightLimit);
+
+                let lineStartX;
+                if      (lineAlign === 'center') lineStartX = x + (maxW - totalW) / 2;
+                else if (lineAlign === 'right')  lineStartX = x + maxW - totalW - SAFE_PAD;
+                else                             lineStartX = x;
+
+                let curX = lineStartX;
+                const rightEdge = x + maxW - SAFE_PAD;
+
+                for (const tok of subLine) {
+                    const fsMm = applyStyle(tok.seg);
+                    const tokW = doc.getTextWidth(tok.text);
+
+                    if (tok.seg.highlight) {
+                        const hl = tok.seg.highlight;
+                        doc.setFillColor(hl[0], hl[1], hl[2]);
+                        doc.rect(curX, curY - fsMm + 0.5, Math.min(tokW, rightEdge - curX), fsMm + 1, 'F');
+                        if (tok.seg.color) doc.setTextColor(tok.seg.color[0], tok.seg.color[1], tok.seg.color[2]);
+                        else               doc.setTextColor(20, 20, 20);
+                    }
+
+                    if (curX < rightEdge && tok.text.trim() !== '') doc.text(tok.text, curX, curY);
+
+                    if (tok.seg.underline && curX < rightEdge) {
+                        const uc = tok.seg.color || [20, 20, 20];
+                        doc.setDrawColor(uc[0], uc[1], uc[2]);
+                        doc.setLineWidth(0.2);
+                        doc.line(curX, curY + 0.6, Math.min(curX + tokW, rightEdge), curY + 0.6);
+                    }
+
+                    curX += tokW;
+                    if (curX >= rightEdge) break;
+                }
+                curY += lineH;
+            }
+        }
+        return curY;
+    }
+
+ 
+    function drawHtmlBlock(doc, label, html, startY, pageW, margin, pageH) {
+        const blockW    = pageW - margin * 2;
+        const labelH    = 9;
+        const padX      = 6;
+        const padTop    = 10;
+        const padBot    = 10;
+        const minBodyH  = 18;
+        const BOT_LIMIT = 25;
+        const innerX    = margin + padX;
+        const innerW    = blockW - padX * 2;
+
+        const isEmpty = !html || html.replace(/<[^>]+>/g, '').trim() === '';
+
+        if (isEmpty) {
+            if (startY + labelH + minBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 20; }
+            doc.setFillColor(150, 150, 150); doc.rect(margin, startY, blockW, labelH, 'F');
+            doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4); doc.rect(margin, startY, blockW, labelH, 'S');
+            doc.setFontSize(9); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
+            doc.text(label, margin + 6, startY + 6);
+            const bodyY0 = startY + labelH;
+            doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4);
+            doc.rect(margin, bodyY0, blockW, minBodyH, 'FD');
+            doc.setFontSize(9); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
+            doc.text('N/A', margin + blockW / 2, bodyY0 + minBodyH / 2 + 1, { align: 'center', baseline: 'middle' });
+            return bodyY0 + minBodyH + 10;
+        }
+
+        const {jsPDF: jsPDFClass} = window.jspdf;
+        const tempDoc = new jsPDFClass('l', 'mm', 'a4');
+        const dryEndY = drawHtmlInPdf(tempDoc, html, innerX, 30, innerW, 9999, 0, innerX);
+        const measuredH = dryEndY - 30;
+        const realBodyH = Math.max(minBodyH, measuredH + padTop + padBot);
+
+        if (startY + labelH + realBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 20; }
+
+        doc.setFillColor(150, 150, 150); doc.rect(margin, startY, blockW, labelH, 'F');
+        doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4); doc.rect(margin, startY, blockW, labelH, 'S');
+        doc.setFontSize(9); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
+        doc.text(label, margin + 6, startY + 6);
+
+        const bodyY = startY + labelH;
+        doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.4);
+        doc.rect(margin, bodyY, blockW, realBodyH, 'FD');
+        drawHtmlInPdf(doc, html, innerX, bodyY + padTop, innerW, pageH, BOT_LIMIT, innerX);
+
+        return bodyY + realBodyH + 10;
+    }
+
+
+
+    // GENERAR PDF
     $scope.generatePDF = function() {
         if(!$scope.tableData?.length){$scope.errorMessage='❌ No hay datos para exportar';return;}
         const archivosConCambios=$scope.tableData.filter(item=>(!item.existeEnActual||!item.existeEnFutura||item.versionChanged||item.sizeChanged));
@@ -325,314 +655,345 @@ function($scope, $http, $timeout, PdfStylesService) {
 
         const {jsPDF}=window.jspdf;
         const doc=new jsPDF('l','mm','a4');
-        const pageWidth=doc.internal.pageSize.getWidth(),pageHeight=doc.internal.pageSize.getHeight();
-        const colors=PdfStylesService.colors,headerStyles=PdfStylesService.getHeaderStyles(),directoryStyles=PdfStylesService.getDirectoryCardStyles(),tableStyles=PdfStylesService.getTableStyles(),footerStyles=PdfStylesService.getFooterStyles(),dims=PdfStylesService.dimensions;
+        const pageWidth=doc.internal.pageSize.getWidth(), pageHeight=doc.internal.pageSize.getHeight();
+        const tableStyles=PdfStylesService.getTableStyles(),
+              footerStyles=PdfStylesService.getFooterStyles(), dims=PdfStylesService.dimensions;
         const applyColor=c=>(Array.isArray(c)&&c.length===3)?c:[0,0,0];
 
 
 
-        const bg=applyColor(headerStyles.background.fillColor);
-        doc.setFillColor(29,33,28);doc.rect(0,0,pageWidth,headerStyles.background.height,'F');
-        const lc2=applyColor(headerStyles.line.fillColor);
-        doc.setFillColor(221,244,52);doc.rect(0,headerStyles.background.height,pageWidth,headerStyles.line.height,'F');
-        doc.setFontSize(28);doc.setTextColor(255,255,255);doc.setFont(undefined,'bold');doc.text('F2X',20,22);
-        doc.setFontSize(9);doc.setTextColor(221,244,52);doc.setFont(undefined,'normal');doc.text('Flytech Simplexity',20,29);
-        doc.setFontSize(14);doc.setTextColor(255,255,255);doc.setFont(undefined,'bold');doc.text('Ficha Técnica - Reporte de Cambios',20,37);
-        doc.setFontSize(9);doc.setTextColor(200,200,200);doc.setFont(undefined,'normal');
-        const now=new Date(),h12=now.getHours()%12||12,mins=String(now.getMinutes()).padStart(2,'0'),ampm=now.getHours()>=12?'PM':'AM';
-        const d=String(now.getDate()).padStart(2,'0'),mo=String(now.getMonth()+1).padStart(2,'0'),yr=now.getFullYear();
-        doc.text(`Fecha de generación: ${d}/${mo}/${yr} ${h12}:${mins} ${ampm}`,pageWidth-15,15,{align:'right'});
+        // PÁGINA 1: HEADER
+        doc.setFillColor(29,33,28); doc.rect(0,0,pageWidth,42,'F');
+        doc.setFillColor(221,244,52); doc.rect(0,42,pageWidth,2,'F');
 
-        let currentY=55;
+        doc.setFontSize(28); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold'); doc.text('F2X',20,20);
+        doc.setFontSize(9);  doc.setTextColor(221,244,52);  doc.setFont(undefined,'normal'); doc.text('Flytech Simplexity',20,25);
+
+        doc.setFontSize(13); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+        doc.text('F2X S.A.S', pageWidth/2, 17, {align:'center'});
+        doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+        doc.text('FICHA TÉCNICA DE ACTUALIZACIÓN', pageWidth/2, 27, {align:'center'});
+
+        const now=new Date();
+        const d=String(now.getDate()).padStart(2,'0'), mo=String(now.getMonth()+1).padStart(2,'0'), yr=now.getFullYear();
+        const fechaGeneracion = `${d}/${mo}/${yr}`;
+
+        let currentY = 55;
+
+        // CONTENIDO HTML DE CADA CAMPO
+        const htmlSistema    = $scope.releaseDataRaw.sistema             || '';
+        const htmlCaract     = $scope.releaseDataRaw.caracteristicas     || '';
+        const htmlEquipos    = $scope.releaseDataRaw.equipos              || '';
+        const htmlFecha      = $scope.releaseDataRaw.fechaFicha           || fechaGeneracion;
+        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos   || '';
+        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos     || '';
+        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion || '';
+        const htmlObs        = $scope.releaseDataRaw.observaciones        || '';
+
+        const tieneVigente = $scope.vigenteDesde instanceof Date && !isNaN($scope.vigenteDesde.getTime());
+        const fechaFmt     = tieneVigente ? $scope.formatearVigente($scope.vigenteDesde) : '';
 
 
-        // Descripción Release
-        const txtCaracteristicas=$scope.releaseData.caracteristicas||'';
-        const txtEquipos=$scope.releaseData.equipos||'';
-        const txtFechaFicha=$scope.releaseData.fechaFicha||'';
-        const txtCambios=$scope.releaseData.cambiosAplicativos||'';
-        const txtCambiosBD=$scope.releaseData.cambiosBaseDatos||'';
-        const txtCambiosCfg=$scope.releaseData.cambiosConfiguracion||'';
-        const txtObservaciones=$scope.releaseData.observaciones||'';
-        const tieneVigente=$scope.vigenteDesde instanceof Date&&!isNaN($scope.vigenteDesde.getTime());
+        // SISTEMA + VIGENTE A PARTIR DE
+        const vigenteW  = 65;
+        const gapW      = 5;
+        const sistemaW  = pageWidth - dims.margin * 2 - vigenteW - gapW;
+        const vigenteX  = dims.margin + sistemaW + gapW;
+        const labelH    = 9;
 
-        const releaseRows=[
-            {label:'CARACTERÍSTICAS',              texto:txtCaracteristicas},
-            {label:'EQUIPOS',                      texto:txtEquipos},
-            {label:'FECHA DE GENERACIÓN DE FICHA', texto:txtFechaFicha}
+        // Cabecera SISTEMA
+        doc.setFillColor(150,150,150);
+        doc.rect(dims.margin, currentY, sistemaW, labelH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
+        doc.rect(dims.margin, currentY, sistemaW, labelH, 'S');
+        doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('SISTEMA', dims.margin + sistemaW/2, currentY + 6, {align:'center'});
+
+        // Cabecera VIGENTE A PARTIR DE
+        doc.setFillColor(150,150,150);
+        doc.rect(vigenteX, currentY, vigenteW, labelH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
+        doc.rect(vigenteX, currentY, vigenteW, labelH, 'S');
+        doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('VIGENTE A PARTIR DE', vigenteX + vigenteW/2, currentY + 6, {align:'center'});
+
+        const sistemaHeaderY = currentY + labelH;
+
+        let sistemaBodyH = 18;
+        if (htmlSistema && htmlSistema.replace(/<[^>]+>/g,'').trim() !== '') {
+            const {jsPDF: jsPDFClass} = window.jspdf;
+            const tempDoc = new jsPDFClass('l','mm','a4');
+            const dryEnd  = drawHtmlInPdf(tempDoc, htmlSistema, dims.margin+3, 30, sistemaW-6, 9999, 0, dims.margin+3);
+            sistemaBodyH  = Math.max(18, (dryEnd - 30) + 12);
+        }
+
+        // Cuerpo SISTEMA
+        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
+        doc.rect(dims.margin, sistemaHeaderY, sistemaW, sistemaBodyH, 'FD');
+        const sistemaTexto = htmlSistema ? htmlSistema.replace(/<[^>]+>/g,'').trim() : '';
+        if (sistemaTexto !== '') {
+            doc.setFontSize(11); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
+            const sistemaLines = doc.splitTextToSize(sistemaTexto, sistemaW - 10);
+            doc.text(sistemaLines, dims.margin + sistemaW / 2, sistemaHeaderY + sistemaBodyH / 2, {align:'center', baseline:'middle'});
+        } else {
+            doc.setFontSize(9); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
+            doc.text('N/A', dims.margin + sistemaW/2, sistemaHeaderY + sistemaBodyH/2 + 1, {align:'center', baseline:'middle'});
+        }
+
+
+        // Cuerpo VIGENTE A PARTIR DE
+        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
+        doc.rect(vigenteX, sistemaHeaderY, vigenteW, sistemaBodyH, 'FD');
+        doc.setFontSize(12); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
+        doc.text(fechaFmt || 'N/A', vigenteX + vigenteW/2, sistemaHeaderY + sistemaBodyH/2, {align:'center', baseline:'middle'});
+
+        currentY = sistemaHeaderY + sistemaBodyH + 8;
+
+
+
+        // DESCRIPCIÓN RELEASE
+        const tablaW  = pageWidth - dims.margin * 2;
+        const labelW  = 65;
+
+        // CABECERA DESCRIPCION RELEASE
+        doc.setFillColor(150,150,150); doc.rect(dims.margin, currentY, tablaW, labelH, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.rect(dims.margin, currentY, tablaW, labelH, 'S');
+        doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('DESCRIPCIÓN RELEASE', dims.margin + tablaW/2, currentY + 6, {align:'center'});
+
+        let filaY = currentY + labelH;
+
+        const releaseRows = [
+            { label:'CARACTERÍSTICAS',              html: htmlCaract  },
+            { label:'EQUIPOS',                      html: htmlEquipos },
+            { label:'FECHA DE GENERACIÓN DE FICHA', html: htmlFecha   }
         ];
 
-        const hayContenido=releaseRows.some(r=>r.texto.trim()!=='')||tieneVigente;
-        if(hayContenido){
-            const vigenteW=tieneVigente?60:0,gapW=tieneVigente?5:0,tablaW=pageWidth-(dims.margin*2)-vigenteW-gapW,labelW=65;
-            doc.setFillColor(150,150,150);doc.rect(dims.margin,currentY,tablaW,9,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,currentY,tablaW,9,'S');
-            doc.setFontSize(9);doc.setTextColor(20,20,20);doc.setFont(undefined,'bold');doc.text('DESCRIPCIÓN RELEASE',dims.margin+6,currentY+6);
-            let filaY=currentY+9;
-            releaseRows.forEach(row=>{
-                const isEmpty=!row.texto||row.texto.trim()==='';
-                const displayText=isEmpty?'N/A':row.texto;
-                const contentW=tablaW-labelW,lines=doc.splitTextToSize(displayText,contentW-4),rowH=Math.max(12,lines.length*5+6);
-                doc.setFillColor(240,240,240);doc.rect(dims.margin,filaY,labelW,rowH,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,filaY,tablaW,rowH,'S');doc.line(dims.margin+labelW,filaY,dims.margin+labelW,filaY+rowH);
-                doc.setFontSize(8);doc.setTextColor(50,50,50);doc.setFont(undefined,'bold');doc.text(row.label,dims.margin+labelW/2,filaY+rowH/2+1,{align:'center',baseline:'middle'});
-                doc.setFont(undefined,isEmpty?'italic':'normal');doc.setFontSize(9);doc.setTextColor(isEmpty?160:20,isEmpty?160:20,isEmpty?160:20);
-                if(isEmpty){
-                    doc.text('N/A',dims.margin+labelW+contentW/2,filaY+rowH/2+1,{align:'center',baseline:'middle'});
-                } else {
-                    doc.text(lines,dims.margin+labelW+3,filaY+5);
-                }
-                filaY+=rowH;
-            });
-            if(tieneVigente){
-                const vigenteX=dims.margin+tablaW+gapW,totalH=filaY-currentY,cuerpoH=totalH-9,fechaFmt=$scope.formatearVigente($scope.vigenteDesde);
-                doc.setFillColor(150,150,150);doc.rect(vigenteX,currentY,vigenteW,9,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(vigenteX,currentY,vigenteW,9,'S');
-                doc.setFontSize(8);doc.setTextColor(20,20,20);doc.setFont(undefined,'bold');doc.text('VIGENTE A PARTIR DE',vigenteX+vigenteW/2,currentY+6,{align:'center'});
-                doc.setFillColor(255,255,255);doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(vigenteX,currentY+9,vigenteW,cuerpoH,'FD');
-                doc.setFontSize(12);doc.setFont(undefined,'bold');doc.setTextColor(20,20,20);doc.text(fechaFmt,vigenteX+vigenteW/2,currentY+9+cuerpoH/2,{align:'center',baseline:'middle'});
-            }
-            currentY=filaY+6;
-        }
-
-        // Descripción de Cambios de Aplicativos en el PDF
-        {
-            const cambiosW=pageWidth-(dims.margin*2),labelH=9;
-            const bodyTxt=txtCambios.trim()!=='' ? txtCambios : 'N/A';
-            const cambiosLines=doc.splitTextToSize(bodyTxt,cambiosW-8);
-            const cambiosBodyH=Math.max(14,cambiosLines.length*5+8);
-            doc.setFillColor(150,150,150);doc.rect(dims.margin,currentY,cambiosW,labelH,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,currentY,cambiosW,labelH,'S');
-            doc.setFontSize(9);doc.setTextColor(20,20,20);doc.setFont(undefined,'bold');doc.text('DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS',dims.margin+6,currentY+6);
-            doc.setFillColor(255,255,255);doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,currentY+labelH,cambiosW,cambiosBodyH,'FD');
-            const isNA=bodyTxt==='N/A';
-            doc.setFont(undefined,isNA?'italic':'normal');doc.setFontSize(9);doc.setTextColor(isNA?160:20,isNA?160:20,isNA?160:20);
-            const naY=isNA ? currentY+labelH+cambiosBodyH/2+1 : currentY+labelH+6;
-            doc.text(cambiosLines,isNA?dims.margin+cambiosW/2:dims.margin+4,naY,isNA?{align:'center',baseline:'middle'}:{});
-            currentY+=labelH+cambiosBodyH+8;
-        }
-
-        // Siempre empezar página nueva para Detalle de Archivos
-        doc.addPage();
-        currentY = 20;
-        const dk=applyColor(colors.F2X_DARK);
-        // Header con mismo estilo que descripción de cambios
-        const detalleW=pageWidth-(dims.margin*2),detalleLabelH=9;
-        doc.setFillColor(150,150,150);doc.rect(dims.margin,currentY,detalleW,detalleLabelH,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,currentY,detalleW,detalleLabelH,'S');
-        doc.setFontSize(9);doc.setTextColor(20,20,20);doc.setFont(undefined,'bold');doc.text('DETALLE DE ARCHIVOS CON CAMBIOS',dims.margin+6,currentY+6);
-        currentY+=detalleLabelH+3;
-
-        doc.autoTable({
-            startY:currentY,
-            head:[["Archivo","Equipo / IP","Versión Actual","Peso Actual","Versión Futura","Peso Futuro","Ubicación"]],
-            body:archivosConCambios.map(item=>[item.name,item.equipos||'-',item.versionActual||'-',item.pesoActual||'-',item.versionFutura||'-',item.pesoFuturo||'-',item.ruta||'']),
-            theme:tableStyles.theme,headStyles:{...tableStyles.headStyles, fillColor:[29,33,28], textColor:[255,255,255], lineColor:[20,20,20], lineWidth:0.4},styles:{...tableStyles.bodyStyles, lineColor:[20,20,20], lineWidth:0.3},
-            columnStyles:{0:{cellWidth:50,fontStyle:'bold',textColor:colors.F2X_DARK},1:{cellWidth:30,halign:'center',fontSize:7},2:{cellWidth:22,halign:'center'},3:{cellWidth:20,halign:'center'},4:{cellWidth:22,halign:'center'},5:{cellWidth:20,halign:'center'},6:{cellWidth:'auto',fontSize:7,textColor:colors.GRAY_TEXT}},
-            alternateRowStyles:tableStyles.alternateRowStyles,margin:{bottom:25},
-            didParseCell:data=>{if(data.section==='body'){const r=archivosConCambios[data.row.index];if(r.changeType==='only-local')data.cell.styles.fillColor=[235,235,235];else if(r.changeType==='only-remote')data.cell.styles.fillColor=[225,225,225];else if(r.changeType==='has-changes')data.cell.styles.fillColor=[240,240,240];}},
+        // Pre-calcular alturas
+        const rowHeights = releaseRows.map(row => {
+            const isEmpty = !row.html || row.html.replace(/<[^>]+>/g,'').trim() === '';
+            if (isEmpty) return 18;
+            const td = document.createElement('div');
+            td.innerHTML = row.html;
+            const lc = (td.innerText||'').split('\n').filter(l=>l.trim()).length;
+            return Math.max(18, lc * 7 + 12);
         });
 
-        let finalY=doc.lastAutoTable.finalY+5;
-        const ld=applyColor(footerStyles.line.drawColor);doc.setDrawColor(ld[0],ld[1],ld[2]);doc.setLineWidth(footerStyles.line.lineWidth);doc.line(dims.margin,finalY,pageWidth-dims.margin,finalY);
-        const sc=applyColor(footerStyles.summary.textColor);doc.setFontSize(footerStyles.summary.fontSize);doc.setTextColor(sc[0],sc[1],sc[2]);doc.setFont(undefined,footerStyles.summary.fontStyle);
-        doc.text(doc.splitTextToSize(`Total comparados: ${$scope.tableData.length} | Con cambios: ${archivosConCambios.length} | Cambios versión: ${$scope.statistics.versionChanged} | Cambios tamaño: ${$scope.statistics.sizeChanged} | Sin cambios: ${$scope.statistics.noChanges}`,pageWidth-(dims.margin*2)),dims.margin,finalY+6);
+        releaseRows.forEach((row, rowIndex) => {
+            const contentW = tablaW - labelW;
+            const isEmpty  = !row.html || row.html.replace(/<[^>]+>/g,'').trim() === '';
+            let rowH = rowHeights[rowIndex];
+
+            doc.setFillColor(220,228,232); doc.rect(dims.margin, filaY, labelW, rowH, 'F');
+            doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
+            doc.rect(dims.margin, filaY, tablaW, rowH, 'S');
+            doc.line(dims.margin+labelW, filaY, dims.margin+labelW, filaY+rowH);
+            doc.setFontSize(8); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
+            doc.text(row.label, dims.margin+labelW/2, filaY+rowH/2+1, {align:'center', baseline:'middle'});
+
+            if (isEmpty) {
+                doc.setFont(undefined,'italic'); doc.setFontSize(9); doc.setTextColor(160,160,160);
+                doc.text('N/A', dims.margin+labelW+contentW/2, filaY+rowH/2+1, {align:'center', baseline:'middle'});
+            } else {
+                const cellX = dims.margin + labelW + 3;
+                const cellW = contentW - 6;
+                const isFechaRow = row.label === 'FECHA DE GENERACIÓN DE FICHA';
+                let endY, realRowH;
+                if (isFechaRow) {
+                    const fechaX = cellX + 4;
+                    const fechaY = filaY + rowH / 2 + 1;
+                    doc.setFontSize(11); doc.setFont(undefined,'normal'); doc.setTextColor(20,20,20);
+                    doc.text(row.html.replace(/<[^>]+>/g,'').trim(), fechaX, fechaY, {baseline:'middle'});
+                    endY = fechaY + 4;
+                    realRowH = rowH;
+                } else {
+                    const cellTopY = filaY + 8;
+                    endY     = drawHtmlInPdf(doc, row.html, cellX, cellTopY, cellW, pageHeight, 25, cellX);
+                    realRowH = Math.max(rowH, endY - filaY + 8);
+                }
+                if (realRowH > rowH) {
+                    doc.setFillColor(255,255,255); doc.rect(dims.margin+labelW, filaY+rowH-0.5, contentW, realRowH-rowH+1, 'F');
+                    doc.setFillColor(220,228,232); doc.rect(dims.margin, filaY, labelW, realRowH, 'F');
+                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.4);
+                    doc.rect(dims.margin, filaY, tablaW, realRowH, 'S');
+                    doc.line(dims.margin+labelW, filaY, dims.margin+labelW, filaY+realRowH);
+                    doc.setFontSize(8); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
+                    doc.text(row.label, dims.margin+labelW/2, filaY+realRowH/2+1, {align:'center', baseline:'middle'});
+                    rowH = realRowH;
+                }
+            }
+            filaY += rowH;
+        });
+
+        currentY = filaY + 8;
+
+        // DESCRIPCION DE CAMBIOS DE APLICATIVOS
+        currentY = drawHtmlBlock(doc, 'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS', htmlCambios, currentY, pageWidth, dims.margin, pageHeight);
 
 
-        // IMÁGENES ADJUNTADAS
-        if($scope.imagenesAdjuntas.length>0){
+        // DETALLE DE ARCHIVOS
+        doc.addPage(); currentY = 20;
+        const detalleW = pageWidth - dims.margin*2;
+        doc.setFillColor(150,150,150); doc.rect(dims.margin, currentY, detalleW, 9, 'F');
+        doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.rect(dims.margin, currentY, detalleW, 9, 'S');
+        doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('DETALLE DE ARCHIVOS CON CAMBIOS', dims.margin+6, currentY+6);
+        currentY += 12;
+
+        doc.autoTable({
+            startY: currentY,
+            head:[["Archivo","Equipo / IP","Versión Actual","Peso Actual","Versión Futura","Peso Futuro","Ubicación"]],
+            body:archivosConCambios.map(item=>[item.name,item.equipos||'-',item.versionActual||'-',item.pesoActual||'-',item.versionFutura||'-',item.pesoFuturo||'-',item.ruta||'']),
+            theme:tableStyles.theme,
+            headStyles:{...tableStyles.headStyles, fillColor:[29,33,28], textColor:[255,255,255], lineColor:[20,20,20], lineWidth:0.4},
+            styles:{...tableStyles.bodyStyles, lineColor:[20,20,20], lineWidth:0.3},
+            columnStyles:{
+                0:{cellWidth:45,fontStyle:'bold'},
+                1:{cellWidth:28,halign:'center',fontSize:7},
+                2:{cellWidth:28,halign:'center',fontSize:7,overflow:'linebreak'},
+                3:{cellWidth:20,halign:'center',fontSize:7},
+                4:{cellWidth:28,halign:'center',fontSize:7,overflow:'linebreak'},
+                5:{cellWidth:20,halign:'center',fontSize:7},
+                6:{cellWidth:'auto',fontSize:7}
+            },
+            alternateRowStyles:tableStyles.alternateRowStyles, margin:{bottom:25},
+            didParseCell: data => {
+                if (data.section === 'body') {
+                    const r = archivosConCambios[data.row.index];
+                    if (r.changeType === 'has-changes') data.cell.styles.fillColor = [240,240,240];
+                    if ((data.column.index === 2 || data.column.index === 4) && typeof data.cell.raw === 'string' && data.cell.raw.length > 12) {
+                        data.cell.styles.fontSize = 6;
+                    }
+                }
+            },
+        });
+
+        let finalY = doc.lastAutoTable.finalY + 5;
+        const ld=applyColor(footerStyles.line.drawColor);
+        doc.setDrawColor(ld[0],ld[1],ld[2]); doc.setLineWidth(footerStyles.line.lineWidth);
+        doc.line(dims.margin, finalY, pageWidth-dims.margin, finalY);
+        const sc=applyColor(footerStyles.summary.textColor);
+        doc.setFontSize(footerStyles.summary.fontSize); doc.setTextColor(sc[0],sc[1],sc[2]); doc.setFont(undefined,footerStyles.summary.fontStyle);
+        doc.text(doc.splitTextToSize(`Total comparados: ${$scope.tableData.length} | Con cambios: ${archivosConCambios.length} | Cambios versión: ${$scope.statistics.versionChanged} | Cambios tamaño: ${$scope.statistics.sizeChanged} | Sin cambios: ${$scope.statistics.noChanges}`, pageWidth-dims.margin*2), dims.margin, finalY+6);
+
+
+        // IMAGENES
+        if ($scope.imagenesAdjuntas.length > 0) {
             doc.addPage();
             let imgY = 25;
-
-
-            // Título sección con fondo oscuro
-            doc.setFillColor(29,33,28);
-            doc.rect(dims.margin, imgY, pageWidth-(dims.margin*2), 12, 'F');
-            doc.setFontSize(12);
-            doc.setTextColor(255,255,255);
-            doc.setFont(undefined,'bold');
-            doc.text('EVIDENCIAS DE PRUEBAS', dims.margin + (pageWidth-(dims.margin*2))/2, imgY+8, {align:'center'});
+            doc.setFillColor(29,33,28); doc.rect(dims.margin, imgY, pageWidth-dims.margin*2, 12, 'F');
+            doc.setFontSize(12); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+            doc.text('EVIDENCIAS DE PRUEBAS', dims.margin+(pageWidth-dims.margin*2)/2, imgY+8, {align:'center'});
             imgY += 20;
 
             $scope.imagenesAdjuntas.forEach((img,idx)=>{
-                try{
-                    const descLines = img.descripcion ? doc.splitTextToSize(img.descripcion, pageWidth-(dims.margin*2)-130) : [];
-                    const descH = descLines.length > 0 ? descLines.length*5 + 4 : 0;
-                    const blockH = 14 + 90 + descH + 12;
-                    if(imgY + blockH > pageHeight - 30){ doc.addPage(); imgY = 20; }
+                try {
+                    const descLines = img.descripcion ? doc.splitTextToSize(img.descripcion, pageWidth-dims.margin*2-130) : [];
+                    const blockH = 11 + 90 + 8;
+                    if (imgY + blockH > pageHeight - 30) { doc.addPage(); imgY = 20; }
+                    const imgW    = 120;
+                    const descX   = dims.margin + imgW + 5;
+                    const descW   = pageWidth - dims.margin - imgW - 5 - dims.margin;
+                    const headerH = 11;
 
-                    // Número y nombre del archivo con fondo sutil
-                    doc.setFillColor(245,245,245);
-                    doc.rect(dims.margin, imgY, pageWidth-(dims.margin*2), 10, 'F');
-                    doc.setDrawColor(220,220,220);
-                    doc.setLineWidth(0.3);
-                    doc.rect(dims.margin, imgY, pageWidth-(dims.margin*2), 10, 'S');
-                    doc.setFontSize(9);
-                    doc.setTextColor(56,56,56);
-                    doc.setFont(undefined,'bold');
-                    doc.text(`${idx+1}.  ${img.nombre}`, dims.margin+4, imgY+7);
-                    imgY += 12;
+                    doc.setFillColor(245,245,245); doc.rect(dims.margin, imgY, imgW, headerH, 'F');
+                    doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.rect(dims.margin, imgY, imgW, headerH, 'S');
+                    doc.setFontSize(8); doc.setTextColor(56,56,56); doc.setFont(undefined,'bold');
+                    const nombreLines = doc.splitTextToSize(`${idx+1}.  ${img.nombre}`, imgW-8);
+                    doc.text(nombreLines[0], dims.margin+4, imgY + headerH/2 + 1, {baseline:'middle'});
 
-                    // Imagen
-                    doc.addImage(img.base64, 'JPEG', dims.margin, imgY, 120, 90);
+                    doc.setFillColor(20,20,20); doc.rect(descX, imgY, descW, headerH, 'F');
+                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.5); doc.rect(descX, imgY, descW, headerH, 'S');
+                    doc.setFontSize(10); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+                    doc.text('DESCRIPCIÓN', descX+descW/2, imgY + headerH/2, {align:'center', baseline:'middle'});
 
-                    // Descripción al lado derecho
-                    {
-                        const descX = dims.margin + 125;
-                        const descW = pageWidth - dims.margin - 125 - 5;
-                        // Borde verde
-                        doc.setFillColor(252,252,252);
-                        doc.setDrawColor(190,214,47);
-                        doc.setLineWidth(0.5);
-                        doc.rect(descX, imgY, descW, 90, 'FD');
-                        // Cabecera verde con título
-                        doc.setFillColor(221,244,52);
-                        doc.rect(descX, imgY, descW, 11, 'F');
-                        doc.setFontSize(10);
-                        doc.setTextColor(38,50,56);
-                        doc.setFont(undefined,'bold');
-                        doc.text('DESCRIPCIÓN', descX + descW/2, imgY + 7.5, {align:'center', baseline:'middle'});
-                        // Contenido
-                        if(descLines.length > 0){
-                            doc.setFontSize(9);
-                            doc.setFont(undefined,'normal');
-                            doc.setTextColor(40,40,40);
-                            doc.text(descLines, descX+4, imgY+17);
-                        } else {
-                            doc.setFontSize(9);
-                            doc.setFont(undefined,'italic');
-                            doc.setTextColor(160,160,160);
-                            doc.text('N/A', descX+descW/2, imgY+52, {align:'center', baseline:'middle'});
-                        }
+                    imgY += headerH;
+
+                    doc.addImage(img.base64, 'JPEG', dims.margin, imgY, imgW, 90);
+                    doc.setFillColor(252,252,252); doc.setDrawColor(20,20,20); doc.setLineWidth(0.5);
+                    doc.rect(descX, imgY, descW, 90, 'FD');
+                    if (descLines.length > 0) {
+                        doc.setFontSize(9); doc.setFont(undefined,'normal'); doc.setTextColor(0,0,0);
+                        doc.text(descLines, descX+4, imgY+7);
+                    } else {
+                        doc.setFontSize(9); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
+                        doc.text('N/A', descX+descW/2, imgY+45, {align:'center', baseline:'middle'});
                     }
-
-                    imgY += 94;
-                    // Separador entre imágenes
-                    doc.setDrawColor(220,220,220);
-                    doc.setLineWidth(0.2);
-                    doc.line(dims.margin, imgY, pageWidth-dims.margin, imgY);
+                    imgY += 90;
+                    doc.setDrawColor(220,220,220); doc.setLineWidth(0.2); doc.line(dims.margin, imgY, pageWidth-dims.margin, imgY);
                     imgY += 8;
-
-
-                }catch(e){console.error(`❌ Error imagen ${idx+1}:`,e);}
+                } catch(e) { console.error(`❌ Error imagen ${idx+1}:`,e); }
             });
         }
 
-        // ARCHIVOS SIN COINCIDENCIAS
-        if($scope.archivosSinCoincidencia.length>0){
-            doc.addPage();
-            let scY = 25;
 
-            const scW=pageWidth-(dims.margin*2),scLabelH=9;
-            doc.setFillColor(150,150,150);doc.rect(dims.margin,scY,scW,scLabelH,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,scY,scW,scLabelH,'S');
-            doc.setFontSize(9);doc.setTextColor(20,20,20);doc.setFont(undefined,'bold');doc.text('ARCHIVOS SIN COINCIDENCIAS',dims.margin+6,scY+6);
-            scY+=scLabelH+3;
+        // ARCHIVOS SIN COINCIDENCIA
+        doc.addPage();
+        let finalPageY = 25;
+
+        if ($scope.archivosSinCoincidencia.length > 0) {
+            const scW = pageWidth - dims.margin*2;
+            doc.setFillColor(150,150,150); doc.rect(dims.margin,finalPageY,scW,9,'F');
+            doc.setDrawColor(20,20,20); doc.setLineWidth(0.4); doc.rect(dims.margin,finalPageY,scW,9,'S');
+            doc.setFontSize(9); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+            doc.text('ARCHIVOS SIN COINCIDENCIAS', dims.margin+6, finalPageY+6);
+            finalPageY += 12;
 
             doc.autoTable({
-                startY: scY,
+                startY: finalPageY,
                 head:[["Archivo","Equipo / IP","Versión Actual","Peso Actual","Versión Futura","Peso Futuro","Ubicación"]],
-                body:$scope.archivosSinCoincidencia.map(item=>[
-                    item.name,
-                    item.equipos||'-',
-                    'N/A',
-                    'N/A',
-                    item.version||'-',
-                    item.peso||'-',
-                    item.ubicacionUsuario||'N/A'
-                ]),
-                theme:tableStyles.theme,headStyles:{...tableStyles.headStyles, fillColor:[29,33,28], textColor:[255,255,255], lineColor:[20,20,20], lineWidth:0.4},
+                body:$scope.archivosSinCoincidencia.map(item=>[item.name,item.equipos||'-','N/A','N/A',item.version||'-',item.peso||'-',item.ubicacionUsuario||'N/A']),
+                theme:tableStyles.theme,
+                headStyles:{...tableStyles.headStyles, fillColor:[29,33,28], textColor:[255,255,255], lineColor:[20,20,20], lineWidth:0.4},
                 styles:{...tableStyles.bodyStyles, lineColor:[20,20,20], lineWidth:0.3},
-                columnStyles:{
-                    0:{cellWidth:50,fontStyle:'bold',textColor:colors.F2X_DARK},
-                    1:{cellWidth:30,halign:'center',fontSize:7},
-                    2:{cellWidth:22,halign:'center',textColor:[189,189,189],fontStyle:'italic'},
-                    3:{cellWidth:20,halign:'center',textColor:[189,189,189],fontStyle:'italic'},
-                    4:{cellWidth:22,halign:'center'},
-                    5:{cellWidth:20,halign:'center'},
-                    6:{cellWidth:'auto',fontSize:7,textColor:colors.GRAY_TEXT,halign:'center'}
-                },
-                alternateRowStyles:tableStyles.alternateRowStyles,
-                margin:{bottom:25},
-                didParseCell:data=>{
-                    if(data.section==='body' && data.column.index===6){
-                        const val=data.cell.raw;
-                        if(val==='N/A'){data.cell.styles.fontStyle='italic';data.cell.styles.textColor=[180,180,180];data.cell.styles.halign='center';}
+                columnStyles:{0:{cellWidth:50,fontStyle:'bold'},1:{cellWidth:28,halign:'center',fontSize:7},2:{cellWidth:24,halign:'center',fontSize:8,textColor:[189,189,189],fontStyle:'italic'},3:{cellWidth:20,halign:'center',fontSize:8,textColor:[189,189,189],fontStyle:'italic'},4:{cellWidth:38,halign:'center',fontSize:8},5:{cellWidth:20,halign:'center',fontSize:8},6:{cellWidth:'auto',fontSize:7,halign:'center'}},
+                alternateRowStyles:tableStyles.alternateRowStyles, margin:{bottom:25},
+                didParseCell: data => {
+                    if (data.section === 'body' && data.column.index === 6 && data.cell.raw === 'N/A') {
+                        data.cell.styles.textColor = [189,189,189];
+                        data.cell.styles.fontStyle = 'italic';
                     }
                 },
             });
-
-            // Bloques adicionales después de archivos sin coincidencias
-            let extraY = doc.lastAutoTable.finalY + 15;
-
-            // Helper para renderizar bloque con N/A si es vacío
-            const drawBloque=(label,texto,y)=>{
-                const w=pageWidth-(dims.margin*2),lH=9;
-                const t=texto.trim()!=='' ? texto : 'N/A';
-                const lines=doc.splitTextToSize(t,w-8);
-                const bodyH=Math.max(14,lines.length*5+8);
-                doc.setFillColor(150,150,150);doc.rect(dims.margin,y,w,lH,'F');doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,y,w,lH,'S');
-                doc.setFontSize(9);doc.setTextColor(20,20,20);doc.setFont(undefined,'bold');doc.text(label,dims.margin+6,y+6);
-                doc.setFillColor(255,255,255);doc.setDrawColor(20,20,20);doc.setLineWidth(0.4);doc.rect(dims.margin,y+lH,w,bodyH,'FD');
-                const na=t==='N/A';
-                doc.setFont(undefined,na?'italic':'normal');doc.setFontSize(9);doc.setTextColor(na?160:20,na?160:20,na?160:20);
-                const textY=na ? y+lH+bodyH/2+1 : y+lH+6;
-                doc.text(lines,na?dims.margin+w/2:dims.margin+4,textY,na?{align:'center',baseline:'middle'}:{});
-                return y+lH+bodyH+10;
-            };
-
-            extraY=drawBloque('DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',txtCambiosBD,extraY);
-            extraY=drawBloque('DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN',txtCambiosCfg,extraY);
-            drawBloque('OBSERVACIONES',txtObservaciones,extraY);
+            finalPageY = doc.lastAutoTable.finalY + 15;
         }
 
-        // SECCIÓN DE FIRMAS
+        finalPageY = drawHtmlBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',             htmlCambiosBD,  finalPageY, pageWidth, dims.margin, pageHeight);
+        finalPageY = drawHtmlBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN', htmlCambiosCfg, finalPageY, pageWidth, dims.margin, pageHeight);
+                     drawHtmlBlock(doc, 'OBSERVACIONES',                                        htmlObs,        finalPageY, pageWidth, dims.margin, pageHeight);
+
+        // FIRMAS
         doc.addPage();
         let firmasY = 20;
+        const firmasW = pageWidth - dims.margin*2;
+        const colGap=8, colW=(firmasW-colGap)/2;
+        const cols=[{label:'APROBADO POR',x:dims.margin},{label:'ENTREGADO A',x:dims.margin+colW+colGap}];
 
-        //  Columnas de APROBADO POR y ENTREGADO A
-        const firmasW = pageWidth - (dims.margin * 2);
-        const colCount = 2;
-        const colGap = 8;
-        const colW = (firmasW - colGap * (colCount - 1)) / colCount;
-        const firmaH = 40;
-
-        const cols = [
-            { label: 'APROBADO POR', x: dims.margin },
-            { label: 'ENTREGADO A',  x: dims.margin + colW + colGap }
-        ];
-
-        // Dibujar cabeceras de cada columna
-        cols.forEach(col => {
-            doc.setFillColor(230,230,230);
-            doc.rect(col.x, firmasY, colW, 8, 'F');
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-            doc.rect(col.x, firmasY, colW, 8, 'S');
+        cols.forEach(col=>{
+            doc.setFillColor(230,230,230); doc.rect(col.x,firmasY,colW,8,'F');
+            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(col.x,firmasY,colW,8,'S');
             doc.setFontSize(7); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-            doc.text(col.label, col.x + colW/2, firmasY + 5.5, {align:'center'});
+            doc.text(col.label, col.x+colW/2, firmasY+5.5, {align:'center'});
         });
         firmasY += 8;
-
-        // Dibujar cuerpo de firma con campos de nombre y firma
-        cols.forEach(col => {
-            const bodyH = firmaH + 20;
-            doc.setFillColor(255,255,255);
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-            doc.rect(col.x, firmasY, colW, bodyH, 'FD');
-
-            const innerMargin = colW * 0.08;
-            const fieldW = colW - innerMargin * 2;
-
-            // Campo NOMBRE
-            const nombreY = firmasY + 12;
+        cols.forEach(col=>{
+            const bodyH=60;
+            doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
+            doc.rect(col.x,firmasY,colW,bodyH,'FD');
+            const innerMargin=colW*0.08, fieldW=colW-innerMargin*2;
+            const nombreY=firmasY+12;
             doc.setFontSize(6.5); doc.setTextColor(100,100,100); doc.setFont(undefined,'bold');
-            doc.text('NOMBRE:', col.x + innerMargin, nombreY);
+            doc.text('NOMBRE:', col.x+innerMargin, nombreY);
             doc.setDrawColor(80,80,80); doc.setLineWidth(0.4);
-            doc.line(col.x + innerMargin, nombreY + 5, col.x + innerMargin + fieldW, nombreY + 5);
-
-            // Campo FIRMA
-            const firmaLineY = firmasY + bodyH - 14;
+            doc.line(col.x+innerMargin, nombreY+5, col.x+innerMargin+fieldW, nombreY+5);
+            const firmaLineY=firmasY+bodyH-14;
             doc.setFontSize(6.5); doc.setTextColor(100,100,100); doc.setFont(undefined,'bold');
-            doc.text('FIRMA:', col.x + innerMargin, firmaLineY - 2);
+            doc.text('FIRMA:', col.x+innerMargin, firmaLineY-2);
             doc.setDrawColor(80,80,80); doc.setLineWidth(0.4);
-            doc.line(col.x + innerMargin, firmaLineY + 4, col.x + innerMargin + fieldW, firmaLineY + 4);
+            doc.line(col.x+innerMargin, firmaLineY+4, col.x+innerMargin+fieldW, firmaLineY+4);
         });
 
-        const nombre=PdfStylesService.generateFileName($scope.directory1Name,$scope.directory2Name);
+        const nombre = PdfStylesService.generateFileName($scope.directory1Name, $scope.directory2Name);
         doc.save(nombre);
         $scope.successMessage=`✅ PDF generado: ${nombre}`;
         $timeout(()=>$scope.successMessage='',4000);

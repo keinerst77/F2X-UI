@@ -3,112 +3,99 @@ const path = require('path');
 
 class NativeTextarea {
     constructor() {
-        this.textareaWindow = null;
-        this.resolvePromise = null;
-        this._resultHandler = null;
-        this._cancelHandler = null;
+        this.win        = null;
+        this.resolve    = null;
+        this._onResult  = null;
+        this._onCancel  = null;
     }
 
-    open(title = 'Descripción Release', placeholder = '', defaultValue = '', fieldLabel = '') {
-        return new Promise((resolve) => {
-            if (this.textareaWindow && !this.textareaWindow.isDestroyed()) {
-                this.close();
+    open(title = 'Editor', placeholder = '', defaultValue = '', fieldLabel = '') {
+        return new Promise((res) => {
+
+            // Limpiar listeners anteriores antes de crear los nuevos
+            this._cleanup();
+
+            // Destruir ventana anterior si quedó abierta
+            if (this.win && !this.win.isDestroyed()) {
+                this.win.destroy();
+                this.win = null;
             }
 
-            this.resolvePromise = resolve;
+            this.resolve = res;
 
-            ipcMain.removeAllListeners('native-textarea-result');
-            ipcMain.removeAllListeners('native-textarea-cancel');
-
-            this._resultHandler = (event, value) => {
-                const fn = this.resolvePromise;
-                this.resolvePromise = null;
-                this._cleanup();
-                this._closeWindow();
-                if (fn) fn(typeof value === 'string' ? value : '');
+            this._onResult = (event, value) => {
+                this._finish(typeof value === 'string' ? value : '');
+            };
+            this._onCancel = () => {
+                this._finish(null);
             };
 
-            this._cancelHandler = () => {
-                const fn = this.resolvePromise;
-                this.resolvePromise = null;
-                this._cleanup();
-                this._closeWindow();
-                if (fn) fn(null);
-            };
-
-            ipcMain.on('native-textarea-result', this._resultHandler);
-            ipcMain.on('native-textarea-cancel',  this._cancelHandler);
+            ipcMain.on('native-textarea-result', this._onResult);
+            ipcMain.on('native-textarea-cancel',  this._onCancel);
 
             const win = new BrowserWindow({
-                width:     720,
-                height:    520,
-                minWidth:  580,
-                minHeight: 400,
+                width: 720, height: 520,
+                minWidth: 580, minHeight: 400,
                 resizable: true,
-                frame:     true,
+                frame: true,
                 backgroundColor: '#EEF2F6',
                 webPreferences: {
-                    preload:            path.join(__dirname, 'native-textarea-preload.js'),
-                    nodeIntegration:    false,
-                    contextIsolation:   true,
-                    enableRemoteModule: false
+                    preload:          path.join(__dirname, 'native-textarea-preload.js'),
+                    nodeIntegration:  false,
+                    contextIsolation: true,
                 },
                 title: fieldLabel || title
             });
 
-            this.textareaWindow = win;
+            this.win = win;
             win.setMenu(null);
+
+            const safeDefault = (typeof defaultValue === 'string')
+                ? defaultValue
+                : String(defaultValue || '');
 
             const initData = {
                 title,
-                placeholder: placeholder || 'Ingrese el contenido aquí...',
-                defaultValue: defaultValue || '',
-                fieldLabel:   fieldLabel   || title
+                placeholder:  placeholder || 'Ingrese el contenido aqui...',
+                defaultValue: safeDefault,
+                fieldLabel:   fieldLabel || title
             };
 
             win.loadFile(path.join(__dirname, 'src', 'native-editor.html'));
 
             win.webContents.once('did-finish-load', () => {
-                if (!win.isDestroyed()) {
-                    win.webContents.send('editor-init', initData);
-                }
+                if (!win.isDestroyed()) win.webContents.send('editor-init', initData);
             });
 
+            // Cerrar con X = cancelar
             win.on('closed', () => {
-                if (this.textareaWindow === win) this.textareaWindow = null;
-                this._cleanup();
-                if (this.resolvePromise) {
-                    const fn = this.resolvePromise;
-                    this.resolvePromise = null;
-                    fn(null);
-                }
+                this.win = null;
+                if (this.resolve) this._finish(null);
             });
         });
     }
 
-    _cleanup() {
-        if (this._resultHandler) {
-            ipcMain.removeListener('native-textarea-result', this._resultHandler);
-            this._resultHandler = null;
-        }
-        if (this._cancelHandler) {
-            ipcMain.removeListener('native-textarea-cancel', this._cancelHandler);
-            this._cancelHandler = null;
-        }
-    }
-
-    _closeWindow() {
-        const win = this.textareaWindow;
-        if (win && !win.isDestroyed()) {
-            this.textareaWindow = null;
-            try { win.close(); } catch(e) {}
-        }
-    }
-
-    close() {
+    _finish(value) {
+        const fn = this.resolve;
+        this.resolve = null;
         this._cleanup();
-        this._closeWindow();
-        this.resolvePromise = null;
+        if (this.win && !this.win.isDestroyed()) {
+            const w = this.win;
+            this.win = null;
+            try { w.close(); } catch(e) {}
+        }
+        if (fn) fn(value);
+    }
+
+    _cleanup() {
+        if (this._onResult) {
+            ipcMain.removeListener('native-textarea-result', this._onResult);
+            this._onResult = null;
+        }
+        if (this._onCancel) {
+            ipcMain.removeListener('native-textarea-cancel', this._onCancel);
+            this._onCancel = null;
+        }
     }
 }
 
