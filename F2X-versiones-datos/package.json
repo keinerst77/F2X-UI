@@ -12,6 +12,12 @@
   "build": {
     "appId": "com.f2x.fichа теcnica",
     "productName": "Ficha",
+    "extraFiles": [
+        {
+            "from": "F2X.VersionReader.API.exe",
+            "to": "F2X.VersionReader.API.exe"
+        }
+     ],
     "win": {
       "target": [
         "nsis",

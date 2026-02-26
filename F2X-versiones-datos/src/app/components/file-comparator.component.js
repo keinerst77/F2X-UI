@@ -67,9 +67,9 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     $scope.errorMessage = ''; $scope.successMessage = '';
     $scope.isScanning = false;
 
-    const API_URL              = 'https://localhost:7001/api/versionscanner';
-    const MULTI_EQUIPO_API_URL = 'https://localhost:7001/api/multiequiposcan';
-    const VALIDATION_API_URL   = 'https://localhost:7001/api/powershellremotetest';
+    const API_URL              = 'http://localhost:7001/api/versionscanner';
+    const MULTI_EQUIPO_API_URL = 'http://localhost:7001/api/multiequiposcan';
+    const VALIDATION_API_URL   = 'http://localhost:7001/api/powershellremotetest';
     const isElectron = window.electronAPI !== undefined;
 
     // IMAGENES
@@ -790,10 +790,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             didParseCell: data => {
                 if (data.section === 'body') {
                     const r = archivosConCambios[data.row.index];
-                    if (r && r.versionMenor && (data.column.index === 4)) {
-                        data.cell.styles.textColor = [180, 0, 0];
-                        data.cell.styles.fontStyle = 'bold';
-                    }
                 }
             }
         });
