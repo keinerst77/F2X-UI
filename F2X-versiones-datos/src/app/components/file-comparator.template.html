@@ -20,7 +20,9 @@
                     <div class="equipo-card-header">
                         <span class="equipo-card-title">🖥️ Equipo {{$index + 1}}</span>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <span class="connection-status" ng-class="{'connected': equipo.status === 'connected','disconnected': equipo.status === 'disconnected','connecting': equipo.status === 'connecting'}" ng-if="equipo.status">
+                            <span class="connection-status"
+                                  ng-class="{'connected': equipo.status === 'connected','disconnected': equipo.status === 'disconnected','connecting': equipo.status === 'connecting'}"
+                                  ng-if="equipo.status">
                                 <span ng-if="equipo.status === 'connected'">✓ Conectado</span>
                                 <span ng-if="equipo.status === 'disconnected'">✕ Desconectado</span>
                                 <span ng-if="equipo.status === 'connecting'">⏳ Conectando...</span>
@@ -29,16 +31,22 @@
                         </div>
                     </div>
                     <div class="equipo-card-body">
-                        <input type="text" class="equipo-input" ng-model="equipo.ipEquipo" placeholder="🌐 IP del equipo">
-                        <input type="text" class="equipo-input" ng-model="equipo.usuario" placeholder="👤 Usuario">
-                        <input type="password" class="equipo-input" ng-model="equipo.password" placeholder="🔒 Contraseña">
-                        <input type="text" class="equipo-input" ng-model="equipo.rutaActual" placeholder="📁 Ruta Versión Actual en este equipo" ng-class="{'auto-found': equipo.rutaActual && equipo.carpetasEncontradas}">
-                        <input type="text" class="equipo-input" ng-model="equipo.rutaFutura" placeholder="📁 Ruta Versión Futura en este equipo" ng-class="{'auto-found': equipo.rutaFutura && equipo.carpetasEncontradas}">
-                        <button class="btn-validate-connection" ng-click="validarConexion(equipo, $index)" ng-disabled="!equipo.ipEquipo || !equipo.usuario || !equipo.password" ng-class="{'btn-validated': equipo.status === 'connected'}">
+                        <input type="text"     class="equipo-input" ng-model="equipo.ipEquipo"   placeholder="🌐 IP del equipo">
+                        <input type="text"     class="equipo-input" ng-model="equipo.usuario"    placeholder="👤 Usuario">
+                        <input type="password" class="equipo-input" ng-model="equipo.password"   placeholder="🔒 Contraseña">
+                        <input type="text"     class="equipo-input" ng-model="equipo.rutaActual" placeholder="📁 Ruta Versión Actual en este equipo" ng-class="{'auto-found': equipo.rutaActual && equipo.carpetasEncontradas}">
+                        <input type="text"     class="equipo-input" ng-model="equipo.rutaFutura" placeholder="📁 Ruta Versión Futura en este equipo" ng-class="{'auto-found': equipo.rutaFutura && equipo.carpetasEncontradas}">
+                        <button class="btn-validate-connection"
+                                ng-click="validarConexion(equipo, $index)"
+                                ng-disabled="!equipo.ipEquipo || !equipo.usuario || !equipo.password"
+                                ng-class="{'btn-validated': equipo.status === 'connected'}">
                             <span ng-if="equipo.status !== 'connecting'">🔌 Validar Conexión</span>
                             <span ng-if="equipo.status === 'connecting'">⏳ Conectando...</span>
                         </button>
-                        <button class="btn-auto-search" ng-click="buscarCarpetasAutomaticamente(equipo)" ng-disabled="equipo.status !== 'connected' || !directory1Name || !directory2Name" ng-if="equipo.status === 'connected'">
+                        <button class="btn-auto-search"
+                                ng-click="buscarCarpetasAutomaticamente(equipo)"
+                                ng-disabled="equipo.status !== 'connected' || !directory1Name || !directory2Name"
+                                ng-if="equipo.status === 'connected'">
                             <span ng-if="!equipo.searchingFolders">🔍 Buscar Carpetas Automáticamente</span>
                             <span ng-if="equipo.searchingFolders">⏳ Buscando...</span>
                         </button>
@@ -94,13 +102,25 @@
         </div>
     </div>
 
-    <!-- SISTEMA + VIGENTE A PARTIR DE  -->
-    <div class="sistema-vigente-section" ng-show="showTable">
+    <!-- TÍTULO DEL DOCUMENTO -->
+    <div class="cambios-section" ng-show="showTable">
+        <div class="cambios-card" style="padding:0;">
+            <div class="cambios-title">TÍTULO DEL DOCUMENTO</div>
+            <div ng-click="abrirEditorCampo('tituloFicha')"
+                 title="Haz clic para agregar el título del documento"
+                 style="width:100%; min-height:70px; padding:14px 16px; box-sizing:border-box; cursor:pointer;">
+                <div class="cambios-placeholder" ng-if="!releaseDataRaw.tituloFicha">
+                    Haz click para agregar el título del encabezado del PDF
+                </div>
+                <div class="cambios-text" ng-if="releaseDataRaw.tituloFicha" ng-bind-html="getHtml('tituloFicha')"></div>
+            </div>
+        </div>
+    </div>
 
-        <!-- SISTEMA -->
+    <!-- SISTEMA + VIGENTE A PARTIR DE -->
+    <div class="sistema-vigente-section" ng-show="showTable">
         <div class="sistema-card">
             <div class="sistema-header">SISTEMA</div>
-            <!-- área clickeable completa, centrado vertical y horizontal -->
             <div class="sistema-body release-row--clickable"
                  ng-click="abrirEditorCampo('sistema')"
                  title="Haz clic para agregar el nombre del sistema">
@@ -108,73 +128,56 @@
                 <div class="release-text" ng-if="releaseDataRaw.sistema" ng-bind-html="getHtml('sistema')" style="width:100%; text-align:center;"></div>
             </div>
         </div>
-
-        <!-- VIGENTE A PARTIR DE -->
         <div class="vigente-card">
             <div class="vigente-header">📅 VIGENTE A PARTIR DE</div>
             <div class="vigente-body">
                 <input type="date" class="vigente-input" ng-model="vigenteDesde" />
             </div>
         </div>
-
     </div>
 
-    <!-- DESCRIPCIÓN RELEASE  -->
-    <div class="release-section" ng-show="showTable">
-        <div class="release-table-card">
-            <div class="release-table-title">DESCRIPCIÓN RELEASE</div>
-            <table class="release-table">
-                <tbody>
-
-                    <!-- FILA CARACTERÍSTICAS -->
-                    <tr class="release-row release-row--clickable"
-                        ng-click="abrirEditorCampo('caracteristicas')"
-                        title="Haz clic para agregar contenido">
-                        <td class="release-label-cell">CARACTERÍSTICAS</td>
-                        <td class="release-content-cell" ng-click="abrirEditorCampo('caracteristicas')" style="cursor:pointer;">
-                            <div style="display:block; width:100%; min-height:52px; padding:14px 16px; box-sizing:border-box;">
-                                <span class="release-placeholder" ng-if="!releaseDataRaw.caracteristicas">HAZ CLICK PARA AGREGAR CONTENIDO</span>
-                                <div class="release-text" ng-if="releaseDataRaw.caracteristicas" ng-bind-html="getHtml('caracteristicas')"></div>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- FILA EQUIPOS -->
-                    <tr class="release-row release-row--clickable"
-                        ng-click="abrirEditorCampo('equipos')"
-                        title="Haz clic para agregar contenido">
-                        <td class="release-label-cell">EQUIPOS</td>
-                        <td class="release-content-cell" ng-click="abrirEditorCampo('equipos')" style="cursor:pointer;">
-                            <div style="display:block; width:100%; min-height:52px; padding:14px 16px; box-sizing:border-box;">
-                                <span class="release-placeholder" ng-if="!releaseDataRaw.equipos">HAZ CLICK PARA AGREGAR CONTENIDO</span>
-                                <div class="release-text" ng-if="releaseDataRaw.equipos" ng-bind-html="getHtml('equipos')"></div>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- FILA FECHA DE GENERACIÓN DE FICHA -->
-                    <tr class="release-row release-row--clickable"
-                        ng-click="abrirEditorCampo('fechaFicha')"
-                        title="Haz clic para agregar contenido">
-                        <td class="release-label-cell">FECHA DE GENERACIÓN DE FICHA</td>
-                        <td class="release-content-cell" ng-click="abrirEditorCampo('fechaFicha')" style="cursor:pointer;">
-                            <div style="display:block; width:100%; min-height:52px; padding:14px 16px; box-sizing:border-box;">
-                                <span class="release-placeholder" ng-if="!releaseDataRaw.fechaFicha">HAZ CLICK PARA AGREGAR CONTENIDO</span>
-                                <div class="release-text" ng-if="releaseDataRaw.fechaFicha" ng-bind-html="getHtml('fechaFicha')"></div>
-                            </div>
-                        </td>
-                    </tr>
-
-                </tbody>
-            </table>
+    <!-- DESCRIPCIÓN RELEASE -->
+    <div class="cambios-section" ng-show="showTable">
+        <div style="background:#FFFFFF; border:1px solid #E0E0E0; border-radius:16px; box-shadow:0 4px 25px rgba(0,0,0,0.06); overflow:hidden; width:100%; box-sizing:border-box;">
+            <div style="background:#FFFDF0; color:#1a1a1a; font-family:'Segoe UI','Inter',sans-serif; font-size:12px; font-weight:700; letter-spacing:0.4px; text-transform:uppercase; padding:16px 20px 16px 24px; border-bottom:1px solid #e8e8c8; border-left:4px solid #BED62F; cursor:default; box-sizing:border-box; margin-left:-1px;">
+                DESCRIPCIÓN RELEASE
+            </div>
+            <div ng-click="abrirEditorCampo('caracteristicas')"
+                 title="Haz clic para agregar contenido"
+                 style="display:flex; align-items:stretch; border-top:1px solid #E0E0E0; min-height:70px; cursor:pointer;"
+                 onmouseover="this.style.background='#F9FBE7';this.querySelector('[data-label]').style.background='#f0f5d8';"
+                 onmouseout="this.style.background='transparent';this.querySelector('[data-label]').style.background='#F8F9FA';">
+                <div data-label="true" style="width:210px; min-width:180px; flex-shrink:0; background:#F8F9FA; border-right:1px solid #E0E0E0; border-left:3px solid #BED62F; padding:14px; font-family:'Segoe UI','Inter',sans-serif; font-size:11px; font-weight:700; color:#333333; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; text-align:center; box-sizing:border-box; transition:background 0.15s ease;">
+                    CARACTERÍSTICAS
+                </div>
+                <div style="flex:1; display:flex; align-items:center; padding:14px 20px; box-sizing:border-box; font-family:'Segoe UI','Inter',sans-serif;">
+                    <span style="color:#9E9E9E; font-style:italic; font-size:13px;" ng-if="!releaseDataRaw.caracteristicas">Haz click para agregar contenido</span>
+                    <div class="cambios-text" ng-if="releaseDataRaw.caracteristicas" ng-bind-html="getHtml('caracteristicas')"></div>
+                </div>
+            </div>
+            <div ng-click="abrirEditorCampo('equipos')"
+                 title="Haz clic para agregar contenido"
+                 style="display:flex; align-items:stretch; border-top:1px solid #E0E0E0; min-height:70px; cursor:pointer;"
+                 onmouseover="this.style.background='#F9FBE7';this.querySelector('[data-label]').style.background='#f0f5d8';"
+                 onmouseout="this.style.background='transparent';this.querySelector('[data-label]').style.background='#F8F9FA';">
+                <div data-label="true" style="width:210px; min-width:180px; flex-shrink:0; background:#F8F9FA; border-right:1px solid #E0E0E0; border-left:3px solid #BED62F; padding:14px; font-family:'Segoe UI','Inter',sans-serif; font-size:11px; font-weight:700; color:#333333; text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; justify-content:center; text-align:center; box-sizing:border-box; transition:background 0.15s ease;">
+                    EQUIPOS
+                </div>
+                <div style="flex:1; display:flex; align-items:center; padding:14px 20px; box-sizing:border-box; font-family:'Segoe UI','Inter',sans-serif;">
+                    <span style="color:#9E9E9E; font-style:italic; font-size:13px;" ng-if="!releaseDataRaw.equipos">Haz click para agregar contenido</span>
+                    <div class="cambios-text" ng-if="releaseDataRaw.equipos" ng-bind-html="getHtml('equipos')"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS -->
     <div class="cambios-section" ng-show="showTable">
-        <div class="cambios-card" ng-click="abrirEditorCampo('cambiosAplicativos')" title="Haz clic para agregar la descripción de los cambios">
+        <div class="cambios-card" style="padding:0;">
             <div class="cambios-title">DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS</div>
-            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+            <div ng-click="abrirEditorCampo('cambiosAplicativos')"
+                 title="Haz clic para agregar la descripción de los cambios"
+                 style="width:100%; min-height:70px; padding:14px 16px; box-sizing:border-box; cursor:pointer;">
                 <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosAplicativos">
                     Haz click para agregar la descripción de los cambios
                 </div>
@@ -192,88 +195,155 @@
 <div class="error-message"   ng-if="errorMessage">{{errorMessage}}</div>
 <div class="success-message" ng-if="successMessage">{{successMessage}}</div>
 
-<!-- TABLA DE RESULTADOS -->
-<div class="table-wrapper" ng-show="showTable && tableData.length > 0">
-    <div class="table-header-info">
-        <h3>Detalle del Software Versionado</h3>
-        <p>Comparación de archivos entre equipos</p>
-    </div>
-    <div class="table-container">
-        <table class="matrix-table">
-            <thead>
-                <tr>
-                    <th class="col-nombre">Archivo</th>
-                    <th class="col-equipos">Equipo / IP</th>
-                    <th class="col-version-actual">Versión Actual</th>
-                    <th class="col-peso-actual">Peso Actual</th>
-                    <th class="col-version-futura">Versión Futura</th>
-                    <th class="col-peso-futuro">Peso Futuro</th>
-                    <th class="col-ruta">Ubicación</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="row in tableData track by $index"
-                    ng-class="{'has-changes': row.changeType === 'has-changes','only-local': row.changeType === 'only-local','only-remote': row.changeType === 'only-remote','no-changes': row.changeType === 'no-changes','version-menor': row.versionMenor}">
-                    <td class="col-nombre">
-                        <div class="cell-nombre"><span class="file-icon">📄</span><span class="file-name">{{row.name}}</span></div>
-                    </td>
-                    <td class="col-equipos">
-                        <div class="equipos-container">
-                            <span ng-repeat="equipo in row.equiposArray" class="equipo-badge" ng-class="{'badge-local': equipo.startsWith('10.0.134'),'badge-remote': !equipo.startsWith('10.0.134')}">{{equipo}}</span>
-                        </div>
-                    </td>
-                    <td class="col-version-actual text-center">
-                        <span class="version-badge version-actual" ng-if="row.versionActual !== '-'">{{row.versionActual}}</span>
-                        <span class="no-data" ng-if="row.versionActual === '-'">-</span>
-                    </td>
-                    <td class="col-peso-actual text-center">
-                        <span class="peso-value" ng-if="row.pesoActual !== '-'">{{row.pesoActual}}</span>
-                        <span class="no-data" ng-if="row.pesoActual === '-'">-</span>
-                    </td>
-                    <td class="col-version-futura text-center">
-                        <span class="version-badge version-futura" ng-class="{'version-highlight': row.versionChanged}" ng-if="row.versionFutura !== '-'">{{row.versionFutura}}</span>
-                        <span class="no-data" ng-if="row.versionFutura === '-'">-</span>
-                    </td>
-                    <td class="col-peso-futuro text-center">
-                        <span class="peso-value" ng-class="{'peso-highlight': row.sizeChanged}" ng-if="row.pesoFuturo !== '-'">{{row.pesoFuturo}}</span>
-                        <span class="no-data" ng-if="row.pesoFuturo === '-'">-</span>
-                    </td>
-                    <td class="col-ruta">
-                        <div class="ruta-container"><span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span></div>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="statistics" ng-if="tableData.length > 0">
-            <div class="stat-item"><span class="stat-label">Total:</span><span class="stat-value">{{statistics.total}}</span></div>
-            <div class="stat-item"><span class="stat-label">Con Cambios:</span><span class="stat-value stat-changed">{{statistics.versionChanged}}</span></div>
-            <div class="stat-item"><span class="stat-label">Sin Cambios:</span><span class="stat-value stat-unchanged">{{statistics.noChanges}}</span></div>
+<!-- TABLA DETALLE DEL SOFTWARE VERSIONADO -->
+<div class="cambios-section" ng-show="showTable && (tableData.length > 0 || archivosSinCoincidencia.length > 0)">
+    <div class="data-table-card">
+        <div class="data-table-card-header">
+            <h3>Detalle del Software Versionado</h3>
+            <p>Comparación de archivos entre versiones</p>
+        </div>
+        <div style="width:100%; overflow-x:auto; box-sizing:border-box;">
+            <table class="matrix-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th class="col-nombre">Software</th>
+                        <th class="col-equipos">Equipo / IP</th>
+                        <th class="col-version-actual">Versión Actual</th>
+                        <th class="col-peso-actual">Peso Actual</th>
+                        <th class="col-version-futura">Versión Futura</th>
+                        <th class="col-peso-futuro">Peso Futuro</th>
+                        <th class="col-ruta">Ubicación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ARCHIVOS IGUALES EN VERSION ACTUAL -->
+                    <tr ng-repeat="row in tableData track by $index"
+                        ng-class="{'has-changes': row.changeType === 'has-changes',
+                                   'no-changes':  row.changeType === 'no-changes',
+                                   'version-menor': row.versionMenor}">
+                        <td class="col-nombre">
+                            <div class="cell-nombre">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">{{row.name}}</span>
+                            </div>
+                        </td>
+                        <td class="col-equipos">
+                            <div class="equipos-container">
+                                <span ng-repeat="equipo in row.equiposArray"
+                                      class="equipo-badge"
+                                      ng-class="{'badge-local':  equipo.startsWith('10.0.134'),
+                                                 'badge-remote': !equipo.startsWith('10.0.134')}">{{equipo}}</span>
+                            </div>
+                        </td>
+                        <td class="col-version-actual text-center">
+                            <span class="version-badge version-actual" ng-if="row.versionActual !== '-'">{{row.versionActual}}</span>
+                            <span class="no-data" ng-if="row.versionActual === '-'">-</span>
+                        </td>
+                        <td class="col-peso-actual text-center">
+                            <span class="peso-value" ng-if="row.pesoActual !== '-'">{{row.pesoActual}}</span>
+                            <span class="no-data" ng-if="row.pesoActual === '-'">-</span>
+                        </td>
+                        <td class="col-version-futura text-center">
+                            <span class="version-badge version-futura"
+                                  ng-class="{'version-highlight': row.versionChanged}"
+                                  ng-if="row.versionFutura !== '-'">{{row.versionFutura}}</span>
+                            <span class="no-data" ng-if="row.versionFutura === '-'">-</span>
+                        </td>
+                        <td class="col-peso-futuro text-center">
+                            <span class="peso-value"
+                                  ng-class="{'peso-highlight': row.sizeChanged}"
+                                  ng-if="row.pesoFuturo !== '-'">{{row.pesoFuturo}}</span>
+                            <span class="no-data" ng-if="row.pesoFuturo === '-'">-</span>
+                        </td>
+                        <td class="col-ruta">
+                            <div class="ruta-container">
+                                <span class="ruta-path" title="{{row.ruta}}">{{row.ruta}}</span>
+                            </div>
+                        </td>
+                    </tr>
+                    <!-- ARCHIVOS SIN COINCIDENCIA EN VERSION ACTUAL -->
+                    <tr ng-repeat="archivo in archivosSinCoincidencia track by $index"
+                        class="no-match-row">
+                        <td class="col-nombre">
+                            <div class="cell-nombre">
+                                <span class="file-icon">📄</span>
+                                <span class="file-name">{{archivo.name}}</span>
+                            </div>
+                        </td>
+                        <td class="col-equipos">
+                            <div class="equipos-container">
+                                <span ng-repeat="equipo in archivo.equiposArray" class="equipo-badge badge-remote">{{equipo}}</span>
+                            </div>
+                        </td>
+                        <td class="col-version-actual text-center"><span class="no-data-na">N/A</span></td>
+                        <td class="col-peso-actual   text-center"><span class="no-data-na">N/A</span></td>
+                        <td class="col-version-futura text-center">
+                            <span class="version-badge version-futura">{{archivo.version}}</span>
+                        </td>
+                        <td class="col-peso-futuro text-center">
+                            <span class="peso-value">{{archivo.peso}}</span>
+                        </td>
+                        <td class="col-ruta">
+                            <input type="text"
+                                   class="ubicacion-input"
+                                   ng-model="archivo.ubicacionUsuario"
+                                   placeholder="Ingresar ubicación..."
+                                   title="Ingrese la ubicación del archivo" />
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- ESTADISTICAS (CONTADORES)-->
+            <div class="statistics" style="margin-top:12px;">
+                <div class="stat-item">
+                    <span class="stat-label">Total</span>
+                    <span class="stat-value">{{tableData.length + archivosSinCoincidencia.length}}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Con Cambios</span>
+                    <span class="stat-value stat-changed">{{statistics.versionChanged}}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Sin Cambios</span>
+                    <span class="stat-value stat-unchanged">{{statistics.noChanges}}</span>
+                </div>
+                <div class="stat-item" ng-if="archivosSinCoincidencia.length > 0">
+                    <span class="stat-label">Archivos Nuevos</span>
+                    <span class="stat-value stat-new">{{archivosSinCoincidencia.length}}</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- EXPORTACIÓN -->
-<div class="pdf-export-section" ng-if="showTable && tableData.length > 0">
+<div class="pdf-export-section" ng-if="showTable && (tableData.length > 0 || archivosSinCoincidencia.length > 0)">
     <button ng-click="generatePDF()" class="btn btn-pdf">
         <i class="fas fa-file-pdf"></i> EXPORTAR A PDF
     </button>
 </div>
 
 <!-- EVIDENCIAS DE PRUEBAS -->
-<div class="evidencias-section" ng-if="showTable && tableData.length > 0">
-    <div class="evidencias-card">
-        <div class="evidencias-title">EVIDENCIAS DE PRUEBAS</div>
+<div class="cambios-section" ng-if="showTable && (tableData.length > 0 || archivosSinCoincidencia.length > 0)">
+    <div class="cambios-card" style="cursor:default; padding:0;">
+        <div class="cambios-title">EVIDENCIAS DE PRUEBAS</div>
         <div class="evidencias-body">
-            <button class="btn-adjuntar-evidencias" ng-click="abrirSelectorImagenes()">
-                <i class="fas fa-image"></i> ADJUNTAR EVIDENCIAS
-            </button>
-        </div>
-        <div class="evidencias-images-wrapper" ng-if="imagenesAdjuntas.length > 0">
-            <div class="evidencias-inner-header">
-                <h3>📸 Evidencias Adjuntadas ({{imagenesAdjuntas.length}})</h3>
+
+            <!-- BOTON ADJUNTAR EVIDENCIAS CON CONTADOR -->
+            <div class="evidencias-topbar">
+                <button class="btn-adjuntar-evidencias" ng-click="abrirSelectorImagenes()">
+                    📎 ADJUNTAR EVIDENCIAS
+                </button>
+                <span class="evidencias-counter" ng-if="imagenesAdjuntas.length > 0">
+                    📸 {{imagenesAdjuntas.length}} evidencia(s) adjuntada(s)
+                </span>
             </div>
-            <div class="images-grid">
+
+            <!-- IMAGENES -->
+            <div class="images-grid" ng-if="imagenesAdjuntas.length > 0">
                 <div class="image-card" ng-repeat="imagen in imagenesAdjuntas track by $index">
+                    <button class="btn-remove-image" ng-click="eliminarImagen($index)" title="Eliminar">✕</button>
                     <div class="image-preview">
                         <img ng-src="{{imagen.base64}}" alt="{{imagen.nombre}}" class="image-thumbnail">
                     </div>
@@ -287,9 +357,16 @@
                                   placeholder="Agregar descripción..."
                                   rows="2"></textarea>
                     </div>
-                    <button class="btn-remove-image" ng-click="eliminarImagen($index)">✕</button>
                 </div>
             </div>
+
+            <!-- PLACEHOLDER SI NO HAY IMAGENES -->
+            <div class="evidencias-empty" ng-if="imagenesAdjuntas.length === 0">
+                <span style="color:#9E9E9E; font-style:italic; font-size:13px;">
+                    No hay evidencias adjuntadas aún. Haz clic en el botón para agregar imágenes.
+                </span>
+            </div>
+
         </div>
     </div>
 </div>
@@ -312,71 +389,16 @@
     </div>
 </div>
 
-<!-- ARCHIVOS SIN COINCIDENCIAS -->
-<div class="table-wrapper no-match-wrapper" ng-if="archivosSinCoincidencia.length > 0">
-    <div class="table-header-info">
-        <h3>Archivos Sin Coincidencias</h3>
-        <p>Archivos que existen en Versión Futura pero no en Versión Actual</p>
-    </div>
-    <div class="table-container">
-        <table class="matrix-table no-match-table">
-            <thead>
-                <tr>
-                    <th class="col-nombre">Archivo</th>
-                    <th class="col-equipos">Equipo / IP</th>
-                    <th class="col-version-actual">Versión Actual</th>
-                    <th class="col-peso-actual">Peso Actual</th>
-                    <th class="col-version-futura">Versión Futura</th>
-                    <th class="col-peso-futuro">Peso Futuro</th>
-                    <th class="col-ruta">Ubicación</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="archivo in archivosSinCoincidencia track by $index" class="no-match-row">
-                    <td class="col-nombre">
-                        <div class="cell-nombre">
-                            <span class="file-icon">📄</span>
-                            <span class="file-name">{{archivo.name}}</span>
-                        </div>
-                    </td>
-                    <td class="col-equipos">
-                        <div class="equipos-container">
-                            <span ng-repeat="equipo in archivo.equiposArray" class="equipo-badge badge-remote">{{equipo}}</span>
-                        </div>
-                    </td>
-                    <td class="col-version-actual text-center"><span class="no-data-na">N/A</span></td>
-                    <td class="col-peso-actual text-center"><span class="no-data-na">N/A</span></td>
-                    <td class="col-version-futura text-center">
-                        <span class="version-badge version-futura">{{archivo.version}}</span>
-                    </td>
-                    <td class="col-peso-futuro text-center">
-                        <span class="peso-value">{{archivo.peso}}</span>
-                    </td>
-                    <td class="col-ruta">
-                        <input type="text"
-                               class="ubicacion-input"
-                               ng-model="archivo.ubicacionUsuario"
-                               placeholder="Ingresar ubicación..."
-                               title="Ingrese la ubicación del archivo" />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-        <div class="no-match-summary">
-            <span class="summary-label">Total de archivos sin coincidencia:</span>
-            <span class="summary-value">{{archivosSinCoincidencia.length}}</span>
-        </div>
-    </div>
-</div>
-
 <!-- BLOQUES ADICIONALES -->
 <div class="container" ng-show="showTable">
 
     <!-- DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS -->
-    <div class="cambios-section cambios-bd-section">
-        <div class="cambios-card cambios-bd-card" ng-click="abrirEditorCampo('cambiosBaseDatos')" title="Haz clic para agregar la descripción de cambios en base de datos">
-            <div class="cambios-title cambios-bd-title">DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS</div>
-            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+    <div class="cambios-section">
+        <div class="cambios-card" style="padding:0;">
+            <div class="cambios-title">DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS</div>
+            <div ng-click="abrirEditorCampo('cambiosBaseDatos')"
+                 title="Haz clic para agregar la descripción de cambios en base de datos"
+                 style="width:100%; min-height:70px; padding:14px 16px; box-sizing:border-box; cursor:pointer;">
                 <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosBaseDatos">
                     Haz click para agregar la descripción de los cambios
                 </div>
@@ -386,10 +408,12 @@
     </div>
 
     <!-- DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN -->
-    <div class="cambios-section cambios-cfg-section">
-        <div class="cambios-card cambios-cfg-card" ng-click="abrirEditorCampo('cambiosConfiguracion')" title="Haz clic para agregar la descripción de cambios en archivos de configuración">
-            <div class="cambios-title cambios-cfg-title">DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN</div>
-            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+    <div class="cambios-section">
+        <div class="cambios-card" style="padding:0;">
+            <div class="cambios-title">DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN</div>
+            <div ng-click="abrirEditorCampo('cambiosConfiguracion')"
+                 title="Haz clic para agregar la descripción de cambios en archivos de configuración"
+                 style="width:100%; min-height:70px; padding:14px 16px; box-sizing:border-box; cursor:pointer;">
                 <div class="cambios-placeholder" ng-if="!releaseDataRaw.cambiosConfiguracion">
                     Haz click para agregar la descripción de los cambios
                 </div>
@@ -399,10 +423,12 @@
     </div>
 
     <!-- OBSERVACIONES -->
-    <div class="cambios-section cambios-obs-section">
-        <div class="cambios-card cambios-obs-card" ng-click="abrirEditorCampo('observaciones')" title="Haz clic para agregar observaciones">
-            <div class="cambios-title cambios-obs-title">OBSERVACIONES</div>
-            <div style="display:block; width:100%; min-height:70px; box-sizing:border-box;">
+    <div class="cambios-section">
+        <div class="cambios-card" style="padding:0;">
+            <div class="cambios-title">OBSERVACIONES</div>
+            <div ng-click="abrirEditorCampo('observaciones')"
+                 title="Haz clic para agregar observaciones"
+                 style="width:100%; min-height:70px; padding:14px 16px; box-sizing:border-box; cursor:pointer;">
                 <div class="cambios-placeholder" ng-if="!releaseDataRaw.observaciones">
                     Haz click para agregar la descripción de los cambios
                 </div>
@@ -427,7 +453,7 @@
         </div>
     </div>
     <div class="footer-logo">
-        <img src="./assets/images/f2x-logo.png" alt="F2X Logo" class="footer-f2x-logo">
+        <img src="./assets/images/f2x-logo.jpeg" alt="F2X Logo" class="footer-f2x-logo">
     </div>
     <p class="copyright">© 2026 Todos los derechos reservados.</p>
 </div>

@@ -27,11 +27,11 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     $scope.tableData = []; $scope.archivosSinCoincidencia = [];
 
     $scope.releaseData = {
-        sistema: '', caracteristicas: '', equipos: '', fechaFicha: '',
+        tituloFicha: '', sistema: '', caracteristicas: '', equipos: '', fechaFicha: '',
         cambiosAplicativos: '', cambiosBaseDatos: '', cambiosConfiguracion: '', observaciones: ''
     };
     $scope.releaseDataRaw = {
-        sistema: '', caracteristicas: '', equipos: '', fechaFicha: '',
+        tituloFicha: '', sistema: '', caracteristicas: '', equipos: '', fechaFicha: '',
         cambiosAplicativos: '', cambiosBaseDatos: '', cambiosConfiguracion: '', observaciones: ''
     };
 
@@ -40,6 +40,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     };
 
     const releaseLabels = {
+        tituloFicha:          'TÍTULO DEL DOCUMENTO',
         sistema:              'SISTEMA',
         caracteristicas:      'CARACTERÍSTICAS',
         equipos:              'EQUIPOS',
@@ -72,7 +73,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     const VALIDATION_API_URL   = 'http://localhost:7001/api/powershellremotetest';
     const isElectron = window.electronAPI !== undefined;
 
-    // IMAGENES
+    // IMÁGENES
     $scope.abrirSelectorImagenes = function() {
         const input = document.createElement('input');
         input.type = 'file'; input.accept = 'image/*'; input.multiple = true;
@@ -193,8 +194,8 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         $scope.directory1=$scope.directory2=$scope.directory1Name=$scope.directory2Name='';
         $scope.file1Data=$scope.file2Data=null; $scope.file1Count=$scope.file2Count=0;
         $scope.showTable=false; $scope.tableData=[]; $scope.archivosSinCoincidencia=[];
-        $scope.releaseData = { sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
-        $scope.releaseDataRaw = { sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
+        $scope.releaseData = { tituloFicha:'', sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
+        $scope.releaseDataRaw = { tituloFicha:'', sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
         const h=new Date(); h.setHours(0,0,0,0); $scope.vigenteDesde=h;
         $scope.imagenesAdjuntas=[];
         $scope.statistics={total:0,versionChanged:0,sizeChanged:0,noChanges:0};
@@ -324,7 +325,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         }).catch(()=>{ $scope.$apply(()=>$scope.errorMessage='❌ Error al abrir el editor'); });
     };
 
-
     // MOTOR DE RENDERIZADO HTML
     function _hexToRgb(hex) {
         if (!hex) return null;
@@ -374,56 +374,44 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         function pushLine(align) { lines.push({ align: align || currentAlign, segments: currentSegments }); currentSegments = []; }
         const BLOCK_TAGS = ['P','DIV','H1','H2','H3','H4','H5','H6','BLOCKQUOTE','LI','TR'];
         function walkNode(node, ctx) {
-    if (node.nodeType === Node.TEXT_NODE) {
-        const txt = node.textContent;
-        if (txt) currentSegments.push({ ...ctx, text: txt });
-        return;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) return;
-    const tag = node.tagName.toUpperCase();
-    const newCtx = { ...ctx };
-
-
-    // Etiquetas semánticas
-    if (tag === 'B' || tag === 'STRONG') newCtx.bold = true;
-    if (tag === 'I' || tag === 'EM')     newCtx.italic = true;
-    if (tag === 'U' || tag === 'INS')    newCtx.underline = true;
-    if (tag === 'S' || tag === 'STRIKE' || tag === 'DEL') newCtx.strikethrough = true;
-
-    // Estilos inline
-    if (node.style) {
-        const fw = node.style.fontWeight;
-        if (fw === 'bold' || fw === 'bolder' || (+fw >= 600)) newCtx.bold = true;
-
-        const fi = node.style.fontStyle;
-        if (fi === 'italic' || fi === 'oblique') newCtx.italic = true;
-
-        const td  = node.style.textDecoration || '';
-        const tdl = node.style.textDecorationLine || '';
-        if (td.includes('underline') || tdl.includes('underline')) newCtx.underline = true;
-        if (td.includes('line-through') || tdl.includes('line-through')) newCtx.strikethrough = true;
-    }
-
-    const col = _extractColor(node);     if (col) newCtx.color     = col;
-    const hl  = _extractHighlight(node); if (hl)  newCtx.highlight = hl;
-    const fs  = _extractFontSize(node);  if (fs)  newCtx.fontSize  = fs;
-
-    const align   = _getAlign(node);
-    const isBlock = BLOCK_TAGS.includes(tag);
-    const isBr    = tag === 'BR';
-    const isLi    = tag === 'LI';
-
-    if (isBr) { pushLine(currentAlign); return; }
-    if (isBlock) {
-        if (currentSegments.length > 0) pushLine(currentAlign);
-        if (align) currentAlign = align;
-    }
-    if (isLi) currentSegments.push({ ...newCtx, text: '• ' });
-
-    node.childNodes.forEach(child => walkNode(child, newCtx));
-
-    if (isBlock) { pushLine(align || currentAlign); currentAlign = 'left'; }
-}
+            if (node.nodeType === Node.TEXT_NODE) {
+                const txt = node.textContent;
+                if (txt) currentSegments.push({ ...ctx, text: txt });
+                return;
+            }
+            if (node.nodeType !== Node.ELEMENT_NODE) return;
+            const tag = node.tagName.toUpperCase();
+            const newCtx = { ...ctx };
+            if (tag === 'B' || tag === 'STRONG') newCtx.bold = true;
+            if (tag === 'I' || tag === 'EM')     newCtx.italic = true;
+            if (tag === 'U' || tag === 'INS')    newCtx.underline = true;
+            if (tag === 'S' || tag === 'STRIKE' || tag === 'DEL') newCtx.strikethrough = true;
+            if (node.style) {
+                const fw = node.style.fontWeight;
+                if (fw === 'bold' || fw === 'bolder' || (+fw >= 600)) newCtx.bold = true;
+                const fi = node.style.fontStyle;
+                if (fi === 'italic' || fi === 'oblique') newCtx.italic = true;
+                const td  = node.style.textDecoration || '';
+                const tdl = node.style.textDecorationLine || '';
+                if (td.includes('underline') || tdl.includes('underline')) newCtx.underline = true;
+                if (td.includes('line-through') || tdl.includes('line-through')) newCtx.strikethrough = true;
+            }
+            const col = _extractColor(node);     if (col) newCtx.color     = col;
+            const hl  = _extractHighlight(node); if (hl)  newCtx.highlight = hl;
+            const fs  = _extractFontSize(node);  if (fs)  newCtx.fontSize  = fs;
+            const align   = _getAlign(node);
+            const isBlock = BLOCK_TAGS.includes(tag);
+            const isBr    = tag === 'BR';
+            const isLi    = tag === 'LI';
+            if (isBr) { pushLine(currentAlign); return; }
+            if (isBlock) {
+                if (currentSegments.length > 0) pushLine(currentAlign);
+                if (align) currentAlign = align;
+            }
+            if (isLi) currentSegments.push({ ...newCtx, text: '• ' });
+            node.childNodes.forEach(child => walkNode(child, newCtx));
+            if (isBlock) { pushLine(align || currentAlign); currentAlign = 'left'; }
+        }
         const defaultCtx = { bold: false, italic: false, underline: false, color: null, highlight: null, fontSize: 11 };
         container.childNodes.forEach(child => walkNode(child, defaultCtx));
         if (currentSegments.length > 0) pushLine(currentAlign);
@@ -502,28 +490,24 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                     }
                     if (curX < rightEdge && tok.text.trim() !== '') doc.text(tok.text, curX, curY);
                     if (tok.seg.underline && curX < rightEdge) {
-                    const uc = tok.seg.color || [20, 20, 20];
-                    doc.setDrawColor(uc[0], uc[1], uc[2]); doc.setLineWidth(0.2);
-                    doc.line(curX, curY + 0.6, Math.min(curX + tokW, rightEdge), curY + 0.6);
+                        const uc = tok.seg.color || [20, 20, 20];
+                        doc.setDrawColor(uc[0], uc[1], uc[2]); doc.setLineWidth(0.2);
+                        doc.line(curX, curY + 0.6, Math.min(curX + tokW, rightEdge), curY + 0.6);
                     }
-
-
-                    // TACHADO
                     if (tok.seg.strikethrough && curX < rightEdge) {
                         const sc = tok.seg.color || [20, 20, 20];
                         doc.setDrawColor(sc[0], sc[1], sc[2]); doc.setLineWidth(0.2);
                         doc.line(curX, curY - fsMm * 0.3, Math.min(curX + tokW, rightEdge), curY - fsMm * 0.3);
                     }
-                        curX += tokW;
-                        if (curX >= rightEdge) break;
-                    }
+                    curX += tokW;
+                    if (curX >= rightEdge) break;
+                }
                 curY += lineH;
             }
         }
         return curY;
     }
 
-    // NORMALIZAR TEXTO PLANO
     function normalizeToHtml(input) {
         if (!input) return '';
         if (/<[a-z][\s\S]*>/i.test(input)) return input;
@@ -534,283 +518,302 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             .replace(/\n/g, '<br>');
     }
 
-    // label header + body con HTML/texto
-    function drawCompactBlock(doc, label, rawContent, startY, pageW, margin, pageH) {
-        // Normalizar siempre el contenido antes de procesar
-        const html   = normalizeToHtml(rawContent);
-        const blockW = pageW - margin * 2;
-        const labelH  = 7;
-        const padX    = 4;
-        const padTop  = 9;
-        const padBot  = 6;
-        const minBodyH = 14;
+    // drawDescripcionReleaseBlock
+    function drawDescripcionReleaseBlock(doc, htmlCaract, htmlEquipos, startY, pageW, margin, pageH) {
+        const blockW    = pageW - margin * 2;
+        const padX      = 5;
+        const padTop    = 11;
+        const padBot    = 6;
+        const minBodyH  = 24;
         const BOT_LIMIT = 20;
-        const innerX  = margin + padX;
-        const innerW  = blockW - padX * 2;
-        const GAP     = 3;
+        const titleH    = 7;
+        const GAP       = 6;
+        const labelColW = 38;
+        const {jsPDF: jsPDFClass} = window.jspdf;
+
+        function measureRow(html) {
+            if (!html || html.replace(/<[^>]+>/g, '').trim() === '') return minBodyH;
+            const innerW = blockW - labelColW - padX * 2;
+            const temp   = new jsPDFClass('l', 'mm', 'a4');
+            const endY   = drawHtmlInPdf(temp, normalizeToHtml(html), margin + labelColW + padX, 30, innerW, 9999, 0, margin + labelColW + padX);
+            return Math.max(minBodyH, (endY - 30) + padTop + padBot);
+        }
+
+        const rowHCaract = measureRow(htmlCaract);
+        const rowHEquip  = measureRow(htmlEquipos);
+        const totalBodyH = rowHCaract + rowHEquip;
+
+        if (startY + titleH + totalBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 15; }
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(30, 30, 30);
+        doc.text('DESCRIPCIÓN RELEASE', margin, startY + titleH - 1);
+
+        const bodyY = startY + titleH + 5;
+
+        doc.setFillColor(245, 245, 245);
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(margin, bodyY, blockW, totalBodyH, 2, 2, 'FD');
+
+        const sepY = bodyY + rowHCaract;
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.2);
+        doc.line(margin, sepY, margin + blockW, sepY);
+
+        const sepX = margin + labelColW;
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.2);
+        doc.line(sepX, bodyY, sepX, bodyY + totalBodyH);
+
+        function drawRow(label, html, rowY, rowH) {
+            const isEmptyContent = !html || html.replace(/<[^>]+>/g, '').trim() === '';
+            const innerW = blockW - labelColW - padX * 2;
+            const contentX = sepX + padX;
+
+            doc.setFillColor(235, 235, 235);
+            doc.setDrawColor(220, 220, 220);
+            doc.setLineWidth(0);
+            doc.rect(margin, rowY, labelColW, rowH, 'F');
+
+            doc.setFontSize(7.5);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(30, 30, 30);
+            doc.text(label, margin + labelColW / 2, rowY + rowH / 2, { align: 'center', baseline: 'middle' });
+
+            if (isEmptyContent) {
+                doc.setFontSize(8);
+                doc.setFont(undefined, 'italic');
+                doc.setTextColor(155, 155, 155);
+                doc.text('N/A', contentX, rowY + rowH / 2, { baseline: 'middle' });
+            } else {
+                drawHtmlInPdf(doc, normalizeToHtml(html), contentX, rowY + padTop, innerW, pageH, BOT_LIMIT, contentX);
+            }
+        }
+
+        drawRow('CARACTERÍSTICAS', htmlCaract, bodyY,              rowHCaract);
+        drawRow('EQUIPOS',         htmlEquipos, bodyY + rowHCaract, rowHEquip);
+
+        return bodyY + totalBodyH + GAP;
+    }
+
+    // drawCompactBlock
+    function drawCompactBlock(doc, label, rawContent, startY, pageW, margin, pageH) {
+        const html      = normalizeToHtml(rawContent);
+        const blockW    = pageW - margin * 2;
+        const padX      = 5;
+        const padTop    = 11;
+        const padBot    = 6;
+        const minBodyH  = 24;
+        const BOT_LIMIT = 20;
+        const titleH    = 7;
+        const GAP       = 6;
+        const innerX    = margin + padX;
+        const innerW    = blockW - padX * 2;
 
         const plainText = html.replace(/<[^>]+>/g, '').trim();
         const isEmpty   = !plainText;
 
-        if (isEmpty) {
-            if (startY + labelH + minBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 15; }
-            doc.setFillColor(191, 191, 191);
-            doc.rect(margin, startY, blockW, labelH, 'F');
-            doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
-            doc.rect(margin, startY, blockW, labelH, 'S');
-            doc.setFontSize(8); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
-            doc.text(label, margin + blockW / 2, startY + labelH / 2 + 1, { align: 'center', baseline: 'middle' });
-            const bodyY = startY + labelH;
-            doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
-            doc.rect(margin, bodyY, blockW, minBodyH, 'FD');
-            doc.setFontSize(8); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
-            doc.text('N/A', margin + blockW / 2, bodyY + minBodyH / 2 + 1, { align: 'center', baseline: 'middle' });
-            return bodyY + minBodyH + GAP;
+        let realBodyH = minBodyH;
+        if (!isEmpty) {
+            const {jsPDF: jsPDFClass} = window.jspdf;
+            const tempDoc = new jsPDFClass('l', 'mm', 'a4');
+            const dryEndY = drawHtmlInPdf(tempDoc, html, innerX, 30, innerW, 9999, 0, innerX);
+            realBodyH = Math.max(minBodyH, (dryEndY - 30) + padTop + padBot);
         }
 
-        const {jsPDF: jsPDFClass} = window.jspdf;
-        const tempDoc  = new jsPDFClass('l', 'mm', 'a4');
-        const dryStart = 30;
-        const dryEndY  = drawHtmlInPdf(tempDoc, html, innerX, dryStart, innerW, 9999, 0, innerX);
-        const measuredH = dryEndY - dryStart;
-        const realBodyH = Math.max(minBodyH, measuredH + padTop + padBot);
+        if (startY + titleH + realBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 15; }
 
-        if (startY + labelH + realBodyH > pageH - BOT_LIMIT) { doc.addPage(); startY = 15; }
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(30, 30, 30);
+        doc.text(label, margin, startY + titleH - 1);
 
-        // Header gris
-        doc.setFillColor(191, 191, 191);
-        doc.rect(margin, startY, blockW, labelH, 'F');
-        doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
-        doc.rect(margin, startY, blockW, labelH, 'S');
-        doc.setFontSize(8); doc.setTextColor(20, 20, 20); doc.setFont(undefined, 'bold');
-        doc.text(label, margin + blockW / 2, startY + labelH / 2 + 1, { align: 'center', baseline: 'middle' });
+        const bodyY = startY + titleH + 5;
+        doc.setFillColor(245, 245, 245);
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(margin, bodyY, blockW, realBodyH, 2, 2, 'FD');
 
-        // Body
-        const bodyY = startY + labelH;
-        doc.setFillColor(255, 255, 255); doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
-        doc.rect(margin, bodyY, blockW, realBodyH, 'FD');
-
-        // Renderizar contenido HTML real
-        drawHtmlInPdf(doc, html, innerX, bodyY + padTop, innerW, pageH, BOT_LIMIT, innerX);
+        if (isEmpty) {
+            doc.setFontSize(8);
+            doc.setFont(undefined, 'italic');
+            doc.setTextColor(155, 155, 155);
+            doc.text('N/A', innerX, bodyY + realBodyH / 2, { baseline: 'middle' });
+        } else {
+            drawHtmlInPdf(doc, html, innerX, bodyY + padTop, innerW, pageH, BOT_LIMIT, innerX);
+        }
 
         return bodyY + realBodyH + GAP;
     }
 
+    function loadImageAsBase64(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width  = img.naturalWidth;
+                canvas.height = img.naturalHeight;
+                canvas.getContext('2d').drawImage(img, 0, 0);
+                resolve(canvas.toDataURL('image/png'));
+            };
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
 
     // GENERAR PDF
-    $scope.generatePDF = function() {
+    $scope.generatePDF = async function() {
+
         if(!$scope.tableData?.length){$scope.errorMessage='❌ No hay datos para exportar';return;}
         const archivosConCambios=$scope.tableData.filter(item=>(!item.existeEnActual||!item.existeEnFutura||item.versionChanged||item.sizeChanged));
         if(!archivosConCambios.length){$scope.errorMessage='❌ No hay archivos con cambios';return;}
 
         const {jsPDF} = window.jspdf;
         const doc     = new jsPDF('l', 'mm', 'a4');
+        let logoBase64 = null;
+        try {
+            logoBase64 = await loadImageAsBase64('./assets/images/f2x-logo.jpeg');
+        } catch(e) { console.warn('No se pudo cargar el logo:', e); }
         const pageW   = doc.internal.pageSize.getWidth();
         const pageH   = doc.internal.pageSize.getHeight();
-        const M       = 12;  // margin compacto
+        const M       = 12;
         const tableStyles  = PdfStylesService.getTableStyles();
         const footerStyles = PdfStylesService.getFooterStyles();
 
-        // ── Datos release ──
-        const htmlSistema    = $scope.releaseDataRaw.sistema             || '';
-        const htmlCaract     = $scope.releaseDataRaw.caracteristicas     || '';
-        const htmlEquipos    = $scope.releaseDataRaw.equipos             || '';
-        const htmlFecha      = $scope.releaseDataRaw.fechaFicha          || '';
-        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos  || '';
-        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos    || '';
-        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion|| '';
-        const htmlObs        = $scope.releaseDataRaw.observaciones       || '';
+        
+        // DATOS RELEASE
+        const htmlTitulo     = $scope.releaseDataRaw.tituloFicha          || '';
+        const htmlSistema    = $scope.releaseDataRaw.sistema              || '';
+        const htmlCaract     = $scope.releaseDataRaw.caracteristicas      || '';
+        const htmlEquipos    = $scope.releaseDataRaw.equipos              || '';
+        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos   || '';
+        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos     || '';
+        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion || '';
+        const htmlObs        = $scope.releaseDataRaw.observaciones        || '';
         const fechaFmt       = ($scope.vigenteDesde instanceof Date && !isNaN($scope.vigenteDesde.getTime()))
-        ? $scope.formatearVigente($scope.vigenteDesde) : '';
+            ? $scope.formatearVigente($scope.vigenteDesde) : '';
 
+        const tituloFooter = htmlTitulo.replace(/<[^>]+>/g, '').trim() || 'FICHA TÉCNICA DE ACTUALIZACIÓN';
 
-        // FICHA COMPACTA
-        // HEADER
-        doc.setFillColor(29, 33, 28); doc.rect(0, 0, pageW, 36, 'F');
-        doc.setFillColor(221, 244, 52); doc.rect(0, 36, pageW, 2, 'F');
-
-        doc.setFontSize(24); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold'); doc.text('F2X', 16, 17);
-        doc.setFontSize(8);  doc.setTextColor(221,244,52);  doc.setFont(undefined,'normal'); doc.text('Flytech Simplexity', 16, 22);
-
-        doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-        doc.text('F2X S.A.S', pageW/2, 14, {align:'center'});
-        doc.setFontSize(10); doc.setFont(undefined,'bold');
-        doc.text('FICHA TÉCNICA DE ACTUALIZACIÓN', pageW/2, 23, {align:'center'});
-
-        let Y = 42;
-        const LH  = 7;  
-        const GAP = 3;  
         const fullW = pageW - M * 2;
+        const LH    = 7;
+        const GAP   = 3;
 
-        // SISTEMA + VIGENTE A PARTIR DE
-        const vigenteW = 55;
-        const sistemaW = fullW - vigenteW - 2;
+        // HEADER
+        const headerH = 44;
+        doc.setFillColor(70, 70, 70);
+        doc.rect(0, 0, pageW, headerH, 'F');
+        doc.setFillColor(221, 244, 52);
+        doc.rect(0, headerH, pageW, 2, 'F');
 
-        // Header SISTEMA
-        doc.setFillColor(191,191,191); doc.rect(M, Y, sistemaW, LH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, sistemaW, LH, 'S');
-        doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('SISTEMA', M + sistemaW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
+        const logoW = 30, logoH = 22;
+        const logoX = M,  logoY = (headerH - logoH) / 2;
+        try { doc.addImage(logoBase64, 'JPEG', logoX, logoY, logoW, logoH); } catch(e) {}
 
-        // Header VIGENTE
-        const vX = M + sistemaW + 2;
-        doc.setFillColor(191,191,191); doc.rect(vX, Y, vigenteW, LH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(vX, Y, vigenteW, LH, 'S');
-        doc.setFontSize(7); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('VIGENTE A PARTIR DE', vX + vigenteW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
+        const tituloTexto = tituloFooter;
+        doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
+        doc.text(tituloTexto, pageW / 2, headerH / 2, { align: 'center', baseline: 'middle' });
 
-        Y += LH;
+        const _hoy = new Date();
+        const _fechaGen = `${String(_hoy.getDate()).padStart(2,'0')}/${String(_hoy.getMonth()+1).padStart(2,'0')}/${_hoy.getFullYear()}`;
+        doc.setFontSize(8); doc.setTextColor(200,200,200); doc.setFont(undefined,'normal');
+        doc.text(`Fecha de generación: ${_fechaGen}`, pageW - M, headerH / 2 - 2, { align: 'right' });
+        doc.text(`Vigente a partir de: ${fechaFmt || 'N/A'}`, pageW - M, headerH / 2 + 5, { align: 'right' });
 
-        // Body SISTEMA
-        const sistemaBodyH = 12;
-        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-        doc.rect(M, Y, sistemaW, sistemaBodyH, 'FD');
-        const sText = htmlSistema.replace(/<[^>]+>/g,'').trim();
-        if (sText) {
-            doc.setFontSize(10); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
-            doc.text(sText, M + sistemaW/2, Y + sistemaBodyH/2, {align:'center', baseline:'middle'});
-        } else {
-            doc.setFontSize(8); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
-            doc.text('N/A', M + sistemaW/2, Y + sistemaBodyH/2, {align:'center', baseline:'middle'});
-        }
+        let Y = headerH + 6;
 
-        // Body VIGENTE
-        doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-        doc.rect(vX, Y, vigenteW, sistemaBodyH, 'FD');
-        doc.setFontSize(10); doc.setFont(undefined,'bold'); doc.setTextColor(20,20,20);
-        doc.text(fechaFmt || 'N/A', vX + vigenteW/2, Y + sistemaBodyH/2, {align:'center', baseline:'middle'});
-
-        Y += sistemaBodyH + GAP;
-
-
-
-        // DESCRIPCIÓN RELEASE
-        // Header principal
-        doc.setFillColor(191,191,191); doc.rect(M, Y, fullW, LH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, fullW, LH, 'S');
-        doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('DESCRIPCIÓN RELEASE', M + fullW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
-        Y += LH;
-
-        const labelW  = 55;
-        const contentW = fullW - labelW;
-        const releaseRows = [
-            { label: 'CARACTERÍSTICAS',              html: htmlCaract  },
-            { label: 'EQUIPOS',                      html: htmlEquipos },
-            { label: 'FECHA DE GENERACIÓN DE FICHA', html: htmlFecha || fechaFmt }
-        ];
-
-        releaseRows.forEach(row => {
-            const html    = normalizeToHtml(row.html);
-            const text    = html.replace(/<[^>]+>/g, '').trim();
-            const isEmpty = !text;
-
-            const padX   = 4;
-            const padTop = 5;
-            const padBot = 4;
-            const minH   = 14;
-            const innerX = M + labelW + padX;
-            const innerW = contentW - padX * 2;
-
-            let rowH = minH;
-            if (!isEmpty) {
-                const {jsPDF: jsPDFClass} = window.jspdf;
-                const tmpDoc  = new jsPDFClass('l', 'mm', 'a4');
-                const dryY    = drawHtmlInPdf(tmpDoc, html, innerX, 30, innerW, 9999, 0, innerX);
-                const measH   = dryY - 30;
-                rowH = Math.max(minH, measH + padTop + padBot);
-            }
-
-            // Fondos
-            doc.setFillColor(208, 216, 220); doc.rect(M,          Y, labelW,   rowH, 'F');
-            doc.setFillColor(255, 255, 255); doc.rect(M + labelW, Y, contentW, rowH, 'F');
-
-            // Bordes
-            doc.setDrawColor(20, 20, 20); doc.setLineWidth(0.3);
-            doc.rect(M, Y, fullW, rowH, 'S');
-            doc.line(M + labelW, Y, M + labelW, Y + rowH);
-
-            // Label
-            doc.setFontSize(7.5); doc.setTextColor(40, 40, 40); doc.setFont(undefined, 'bold');
-            doc.text(row.label, M + labelW / 2, Y + rowH / 2, { align: 'center', baseline: 'middle' });
-
-            // Contenido con formato HTML
-            if (isEmpty) {
-                doc.setFontSize(8); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
-                doc.text('N/A', M + labelW + contentW / 2, Y + rowH / 2, { align: 'center', baseline: 'middle' });
-            } else {
-                const {jsPDF: jsPDFClass2} = window.jspdf;
-                const tmpDoc2  = new jsPDFClass2('l', 'mm', 'a4');
-                const dryY2    = drawHtmlInPdf(tmpDoc2, html, innerX, 30, innerW, 9999, 0, innerX);
-                const contentH = dryY2 - 30;
-                const DEFAULT_FS_MM = 9 * 0.352778;
-                const centeredY = Y + (rowH / 2) - (contentH / 2) + DEFAULT_FS_MM * 1.3;
-                drawHtmlInPdf(doc, html, innerX, centeredY, innerW, pageH, 20, innerX);
-            }
-
-            Y += rowH;
-        });
-
-        Y += GAP;
-
-        // DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS
+        // BLOQUES DE LA PRIMERA PÁGINA
+        Y = drawCompactBlock(doc, 'SISTEMA', htmlSistema, Y, pageW, M, pageH);
+        Y = drawDescripcionReleaseBlock(doc, htmlCaract, htmlEquipos, Y, pageW, M, pageH);
         Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS', htmlCambios, Y, pageW, M, pageH);
 
 
-        // DETALLE DE ARCHIVOS
+        // TABLA ARCHIVOS CON CAMBIOS Y SIN CAMBIOS
         doc.addPage(); Y = 15;
+        doc.setFontSize(14); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
+        doc.text('Detalle del Software Versionado', M, Y + 8);
+        Y += 14;
 
-        doc.setFillColor(191,191,191); doc.rect(M, Y, fullW, LH, 'F');
-        doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, fullW, LH, 'S');
-        doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-        doc.text('DETALLE DE ARCHIVOS CON CAMBIOS', M + 4, Y + LH/2 + 1, {baseline:'middle'});
-        Y += LH + 2;
+        const filasCombinadas = [
+            ...archivosConCambios.map(item => ({
+                nombre:          item.name,
+                equipos:         item.equipos || '-',
+                versionActual:   item.versionActual || '-',
+                pesoActual:      item.pesoActual || '-',
+                versionFutura:   item.versionFutura || '-',
+                pesoFuturo:      item.pesoFuturo || '-',
+                ubicacion:       item.ruta || '',
+                sinCoincidencia: false
+            })),
+            ...$scope.archivosSinCoincidencia.map(item => ({
+                nombre:          item.name,
+                equipos:         item.equipos || '-',
+                versionActual:   'N/A',
+                pesoActual:      'N/A',
+                versionFutura:   item.version || '-',
+                pesoFuturo:      item.peso || '-',
+                ubicacion:       item.ubicacionUsuario || 'N/A',
+                sinCoincidencia: true
+            }))
+        ];
 
         doc.autoTable({
             startY: Y,
-            head: [['Archivo','Equipo / IP','Versión Actual','Peso Actual','Versión Futura','Peso Futuro','Ubicación']],
-            body: archivosConCambios.map(item => [
-                item.name, item.equipos||'-', item.versionActual||'-', item.pesoActual||'-',
-                item.versionFutura||'-', item.pesoFuturo||'-', item.ruta||''
+            head: [['Software','Equipo / IP','Versión Actual','Peso Actual','Versión Futura','Peso Futuro','Ubicación']],
+            body: filasCombinadas.map(f => [
+                f.nombre, f.equipos, f.versionActual, f.pesoActual,
+                f.versionFutura, f.pesoFuturo, f.ubicacion
             ]),
             theme: 'grid',
+            showHead: 'firstPage',
+            rowPageBreak: 'avoid',
             headStyles: { fillColor:[29,33,28], textColor:[255,255,255], fontSize:8, fontStyle:'bold', halign:'center', valign:'middle', cellPadding:3 },
             styles: { fontSize:7, cellPadding:2, textColor:[20,20,20], lineColor:[80,80,80], lineWidth:0.2 },
             columnStyles: {
-                0:{cellWidth:45, fontStyle:'bold'},
-                1:{cellWidth:26, halign:'center'},
-                2:{cellWidth:26, halign:'center'},
-                3:{cellWidth:18, halign:'center'},
-                4:{cellWidth:26, halign:'center'},
-                5:{cellWidth:18, halign:'center'},
-                6:{cellWidth:'auto', fontSize:6.5}
+                0:{cellWidth:45,fontStyle:'bold'}, 1:{cellWidth:26,halign:'center'},
+                2:{cellWidth:26,halign:'center'},  3:{cellWidth:18,halign:'center'},
+                4:{cellWidth:26,halign:'center'},  5:{cellWidth:18,halign:'center'},
+                6:{cellWidth:'auto',fontSize:6.5}
             },
             alternateRowStyles: { fillColor:[248,248,248] },
             margin: { left:M, right:M, bottom:20 },
-            didParseCell: data => {
-                if (data.section === 'body') {
-                    const r = archivosConCambios[data.row.index];
+            didParseCell: function(data) {
+                if (data.section !== 'body') return;
+                const fila = filasCombinadas[data.row.index];
+                if (fila && fila.sinCoincidencia) {
+                    data.cell.styles.fillColor = [255, 252, 235];
+                    if (data.column.index === 2 || data.column.index === 3) {
+                        data.cell.styles.textColor = [180, 180, 180];
+                        data.cell.styles.fontStyle = 'italic';
+                        data.cell.styles.halign    = 'center';
+                    }
+                    if (data.column.index === 6) {
+                        data.cell.styles.halign    = 'center';
+                        data.cell.styles.textColor = [180, 180, 180];
+                        data.cell.styles.fontStyle = 'italic';
+                    }
                 }
             }
         });
 
         Y = doc.lastAutoTable.finalY + 3;
-
-        // Resumen compacto
         doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
         doc.line(M, Y, pageW-M, Y); Y += 3;
         doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
         doc.text(
-            `Total comparados: ${$scope.tableData.length} | Con cambios: ${archivosConCambios.length} | Versión: ${$scope.statistics.versionChanged} | Tamaño: ${$scope.statistics.sizeChanged} | Sin cambios: ${$scope.statistics.noChanges}`,
+            `Total software con Cambios: ${archivosConCambios.length} | Total software actualizado: ${$scope.statistics.noChanges} | Total software nuevo: ${$scope.archivosSinCoincidencia.length}`,
             M, Y + 3
         );
 
+        Y += 8;
 
-        // EVIDENCIAS + SIN COINCIDENCIAS + CAMBIOS BD/ CAMBIOS DE ARCHIVOS DE CONFIG/ OBSERVACIONES + FIRMAS
-        doc.addPage(); Y = 15;
-
-        // EVIDENCIAS 
+        // EVIDENCIAS
         if ($scope.imagenesAdjuntas.length > 0) {
+            const firstImgH = 75, firstHdrH = 8;
+            if (Y + 9 + 12 + firstHdrH + firstImgH + 5 > pageH - 20) { doc.addPage(); Y = 15; }
             doc.setFillColor(29,33,28); doc.rect(M, Y, fullW, 9, 'F');
             doc.setFontSize(9); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
             doc.text('EVIDENCIAS DE PRUEBAS', M + fullW/2, Y + 5.5, {align:'center', baseline:'middle'});
@@ -818,28 +821,18 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
 
             $scope.imagenesAdjuntas.forEach((img, idx) => {
                 try {
-                    const imgW    = 110;
-                    const descX   = M + imgW + 4;
-                    const descW   = fullW - imgW - 4;
-                    const headerH = 8;
-                    const imgH    = 75;
-
-                    if (Y + headerH + imgH + 5 > pageH - 20) { doc.addPage(); Y = 15; }
-
-                    // Nombre imagen
-                    doc.setFillColor(240,240,240); doc.rect(M, Y, imgW, headerH, 'F');
-                    doc.setDrawColor(180,180,180); doc.setLineWidth(0.2); doc.rect(M, Y, imgW, headerH, 'S');
+                    const imgW = 110, descX = M + imgW + 4, descW = fullW - imgW - 4;
+                    const hdrH = 8, imgH = 75;
+                    if (Y + hdrH + imgH + 5 > pageH - 20) { doc.addPage(); Y = 15; }
+                    doc.setFillColor(240,240,240); doc.rect(M, Y, imgW, hdrH, 'F');
+                    doc.setDrawColor(180,180,180); doc.setLineWidth(0.2); doc.rect(M, Y, imgW, hdrH, 'S');
                     doc.setFontSize(7); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
-                    doc.text(`${idx+1}. ${img.nombre}`, M+3, Y + headerH/2 + 1, {baseline:'middle'});
-
-                    // Header descripción
-                    doc.setFillColor(20,20,20); doc.rect(descX, Y, descW, headerH, 'F');
-                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(descX, Y, descW, headerH, 'S');
+                    doc.text(`${idx+1}. ${img.nombre}`, M+3, Y + hdrH/2 + 1, {baseline:'middle'});
+                    doc.setFillColor(20,20,20); doc.rect(descX, Y, descW, hdrH, 'F');
+                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(descX, Y, descW, hdrH, 'S');
                     doc.setFontSize(8); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-                    doc.text('DESCRIPCIÓN', descX + descW/2, Y + headerH/2 + 1, {align:'center', baseline:'middle'});
-                    Y += headerH;
-
-                    // IMAGEN Y CAJA DE DESCRIPCION
+                    doc.text('DESCRIPCIÓN', descX + descW/2, Y + hdrH/2 + 1, {align:'center', baseline:'middle'});
+                    Y += hdrH;
                     doc.addImage(img.base64, 'JPEG', M, Y, imgW, imgH);
                     doc.setFillColor(252,252,252); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
                     doc.rect(descX, Y, descW, imgH, 'FD');
@@ -855,81 +848,59 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 } catch(e) { console.error('Error imagen:', e); }
             });
             Y += 2;
+            Y += 8;
         }
 
-        // ARCHIVOS SIN COINCIDENCIAS
-        if ($scope.archivosSinCoincidencia.length > 0) {
-            if (Y + 30 > pageH - 20) { doc.addPage(); Y = 15; }
-            doc.setFillColor(191,191,191); doc.rect(M, Y, fullW, LH, 'F');
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(M, Y, fullW, LH, 'S');
-            doc.setFontSize(8); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-            doc.text('ARCHIVOS SIN COINCIDENCIAS', M+4, Y + LH/2+1, {baseline:'middle'});
-            Y += LH + 2;
 
-            doc.autoTable({
-                startY: Y,
-                head: [['Archivo','Equipo / IP','Versión Actual','Peso Actual','Versión Futura','Peso Futuro','Ubicación']],
-                body: $scope.archivosSinCoincidencia.map(item => [
-                    item.name, item.equipos||'-','N/A','N/A', item.version||'-', item.peso||'-', item.ubicacionUsuario||'N/A'
-                ]),
-                theme: 'grid',
-                headStyles: { fillColor:[29,33,28], textColor:[255,255,255], fontSize:8, fontStyle:'bold', halign:'center', valign:'middle', cellPadding:3 },
-                styles: { fontSize:7, cellPadding:2, textColor:[20,20,20], lineColor:[80,80,80], lineWidth:0.2 },
-                columnStyles: { 0:{cellWidth:45,fontStyle:'bold'}, 1:{cellWidth:26,halign:'center'}, 2:{cellWidth:22,halign:'center',textColor:[160,160,160],fontStyle:'italic'}, 3:{cellWidth:18,halign:'center',textColor:[160,160,160],fontStyle:'italic'}, 4:{cellWidth:30,halign:'center'}, 5:{cellWidth:18,halign:'center'}, 6:{cellWidth:'auto',fontSize:6.5,halign:'center'} },
-                alternateRowStyles: { fillColor:[248,248,248] },
-                margin: { left:M, right:M, bottom:20 }
-            });
-            Y = doc.lastAutoTable.finalY + GAP;
-        }
-
-        // CAMBIOS BD / CAMBIOS DE AECHIVOS DE CONFIG / OBSERVACIONES 
+        // BLOQUES FINALES
         Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',             htmlCambiosBD,  Y, pageW, M, pageH);
         Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN', htmlCambiosCfg, Y, pageW, M, pageH);
         Y = drawCompactBlock(doc, 'OBSERVACIONES',                                        htmlObs,        Y, pageW, M, pageH);
 
 
+
         // FIRMAS
-        if (Y + 45 > pageH - 15) { doc.addPage(); Y = 15; }
-        Y += 3;
-        const colGap = 6;
-        const colW   = (fullW - colGap) / 2;
-        const cols   = [
-            { label:'APROBADO POR', x: M },
-            { label:'ENTREGADO A',  x: M + colW + colGap }
+        const firmaNeededH = 22;
+        if (Y + firmaNeededH > pageH - 20) { doc.addPage(); Y = 15; }
+        const firmaYDynamic = Math.max(Y + 10, pageH - 50);
+        const firmaY = (firmaYDynamic + firmaNeededH < pageH - 18) ? firmaYDynamic : Y + 10;
+        const sigColGap = 20;
+        const sigColW   = (fullW - sigColGap) / 2;
+        const lineLen   = sigColW * 0.75;
+        const firmas    = [
+            { label: 'Firma de quien aprueba', x: M + sigColW * 0.5 },
+            { label: 'Firma de quien recibe',  x: M + sigColW + sigColGap + sigColW * 0.5 }
         ];
-
-        cols.forEach(col => {
-            // Header columna
-            doc.setFillColor(210,210,210); doc.rect(col.x, Y, colW, LH, 'F');
-            doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(col.x, Y, colW, LH, 'S');
-            doc.setFontSize(7.5); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
-            doc.text(col.label, col.x + colW/2, Y + LH/2 + 1, {align:'center', baseline:'middle'});
-        });
-        Y += LH;
-
-        const bodyH  = 45;
-        const iM     = colW * 0.07;
-        const fieldW = colW - iM * 2;
-        cols.forEach(col => {
-            doc.setFillColor(255,255,255); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-            doc.rect(col.x, Y, colW, bodyH, 'FD');
-            // NOMBRE
-            doc.setFontSize(6.5); doc.setTextColor(90,90,90); doc.setFont(undefined,'bold');
-            doc.text('NOMBRE:', col.x + iM, Y + 10);
-            doc.setDrawColor(80,80,80); doc.setLineWidth(0.3);
-            doc.line(col.x + iM, Y + 15, col.x + iM + fieldW, Y + 15);
-            // FIRMA
-            doc.setFontSize(6.5); doc.setTextColor(90,90,90); doc.setFont(undefined,'bold');
-            doc.text('FIRMA:', col.x + iM, Y + bodyH - 14);
-            doc.setDrawColor(80,80,80); doc.setLineWidth(0.3);
-            doc.line(col.x + iM, Y + bodyH - 8, col.x + iM + fieldW, Y + bodyH - 8);
+        firmas.forEach(f => {
+            const lineX = f.x - lineLen / 2;
+            doc.setDrawColor(60, 60, 60); doc.setLineWidth(0.4);
+            doc.line(lineX, firmaY, lineX + lineLen, firmaY);
+            doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(60, 60, 60);
+            doc.text(f.label, f.x, firmaY + 5, { align: 'center' });
+            doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(40, 40, 40);
+            doc.text('Nombre:', lineX, firmaY + 11);
         });
 
 
-        // ── GUARDAR ──
+        // FOOTER EN TODAS LAS PÁGINAS
+        const totalPages = doc.getNumberOfPages();
+        for (let p = 1; p <= totalPages; p++) {
+            doc.setPage(p);
+            const footerY = pageH - 8;
+            doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
+            doc.line(M, footerY - 5, pageW - M, footerY - 5);
+            doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
+            doc.text(`F2X - ${tituloFooter}`, M, footerY);
+            doc.setFontSize(7.5); doc.setFont(undefined,'italic'); doc.setTextColor(100,100,100);
+            doc.text('© 2026 Todos los derechos reservados', pageW / 2, footerY, { align: 'center' });
+            doc.setFontSize(7.5); doc.setFont(undefined,'bold'); doc.setTextColor(60,60,60);
+            doc.text(`Página ${p} de ${totalPages}`, pageW - M, footerY, { align: 'right' });
+        }
+
+
+        // GUARDAR
         const nombre = PdfStylesService.generateFileName($scope.directory1Name, $scope.directory2Name);
         doc.save(nombre);
-        $scope.successMessage = `✅ PDF generado: ${nombre}`;
-        $timeout(() => $scope.successMessage = '', 4000);
     };
+
 }]);

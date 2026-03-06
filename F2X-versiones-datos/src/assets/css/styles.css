@@ -736,3 +736,969 @@ body {
 .motivo-vigente-container {
     display: none !important;
 }
+
+/* Secciones a ancho completo sin restricción del container */
+.cambios-section,
+.release-section,
+.sistema-vigente-section,
+.pdf-export-section,
+.evidencias-section {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+}
+
+.cambios-card,
+.release-table-card {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 6px;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+/* Sacar las secciones del container */
+.container {
+    max-width: 100%;
+    width: 100%;
+    padding-left: 24px;
+    padding-right: 24px;
+    box-sizing: border-box;
+}
+
+/* Tablas a ancho completo */
+.matrix-table {
+    width: 100%;
+    table-layout: auto;
+}
+
+/* PALETA F2X */
+
+/* HEADER DE TODOS LOS CARD */
+.cambios-title,
+.release-table-title,
+.sistema-header,
+.vigente-header {
+    background: #FAFAFA !important;
+    color: var(--text-main) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    padding: 18px 20px !important;
+    text-transform: uppercase !important;
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+/* CARDS CONTENEDORES */
+.cambios-card,
+.release-table-card,
+.sistema-card,
+.vigente-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.06) !important;
+    overflow: hidden !important;
+}
+
+/* PLACEHOLDER */
+.cambios-placeholder,
+.release-placeholder {
+    color: #9E9E9E !important;
+    font-style: italic !important;
+    font-size: 13px !important;
+}
+
+/* LABEL CELLS DE TABLA RELEASE */
+.release-label-cell {
+    background: var(--bg-header-table) !important;
+    color: var(--text-main) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    border-right: 1px solid var(--border-subtle) !important;
+}
+
+/* Acento izquierdo verde en label cells */
+.release-label-cell {
+    border-left: 3px solid var(--f2x-green) !important;
+}
+
+/* ENCABEZADOS TABLAS MATRIX */
+.matrix-table thead tr th {
+    background: var(--bg-header-table) !important;
+    color: var(--text-main) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    border-bottom: 2px solid var(--border-subtle) !important;
+    padding: 18px 15px !important;
+    text-transform: uppercase !important;
+}
+
+/* FILAS */
+.matrix-table tbody tr {
+    border-bottom: 1px solid var(--border-subtle) !important;
+}
+.matrix-table tbody tr:hover {
+    background: #F9FBE7 !important;
+}
+.release-row--clickable:hover {
+    background: #F9FBE7 !important;
+    cursor: pointer !important;
+}
+.release-row--clickable:hover .release-label-cell {
+    background: #f0f5d8 !important;
+}
+
+/* ESTADÍSTICAS */
+.statistics {
+    background: #FAFAFA !important;
+    border-top: 1px solid var(--border-subtle) !important;
+    padding: 25px 30px !important;
+}
+.stat-value.stat-changed { color: var(--f2x-green) !important; }
+
+/* NO-MATCH SUMMARY */
+.no-match-summary {
+    border-top: 1px solid var(--border-subtle) !important;
+    padding: 20px 30px !important;
+    background: #FAFAFA !important;
+}
+.summary-value { color: var(--f2x-green) !important; font-weight: 800 !important; }
+
+/* BOTÓN ADJUNTAR EVIDENCIAS */
+.btn-adjuntar-evidencias {
+    background: var(--f2x-green) !important;
+    color: var(--text-main) !important;
+    border: none !important;
+    font-weight: 700 !important;
+    padding: 10px 20px !important;
+    border-radius: 8px !important;
+    letter-spacing: 0.5px !important;
+    transition: all 0.2s ease !important;
+}
+.btn-adjuntar-evidencias:hover {
+    background: #AEC828 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(190,214,47,0.3) !important;
+}
+
+/* INPUT UBICACION */
+.ubicacion-input {
+    border: 1px dashed #D0D0D0 !important;
+    border-radius: 8px !important;
+}
+.ubicacion-input:focus {
+    border-color: var(--f2x-green) !important;
+    border-style: solid !important;
+    box-shadow: 0 0 0 3px rgba(190,214,47,0.15) !important;
+    outline: none !important;
+}
+
+/* VERSIÓN HIGHLIGHT */
+.version-badge.version-futura.version-highlight {
+    background: var(--f2x-green) !important;
+    color: #333 !important;
+    border-color: var(--f2x-green) !important;
+}
+
+/* PESO HIGHLIGHT */
+.peso-highlight { color: #F57C00 !important; font-weight: 800 !important; }
+
+
+/* padding interno del header de data-table-card */
+.data-table-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.06);
+    overflow: hidden;
+}
+
+.data-table-card-header {
+    background: #FFFDF0;
+    padding: 25px 30px;
+    border-bottom: 1px solid var(--border-subtle);
+    border-left: 4px solid var(--f2x-green);
+}
+
+.data-table-card-header h3 {
+    color: var(--text-main);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.data-table-card-header p {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin: 0;
+}
+
+/* Fondo crema unificado para todos los títulos principales */
+.cambios-title,
+.release-table-title,
+.sistema-header,
+.vigente-header,
+.data-table-card-header h3 {
+    background: #FFFDF0 !important;
+    color: #1a1a1a !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    text-transform: uppercase !important;
+    padding: 16px 20px !important;
+    border-bottom: 1px solid #e8e8c8 !important;
+}
+
+/* Acento verde a la izquierda */
+.cambios-card > .cambios-title,
+.release-table-card > .release-table-title,
+.sistema-card > .sistema-header,
+.vigente-card > .vigente-header,
+.data-table-card > .data-table-card-header {
+    border-left: 4px solid var(--f2x-green) !important;
+    margin-left: -1px;
+    padding-left: 24px !important;
+}
+
+/* Alineación del header con la tabla debajo */
+.data-table-card-header {
+    padding: 25px 30px !important;
+    text-align: left !important;
+    border-bottom: 1px solid #e0e0c0 !important;
+    border-left: 4px solid var(--f2x-green) !important;
+    background: #FFFDF0 !important;
+    margin: 0 !important;
+}
+
+.data-table-card-header h3 {
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.data-table-card-header p {
+    margin: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.data-table-card > div[style*="overflow-x:auto"] {
+    padding-left: 30px !important;
+    padding-right: 30px !important;
+    padding-top: 0 !important;
+    padding-bottom: 20px !important;
+    margin: 0 !important;
+}
+
+.matrix-table {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+@media (max-width: 992px) {
+    .data-table-card-header {
+        padding: 20px 20px !important;
+    }
+    .data-table-card > div[style*="overflow-x:auto"] {
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+    }
+}
+
+/* DESCRIPCIÓN RELEASE CON SUBDIVISIONES */
+
+/* El card no es clickeable a nivel raíz */
+.release-card {
+    cursor: default !important;
+}
+
+.release-card > .release-card-title {
+    cursor: default !important;
+    pointer-events: none;
+}
+
+/* Neutralizar hover del card entero */
+.release-card:hover {
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.06) !important;
+}
+
+/* Fila de subdivisión */
+.release-subrow {
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid var(--border-subtle);
+    min-height: 70px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.release-subrow:hover {
+    background: #F9FBE7;
+}
+
+/* Etiqueta izquierda de la fila */
+.release-sublabel {
+    width: 210px;
+    min-width: 180px;
+    flex-shrink: 0;
+    background: var(--bg-header-table);
+    border-right: 1px solid var(--border-subtle);
+    border-left: 3px solid var(--f2x-green);
+    padding: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-main);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    transition: background 0.15s ease;
+}
+
+.release-subrow:hover .release-sublabel {
+    background: #f0f5d8;
+}
+
+/* Contenido derecho de la fila */
+.release-subcontent {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    min-height: 70px;
+}
+
+.release-subcontent .cambios-placeholder {
+    min-height: 70px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 20px;
+}
+
+.release-subcontent .cambios-text {
+    padding: 14px 20px;
+    width: 100%;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .release-subrow {
+        flex-direction: column;
+    }
+    .release-sublabel {
+        width: 100%;
+        min-width: unset;
+        border-left: 3px solid var(--f2x-green);
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+        justify-content: flex-start;
+        padding: 10px 16px;
+    }
+}
+
+/* DESCRIPCION RELEASE */
+
+/* Título del card */
+.release-card > .cambios-title,
+.release-card > .release-card-title {
+    background: #FFFDF0 !important;
+    color: #1a1a1a !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    text-transform: uppercase !important;
+    padding: 16px 24px !important;
+    border-bottom: 1px solid #e8e8c8 !important;
+    border-left: 4px solid var(--f2x-green) !important;
+    margin-left: -1px;
+    cursor: default !important;
+}
+
+/* Card contenedor */
+.release-card {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-subtle) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.06) !important;
+    overflow: hidden !important;
+    cursor: default !important;
+}
+
+/* Neutralizar hover del card entero */
+.release-card:hover {
+    border-color: var(--border-subtle) !important;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.06) !important;
+}
+
+/* Filas internas */
+.release-subrow {
+    border-top: 1px solid var(--border-subtle) !important;
+}
+
+/* Label izquierda */
+.release-sublabel {
+    background: var(--bg-header-table) !important;
+    border-right: 1px solid var(--border-subtle) !important;
+    border-left: 3px solid var(--f2x-green) !important;
+    color: var(--text-main) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+}
+
+/* Hover por fila */
+.release-subrow:hover {
+    background: #F9FBE7 !important;
+}
+
+.release-subrow:hover .release-sublabel {
+    background: #f0f5d8 !important;
+}
+
+
+.matrix-table tbody tr.no-match-row {
+    background: #FFFCE8 !important;
+    border-left: 3px solid #F9A825 !important;
+}
+
+.matrix-table tbody tr.no-match-row:hover {
+    background: #FFF8D6 !important;
+}
+
+.matrix-table tbody tr.no-match-row:first-of-type {
+    border-top: 2px solid #F9A825 !important;
+}
+
+.matrix-table .no-data-na {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    background: #F5F5F5;
+    color: #BDBDBD;
+    border: 1px solid #E0E0E0;
+    letter-spacing: 0.5px;
+}
+
+.stat-value.stat-no-match {
+    color: #F57C00;
+    font-weight: 800;
+}
+
+/* Nuevo contador "Archivos Nuevos" */
+.stat-value.stat-new {
+    color: #1976D2;   
+    font-weight: 800;
+}
+
+/* Variables de la paleta PDF */
+:root {
+    --pdf-body-bg:      #F5F5F5;
+    --pdf-body-border:  #DCDCDC;
+    --pdf-label-bg:     #EBEBEB;
+    --pdf-title-color:  #1E1E1E;
+    --pdf-na-color:     #9B9B9B;
+    --pdf-radius:       8px;
+}
+
+/* TÍTULOS DE SECCIÓN */
+.cambios-title,
+.release-table-title,
+.release-card-title,
+.sistema-header,
+.data-table-card-header h3 {
+    background: transparent !important;
+    border: none !important;
+    border-left: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+    color: var(--pdf-title-color) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.4px !important;
+    text-transform: uppercase !important;
+    padding: 0 0 8px 0 !important;
+    margin: 0 !important;
+    margin-left: 0 !important;
+    display: block !important;
+}
+
+/* CARDS CONTENEDORES */
+.cambios-card,
+.release-table-card,
+.release-card,
+.sistema-card,
+.vigente-card,
+.data-table-card {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin-bottom: 20px !important;
+}
+
+/* CUERPO / ÁREA DE CONTENIDO */
+.cambios-card .cambios-body,
+.cambios-card > div:not(.cambios-title),
+.sistema-card .sistema-content,
+.sistema-card > div:not(.sistema-header) {
+    background: var(--pdf-body-bg) !important;
+    border: 1px solid var(--pdf-body-border) !important;
+    border-radius: var(--pdf-radius) !important;
+    padding: 16px 18px !important;
+    min-height: 52px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.cambios-text,
+.cambios-placeholder {
+    font-size: 13px !important;
+    font-family: 'Segoe UI', sans-serif !important;
+    line-height: 1.6 !important;
+}
+
+.cambios-placeholder {
+    color: var(--pdf-na-color) !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+}
+
+.cambios-text {
+    color: #1E1E1E !important;
+    font-style: normal !important;
+}
+
+/* TABLA DESCRIPCIÓN RELEASE */
+.release-table-card,
+.release-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+}
+
+.release-table {
+    background: var(--pdf-body-bg) !important;
+    border: 1px solid var(--pdf-body-border) !important;
+    border-radius: var(--pdf-radius) !important;
+    overflow: hidden !important;
+    width: 100% !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+.release-subrow {
+    background: var(--pdf-body-bg) !important;
+    border: 1px solid var(--pdf-body-border) !important;
+    border-radius: var(--pdf-radius) !important;
+    overflow: hidden !important;
+    margin-bottom: 0 !important;
+}
+
+.release-subrow + .release-subrow {
+    border-top: 1px solid var(--pdf-body-border) !important;
+    border-radius: 0 !important;
+}
+
+.release-card > .release-subrow:first-of-type {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+}
+
+.release-card > .release-subrow:last-of-type {
+    border-top: 1px solid var(--pdf-body-border) !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+    margin-top: -1px !important;
+}
+
+.release-sublabel,
+.release-label-cell {
+    background: var(--pdf-label-bg) !important;
+    border-right: 1px solid var(--pdf-body-border) !important;
+    border-left: none !important;
+    color: var(--pdf-title-color) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.3px !important;
+    text-transform: uppercase !important;
+    text-align: center !important;
+    padding: 14px !important;
+    width: 160px !important;
+    min-width: 140px !important;
+}
+
+.release-subcontent,
+.release-content-cell {
+    background: var(--pdf-body-bg) !important;
+    padding: 14px 18px !important;
+    font-size: 13px !important;
+    color: #1E1E1E !important;
+}
+
+.release-subrow:hover {
+    background: #EFEFEF !important;
+}
+
+.release-subrow:hover .release-sublabel {
+    background: #E2E2E2 !important;
+}
+
+.release-subrow:hover .release-subcontent {
+    background: #EFEFEF !important;
+}
+
+/* CARD VIGENTE A PARTIR DE */
+.vigente-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.vigente-header {
+    background: transparent !important;
+    border: none !important;
+    color: var(--pdf-title-color) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    padding: 0 0 8px 0 !important;
+    margin: 0 !important;
+}
+
+.vigente-body {
+    background: var(--pdf-body-bg) !important;
+    border: 1px solid var(--pdf-body-border) !important;
+    border-radius: var(--pdf-radius) !important;
+    padding: 14px !important;
+}
+
+/* TABLA PRINCIPAL (DETALLE DEL SOFTWARE) */
+.data-table-card {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.data-table-card-header {
+    background: transparent !important;
+    border: none !important;
+    border-left: none !important;
+    padding: 0 0 12px 0 !important;
+    margin: 0 !important;
+}
+
+.data-table-card-header h3 {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: var(--pdf-title-color) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.4px !important;
+    margin-bottom: 4px !important;
+}
+
+.data-table-card-header p {
+    font-size: 12px !important;
+    color: #666 !important;
+}
+
+/* SECCIÓN EVIDENCIAS */
+.evidencias-section .evidencias-title,
+.evidencias-section h4,
+.evidencias-section .section-label {
+    background: transparent !important;
+    border: none !important;
+    color: var(--pdf-title-color) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    padding: 0 0 8px 0 !important;
+}
+
+/* HOVER DEL BOTÓN EDITOR NATIVO */
+.btn-motivo-nativo {
+    background: var(--pdf-label-bg) !important;
+    border-left: 1px solid var(--pdf-body-border) !important;
+    color: #555 !important;
+}
+
+.btn-motivo-nativo:hover {
+    background: #E0E0E0 !important;
+    color: #1E1E1E !important;
+}
+
+/* RICH TOOLBAR */
+.rich-toolbar {
+    background: var(--pdf-label-bg) !important;
+    border-bottom: 1px solid var(--pdf-body-border) !important;
+    border-top-left-radius: var(--pdf-radius) !important;
+    border-top-right-radius: var(--pdf-radius) !important;
+}
+
+.release-table-card .rich-editor,
+.cambios-card .rich-editor {
+    background: var(--pdf-body-bg) !important;
+    border: none !important;
+}
+
+.release-table-card .rich-editor:focus,
+.cambios-card .rich-editor:focus {
+    background: #FFFFFF !important;
+    box-shadow: inset 0 0 0 2px rgba(190, 214, 47, 0.3) !important;
+}
+
+/* INPUT UBICACIÓN*/
+.ubicacion-input {
+    background: var(--pdf-body-bg) !important;
+    border: 1px dashed var(--pdf-body-border) !important;
+    border-radius: 6px !important;
+}
+
+.ubicacion-input:focus {
+    background: #FFFFFF !important;
+    border-color: var(--f2x-green) !important;
+    border-style: solid !important;
+    box-shadow: 0 0 0 3px rgba(190, 214, 47, 0.15) !important;
+}
+
+
+/* COMPORTAMIENTO DE CLICK Y CURSOR EN CARDS */
+
+div:focus,
+div:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+div {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
+.cambios-card {
+    cursor: default !important;
+}
+
+.cambios-card > .cambios-title {
+    cursor: default !important;
+    user-select: text !important;
+    pointer-events: auto !important;
+}
+
+.cambios-card > div[ng-click] {
+    cursor: pointer !important;
+}
+
+/* Hover */
+.cambios-card:has(> div[ng-click]:hover) {
+    border-color: var(--f2x-green) !important;
+    box-shadow: 0 4px 25px rgba(190,214,47,0.15) !important;
+}
+
+/* Elementos interactivos */
+.cambios-card input,
+.cambios-card textarea,
+.cambios-card button,
+.cambios-card a,
+.cambios-card select {
+    pointer-events: auto !important;
+}
+
+/* EVIDENCIAS DE PRUEBAS  */
+
+/* Contenedor principal del cuerpo de evidencias */
+.evidencias-body {
+    width: 100%;
+    padding: 16px 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Fila superior */
+.evidencias-topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.evidencias-counter {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 4px 10px;
+    background: #F5F7FA;
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+}
+
+/* Grid horizontal de imágenes */
+.images-grid {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 16px !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+}
+
+/* Cada tarjeta de imagen */
+.image-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 220px !important;
+    min-width: 200px !important;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 10px;
+    box-sizing: border-box;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.image-card:hover {
+    border-color: var(--f2x-green);
+    box-shadow: 0 4px 16px rgba(190,214,47,0.15);
+}
+
+/* Imagen de preview */
+.image-preview {
+    width: 100%;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #F5F5F5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Nombre y tamaño */
+.image-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.image-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.image-size {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+/* Textarea de descripción */
+.image-descripcion-wrapper {
+    width: 100%;
+}
+
+.image-descripcion-input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px dashed #D0D0D0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
+    font-family: 'Segoe UI', sans-serif;
+    color: var(--text-main);
+    background: #FAFAFA;
+    resize: vertical;
+    min-height: 40px;
+    transition: border-color 0.2s ease;
+}
+
+.image-descripcion-input:focus {
+    outline: none;
+    border-color: var(--f2x-green);
+    border-style: solid;
+    background: #FFFFFF;
+    box-shadow: 0 0 0 2px rgba(190,214,47,0.15);
+}
+
+/* Botón eliminar */
+.btn-remove-image {
+    position: absolute !important;
+    top: 6px !important;
+    right: 6px !important;
+    width: 22px !important;
+    height: 22px !important;
+    background: rgba(255,82,82,0.1) !important;
+    border: 1px solid var(--state-error) !important;
+    color: var(--state-error) !important;
+    border-radius: 50% !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    transition: all 0.2s ease !important;
+    z-index: 1 !important;
+    line-height: 1 !important;
+}
+
+.btn-remove-image:hover {
+    background: var(--state-error) !important;
+    color: #FFFFFF !important;
+    transform: scale(1.1) !important;
+}
+
+/* Placeholder cuando no hay imágenes */
+.evidencias-empty {
+    padding: 20px 0 8px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .image-card {
+        width: calc(50% - 8px) !important;
+        min-width: 160px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .image-card {
+        width: 100% !important;
+    }
+}

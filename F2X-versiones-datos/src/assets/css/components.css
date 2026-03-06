@@ -704,7 +704,7 @@
     letter-spacing: 0.5px;
 }
 
-/* ── Input de ubicación editable ── */
+/* Input de ubicación editable */
 .ubicacion-input {
     width: 100%;
     background: #FAFAFA;
@@ -739,7 +739,7 @@
     background: #FFFFFF;
 }
 
-/* ── Columnas reutilizadas de la tabla principal ── */
+/* Columnas reutilizadas de la tabla principal */
 .no-match-table thead th.col-ubicacion,
 .no-match-table tbody td.col-ruta {
     text-align: left;
@@ -768,8 +768,8 @@
     text-align: center;
     vertical-align: middle;
 }
-/* SECCIÓN DE MOTIVO DEL CAMBIO */
 
+/* SECCIÓN DE MOTIVO DEL CAMBIO */
 .change-reason-section {
     background: var(--bg-card);
     border: 1px solid var(--border-subtle);
