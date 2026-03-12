@@ -36,6 +36,11 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     };
 
     $scope.getHtml = function(campo) {
+        if (typeof campo === 'string' && campo.startsWith('_img_')) {
+            const idx = parseInt(campo.replace('_img_', ''), 10);
+            const img = $scope.imagenesAdjuntas[idx];
+            return $sce.trustAsHtml((img && img.descripcion) || '');
+        }
         return $sce.trustAsHtml($scope.releaseDataRaw[campo] || '');
     };
 
@@ -63,6 +68,8 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
 
     $scope.statistics = { total: 0, versionChanged: 0, sizeChanged: 0, noChanges: 0 };
     $scope.imagenesAdjuntas = [];
+    $scope.firmas = { nombreEnvia: '', nombreAprueba: '' };
+    $scope.datos  = { vigenteDesde: hoy };
     $scope.showImageModal = false;
     $scope.showTable = false;
     $scope.errorMessage = ''; $scope.successMessage = '';
@@ -96,6 +103,25 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             reader.onerror = () => { $scope.$apply(() => $scope.errorMessage=`❌ Error al leer "${file.name}"`); $timeout(()=>$scope.errorMessage='',3000); };
             reader.readAsDataURL(file);
         });
+    };
+
+    $scope.abrirEditorImagen = function(index) {
+        if (!window.electronAPI?.openNativeTextarea) { $scope.errorMessage='❌ Función de entrada nativa no disponible'; return; }
+        const imagen = $scope.imagenesAdjuntas[index];
+        window.electronAPI.openNativeTextarea({
+            title:        'DESCRIPCIÓN DE EVIDENCIA',
+            placeholder:  'Ingrese la descripción de la evidencia...',
+            defaultValue: imagen.descripcion || '',
+            fieldLabel:   `Descripción — ${imagen.nombre}`
+        }).then(result => {
+            if (result !== null) {
+                $scope.$apply(() => {
+                    $scope.imagenesAdjuntas[index].descripcion = result;
+                    $scope.successMessage = '✅ Descripción guardada';
+                });
+                $timeout(() => $scope.successMessage = '', 3000);
+            }
+        }).catch(() => { $scope.$apply(() => $scope.errorMessage = '❌ Error al abrir el editor'); });
     };
 
     $scope.eliminarImagen = function(index) {
@@ -196,7 +222,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         $scope.showTable=false; $scope.tableData=[]; $scope.archivosSinCoincidencia=[];
         $scope.releaseData = { tituloFicha:'', sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
         $scope.releaseDataRaw = { tituloFicha:'', sistema:'', caracteristicas:'', equipos:'', fechaFicha:'', cambiosAplicativos:'', cambiosBaseDatos:'', cambiosConfiguracion:'', observaciones:'' };
-        const h=new Date(); h.setHours(0,0,0,0); $scope.vigenteDesde=h;
+        const h=new Date(); h.setHours(0,0,0,0); $scope.vigenteDesde=h; $scope.datos.vigenteDesde=h;
         $scope.imagenesAdjuntas=[];
         $scope.statistics={total:0,versionChanged:0,sizeChanged:0,noChanges:0};
         $scope.errorMessage='';$scope.successMessage='';
@@ -518,7 +544,6 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             .replace(/\n/g, '<br>');
     }
 
-    // drawDescripcionReleaseBlock
     function drawDescripcionReleaseBlock(doc, htmlCaract, htmlEquipos, startY, pageW, margin, pageH) {
         const blockW    = pageW - margin * 2;
         const padX      = 5;
@@ -551,31 +576,29 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         doc.text('DESCRIPCIÓN RELEASE', margin, startY + titleH - 1);
 
         const bodyY = startY + titleH + 5;
+        const sepX  = margin + labelColW;
+        const CR    = 2;
 
         doc.setFillColor(245, 245, 245);
-        doc.setDrawColor(220, 220, 220);
-        doc.setLineWidth(0.2);
-        doc.roundedRect(margin, bodyY, blockW, totalBodyH, 2, 2, 'FD');
+        doc.roundedRect(margin, bodyY, blockW, totalBodyH, CR, CR, 'F');
+
+        doc.setFillColor(235, 235, 235);
+        doc.roundedRect(margin, bodyY, labelColW, totalBodyH, CR, CR, 'F');
+        doc.rect(margin + labelColW - CR, bodyY, CR, totalBodyH, 'F');
 
         const sepY = bodyY + rowHCaract;
         doc.setDrawColor(220, 220, 220);
         doc.setLineWidth(0.2);
         doc.line(margin, sepY, margin + blockW, sepY);
 
-        const sepX = margin + labelColW;
         doc.setDrawColor(220, 220, 220);
         doc.setLineWidth(0.2);
         doc.line(sepX, bodyY, sepX, bodyY + totalBodyH);
 
         function drawRow(label, html, rowY, rowH) {
             const isEmptyContent = !html || html.replace(/<[^>]+>/g, '').trim() === '';
-            const innerW = blockW - labelColW - padX * 2;
+            const innerW   = blockW - labelColW - padX * 2;
             const contentX = sepX + padX;
-
-            doc.setFillColor(235, 235, 235);
-            doc.setDrawColor(220, 220, 220);
-            doc.setLineWidth(0);
-            doc.rect(margin, rowY, labelColW, rowH, 'F');
 
             doc.setFontSize(7.5);
             doc.setFont(undefined, 'bold');
@@ -592,13 +615,16 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             }
         }
 
-        drawRow('CARACTERÍSTICAS', htmlCaract, bodyY,              rowHCaract);
+        drawRow('CARACTERÍSTICAS', htmlCaract,  bodyY,              rowHCaract);
         drawRow('EQUIPOS',         htmlEquipos, bodyY + rowHCaract, rowHEquip);
+
+        doc.setDrawColor(220, 220, 220);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(margin, bodyY, blockW, totalBodyH, CR, CR, 'S');
 
         return bodyY + totalBodyH + GAP;
     }
 
-    // drawCompactBlock
     function drawCompactBlock(doc, label, rawContent, startY, pageW, margin, pageH) {
         const html      = normalizeToHtml(rawContent);
         const blockW    = pageW - margin * 2;
@@ -648,7 +674,7 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         return bodyY + realBodyH + GAP;
     }
 
-    function loadImageAsBase64(src) {
+    function loadImageAsBase64(src, removeBlackBg) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = 'anonymous';
@@ -656,7 +682,19 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 const canvas = document.createElement('canvas');
                 canvas.width  = img.naturalWidth;
                 canvas.height = img.naturalHeight;
-                canvas.getContext('2d').drawImage(img, 0, 0);
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                if (removeBlackBg) {
+                    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const d = imgData.data;
+                    for (let i = 0; i < d.length; i += 4) {
+                        const r = d[i], g = d[i+1], b = d[i+2];
+                        const lum = (r + g + b) / 3;
+                        if (lum < 40) { d[i+3] = 0; }
+                        else if (lum < 80) { d[i+3] = Math.round((lum - 40) / 40 * 255); }
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                }
                 resolve(canvas.toDataURL('image/png'));
             };
             img.onerror = reject;
@@ -665,17 +703,32 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
     }
 
     // GENERAR PDF
-    $scope.generatePDF = async function() {
+    $scope.generatePDF = function() {
+        $scope.errorMessage = '';
+        $scope._generatePDFAsync().catch(function(err) {
+            $scope.$apply(function() {
+                $scope.errorMessage = '❌ Error al generar el PDF: ' + (err && err.message ? err.message : String(err));
+            });
+            console.error('Error generatePDF:', err);
+        });
+    };
 
-        if(!$scope.tableData?.length){$scope.errorMessage='❌ No hay datos para exportar';return;}
-        const archivosConCambios=$scope.tableData.filter(item=>(!item.existeEnActual||!item.existeEnFutura||item.versionChanged||item.sizeChanged));
-        if(!archivosConCambios.length){$scope.errorMessage='❌ No hay archivos con cambios';return;}
+    $scope._generatePDFAsync = async function() {
 
+        if(!$scope.tableData?.length && !$scope.archivosSinCoincidencia?.length){
+            $scope.errorMessage='❌ No hay datos para exportar'; return;
+        }
+
+        const archivosConCambios = $scope.tableData || [];
+
+        const capFirmaNombreEnvia   = ($scope.firmas.nombreEnvia   || '').trim();
+        const capFirmaNombreAprueba = ($scope.firmas.nombreAprueba || '').trim();
+        const capVigenteDesde       = $scope.datos.vigenteDesde || $scope.vigenteDesde;
         const {jsPDF} = window.jspdf;
         const doc     = new jsPDF('l', 'mm', 'a4');
         let logoBase64 = null;
         try {
-            logoBase64 = await loadImageAsBase64('./assets/images/f2x-logo.jpeg');
+            logoBase64 = await loadImageAsBase64('./assets/images/f2x-logo.png', true);
         } catch(e) { console.warn('No se pudo cargar el logo:', e); }
         const pageW   = doc.internal.pageSize.getWidth();
         const pageH   = doc.internal.pageSize.getHeight();
@@ -683,56 +736,82 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         const tableStyles  = PdfStylesService.getTableStyles();
         const footerStyles = PdfStylesService.getFooterStyles();
 
-        
-        // DATOS RELEASE
-        const htmlTitulo     = $scope.releaseDataRaw.tituloFicha          || '';
-        const htmlSistema    = $scope.releaseDataRaw.sistema              || '';
-        const htmlCaract     = $scope.releaseDataRaw.caracteristicas      || '';
-        const htmlEquipos    = $scope.releaseDataRaw.equipos              || '';
-        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos   || '';
-        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos     || '';
-        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion || '';
-        const htmlObs        = $scope.releaseDataRaw.observaciones        || '';
-        const fechaFmt       = ($scope.vigenteDesde instanceof Date && !isNaN($scope.vigenteDesde.getTime()))
-            ? $scope.formatearVigente($scope.vigenteDesde) : '';
-
-        const tituloFooter = htmlTitulo.replace(/<[^>]+>/g, '').trim() || 'FICHA TÉCNICA DE ACTUALIZACIÓN';
+        const htmlTitulo     = $scope.releaseDataRaw.tituloFicha         || '';
+        const htmlSistema    = $scope.releaseDataRaw.sistema             || '';
+        const htmlCaract     = $scope.releaseDataRaw.caracteristicas     || '';
+        const htmlEquipos    = $scope.releaseDataRaw.equipos             || '';
+        const htmlCambios    = $scope.releaseDataRaw.cambiosAplicativos  || '';
+        const htmlCambiosBD  = $scope.releaseDataRaw.cambiosBaseDatos    || '';
+        const htmlCambiosCfg = $scope.releaseDataRaw.cambiosConfiguracion|| '';
+        const htmlObs        = $scope.releaseDataRaw.observaciones       || '';
+        const fechaFmt       = (capVigenteDesde instanceof Date && !isNaN(capVigenteDesde.getTime()))
+            ? $scope.formatearVigente(capVigenteDesde)
+            : (typeof capVigenteDesde === 'string' && capVigenteDesde)
+                ? $scope.formatearVigente(new Date(capVigenteDesde))
+                : '';
 
         const fullW = pageW - M * 2;
         const LH    = 7;
         const GAP   = 3;
 
         // HEADER
-        const headerH = 44;
+        const topZoneH        = 26;
+        const sistemaTexto = decodeHtmlEntities(htmlSistema.replace(/<[^>]+>/g, '')).trim() || '';
+        const sistemaLabelH   = 5;
+        const sistemaGap      = 4;
+        const sistemaContentH = 6;
+        const headerPadBot    = 2;
+        const headerH = topZoneH + sistemaLabelH + sistemaGap + sistemaContentH + headerPadBot;
+
         doc.setFillColor(70, 70, 70);
         doc.rect(0, 0, pageW, headerH, 'F');
+
+        doc.setDrawColor(100, 100, 100);
+        doc.setLineWidth(0.3);
+        doc.line(M, topZoneH, pageW - M, topZoneH);
+
         doc.setFillColor(221, 244, 52);
         doc.rect(0, headerH, pageW, 2, 'F');
 
-        const logoW = 30, logoH = 22;
-        const logoX = M,  logoY = (headerH - logoH) / 2;
-        try { doc.addImage(logoBase64, 'JPEG', logoX, logoY, logoW, logoH); } catch(e) {}
+        const logoH = 25;
+        const logoW = 40;
+        const logoX = M;
+        const logoY = (topZoneH - logoH) / 2 + 2;
+        try { doc.addImage(logoBase64, 'PNG', logoX, logoY, logoW, logoH); } catch(e) {}
 
-        const tituloTexto = tituloFooter;
+        function decodeHtmlEntities(str) {
+        const el = document.createElement('textarea');
+        el.innerHTML = str;
+        return el.value;
+    }
+        const tituloTexto  = decodeHtmlEntities(htmlTitulo.replace(/<[^>]+>/g, '')).trim() || 'FICHA TÉCNICA DE ACTUALIZACIÓN';
+        const tituloFooter = decodeHtmlEntities(htmlTitulo.replace(/<[^>]+>/g, '')).trim() || 'FICHA TÉCNICA DE ACTUALIZACIÓN';
         doc.setFontSize(11); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-        doc.text(tituloTexto, pageW / 2, headerH / 2, { align: 'center', baseline: 'middle' });
+        doc.text(tituloTexto, pageW / 2, topZoneH / 2, { align: 'center', baseline: 'middle' });
 
         const _hoy = new Date();
         const _fechaGen = `${String(_hoy.getDate()).padStart(2,'0')}/${String(_hoy.getMonth()+1).padStart(2,'0')}/${_hoy.getFullYear()}`;
-        doc.setFontSize(8); doc.setTextColor(200,200,200); doc.setFont(undefined,'normal');
-        doc.text(`Fecha de generación: ${_fechaGen}`, pageW - M, headerH / 2 - 2, { align: 'right' });
-        doc.text(`Vigente a partir de: ${fechaFmt || 'N/A'}`, pageW - M, headerH / 2 + 5, { align: 'right' });
+        doc.setFontSize(7.5); doc.setTextColor(200,200,200); doc.setFont(undefined,'normal');
+        doc.text(`Fecha de generación: ${_fechaGen}`, pageW - M, topZoneH / 2 - 2.5, { align: 'right' });
+        doc.text(`Vigente a partir de: ${fechaFmt || 'N/A'}`,  pageW - M, topZoneH / 2 + 4, { align: 'right' });
+
+        const sisY = topZoneH + 1;
+        doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(190, 214, 47);
+        doc.text('SISTEMA', pageW / 2, sisY + sistemaLabelH - 1, { align: 'center' });
+
+        if (sistemaTexto) {
+            doc.setFontSize(10); doc.setFont(undefined, 'normal'); doc.setTextColor(240, 240, 240);
+            doc.text(sistemaTexto, pageW / 2, sisY + sistemaLabelH + sistemaGap, { align: 'center' });
+        }
 
         let Y = headerH + 6;
 
-        // BLOQUES DE LA PRIMERA PÁGINA
-        Y = drawCompactBlock(doc, 'SISTEMA', htmlSistema, Y, pageW, M, pageH);
         Y = drawDescripcionReleaseBlock(doc, htmlCaract, htmlEquipos, Y, pageW, M, pageH);
         Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS DE APLICATIVOS', htmlCambios, Y, pageW, M, pageH);
 
-
-        // TABLA ARCHIVOS CON CAMBIOS Y SIN CAMBIOS
-        doc.addPage(); Y = 15;
+        // TABLA UNIFICADA
+       if (Y + 40 > pageH - 20) { doc.addPage(); Y = 15; }
+       else { Y += 8; }
         doc.setFontSize(14); doc.setTextColor(20,20,20); doc.setFont(undefined,'bold');
         doc.text('Detalle del Software Versionado', M, Y + 8);
         Y += 14;
@@ -746,7 +825,10 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 versionFutura:   item.versionFutura || '-',
                 pesoFuturo:      item.pesoFuturo || '-',
                 ubicacion:       item.ruta || '',
-                sinCoincidencia: false
+                sinCoincidencia: false,
+                versionChanged:  item.versionChanged || false,
+                sizeChanged:     item.sizeChanged    || false,
+                versionMenor:    item.versionMenor   || false
             })),
             ...$scope.archivosSinCoincidencia.map(item => ({
                 nombre:          item.name,
@@ -756,7 +838,10 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 versionFutura:   item.version || '-',
                 pesoFuturo:      item.peso || '-',
                 ubicacion:       item.ubicacionUsuario || 'N/A',
-                sinCoincidencia: true
+                sinCoincidencia: true,
+                versionChanged:  false,
+                sizeChanged:     false,
+                versionMenor:    false
             }))
         ];
 
@@ -767,33 +852,66 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
                 f.nombre, f.equipos, f.versionActual, f.pesoActual,
                 f.versionFutura, f.pesoFuturo, f.ubicacion
             ]),
-            theme: 'grid',
+            theme: 'plain',
             showHead: 'firstPage',
             rowPageBreak: 'avoid',
-            headStyles: { fillColor:[29,33,28], textColor:[255,255,255], fontSize:8, fontStyle:'bold', halign:'center', valign:'middle', cellPadding:3 },
-            styles: { fontSize:7, cellPadding:2, textColor:[20,20,20], lineColor:[80,80,80], lineWidth:0.2 },
-            columnStyles: {
-                0:{cellWidth:45,fontStyle:'bold'}, 1:{cellWidth:26,halign:'center'},
-                2:{cellWidth:26,halign:'center'},  3:{cellWidth:18,halign:'center'},
-                4:{cellWidth:26,halign:'center'},  5:{cellWidth:18,halign:'center'},
-                6:{cellWidth:'auto',fontSize:6.5}
+            headStyles: {
+                fillColor: [245,245,245], textColor: [50,50,50],
+                fontSize: 7.5, fontStyle: 'bold',
+                halign: 'center', valign: 'middle', cellPadding: 4,
+                lineWidth: 0
             },
-            alternateRowStyles: { fillColor:[248,248,248] },
-            margin: { left:M, right:M, bottom:20 },
+            styles: {
+                fontSize: 7.5, cellPadding: { top:4, bottom:4, left:3, right:3 },
+                textColor: [40,40,40],
+                lineColor: [220,220,220], lineWidth: 0,
+                valign: 'middle'
+            },
+            columnStyles: {
+                0: { cellWidth: 48, fontStyle: 'bold' },
+                1: { cellWidth: 26, halign: 'center' },
+                2: { cellWidth: 26, halign: 'center' },
+                3: { cellWidth: 20, halign: 'center' },
+                4: { cellWidth: 26, halign: 'center' },
+                5: { cellWidth: 20, halign: 'center' },
+                6: { cellWidth: 'auto', fontSize: 6.5 }
+            },
+            alternateRowStyles: { fillColor: [248,250,245] },
+            margin: { left: M, right: M, bottom: 20 },
+            didDrawRow: function(data) {
+                if (data.section === 'body' && data.row.index === filasCombinadas.length - 1) return;
+                const x1 = data.settings.margin.left;
+                const x2 = doc.internal.pageSize.getWidth() - data.settings.margin.right;
+                const y  = data.row.y + data.row.height;
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(data.section === 'head' ? 0.5 : 0.2);
+                doc.line(x1, y, x2, y);
+            },
             didParseCell: function(data) {
                 if (data.section !== 'body') return;
                 const fila = filasCombinadas[data.row.index];
-                if (fila && fila.sinCoincidencia) {
-                    data.cell.styles.fillColor = [255, 252, 235];
+                if (!fila) return;
+                if (!fila.sinCoincidencia && (fila.versionChanged || fila.sizeChanged)) {
+                    data.cell.styles.fillColor = [230, 248, 220];
+                }
+                if (!fila.sinCoincidencia && fila.versionChanged && data.column.index === 4) {
+                    data.cell.styles.textColor = [30, 100, 0];
+                    data.cell.styles.fontStyle = 'bold';
+                }
+                if (!fila.sinCoincidencia && fila.sizeChanged && data.column.index === 5) {
+                    data.cell.styles.fontStyle = 'bold';
+                }
+                if (fila.sinCoincidencia) {
+                    data.cell.styles.fillColor = [255, 252, 230];
                     if (data.column.index === 2 || data.column.index === 3) {
-                        data.cell.styles.textColor = [180, 180, 180];
+                        data.cell.styles.textColor = [180,180,180];
                         data.cell.styles.fontStyle = 'italic';
                         data.cell.styles.halign    = 'center';
                     }
                     if (data.column.index === 6) {
-                        data.cell.styles.halign    = 'center';
-                        data.cell.styles.textColor = [180, 180, 180];
+                        data.cell.styles.textColor = [180,180,180];
                         data.cell.styles.fontStyle = 'italic';
+                        data.cell.styles.halign    = 'center';
                     }
                 }
             }
@@ -801,63 +919,133 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
 
         Y = doc.lastAutoTable.finalY + 3;
         doc.setDrawColor(180,180,180); doc.setLineWidth(0.3);
-        doc.line(M, Y, pageW-M, Y); Y += 3;
-        doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
-        doc.text(
-            `Total software con Cambios: ${archivosConCambios.length} | Total software actualizado: ${$scope.statistics.noChanges} | Total software nuevo: ${$scope.archivosSinCoincidencia.length}`,
-            M, Y + 3
-        );
+        doc.line(M, Y, pageW-M, Y); Y += 4;
+
+        const archivosModificados = $scope.tableData.filter(item => item.versionChanged || item.sizeChanged);
+        const totalInstalado   = filasCombinadas.length;
+        const totalActualizado = archivosModificados.length;
+        const totalNuevos      = $scope.archivosSinCoincidencia.length;
+
+        // LEYENDA DE COLORES
+        const legendItems = [
+            { color: null,            label: `Total Software Instalado: ${totalInstalado}` },
+            { color: [230, 248, 220], label: `Total Software Actualizado: ${totalActualizado}` },
+            { color: [255, 252, 230], label: `Total Software Nuevos: ${totalNuevos}`, show: totalNuevos > 0 },
+        ];
+
+        const boxSize = 4;
+        const boxGap  = 2.5;
+        const itemGap = 10;
+        let legendX   = M;
+        const legendY = Y + 3;
+
+        legendItems.forEach(item => {
+            if (item.show === false) return;
+            const offsetX = item.color ? boxSize + boxGap : 0;
+            if (item.color) {
+                doc.setFillColor(item.color[0], item.color[1], item.color[2]);
+                doc.setDrawColor(180, 180, 180);
+                doc.setLineWidth(0.2);
+                doc.roundedRect(legendX, legendY - boxSize / 2, boxSize, boxSize, 0.8, 0.8, 'FD');
+            }
+            doc.setFontSize(7.5);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(60, 60, 60);
+            doc.text(item.label, legendX + offsetX, legendY, { baseline: 'middle' });
+            const textW = doc.getTextWidth(item.label);
+            legendX += offsetX + textW + itemGap;
+            if (legendX < pageW - M) {
+                doc.setDrawColor(200, 200, 200);
+                doc.setLineWidth(0.3);
+                doc.line(legendX - itemGap / 2, legendY - 2.5, legendX - itemGap / 2, legendY + 2.5);
+            }
+        });
 
         Y += 8;
 
         // EVIDENCIAS
         if ($scope.imagenesAdjuntas.length > 0) {
-            const firstImgH = 75, firstHdrH = 8;
-            if (Y + 9 + 12 + firstHdrH + firstImgH + 5 > pageH - 20) { doc.addPage(); Y = 15; }
-            doc.setFillColor(29,33,28); doc.rect(M, Y, fullW, 9, 'F');
-            doc.setFontSize(9); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-            doc.text('EVIDENCIAS DE PRUEBAS', M + fullW/2, Y + 5.5, {align:'center', baseline:'middle'});
-            Y += 12;
+            const {jsPDF: jsPDFClass} = window.jspdf;
+            const BOT_LIMIT  = 20;
+            const imgW       = 110;
+            const imgH       = 75;          
+            const descX      = M + imgW + 4;
+            const descW      = fullW - imgW - 4;
+            const titleOffY  = 5;           
+            const bodyOffY   = 8;           
+            const bodyPadTop = 5;           
+            const bodyPadX   = 3;
+            const minDescH   = imgH - 10;   
 
             $scope.imagenesAdjuntas.forEach((img, idx) => {
                 try {
-                    const imgW = 110, descX = M + imgW + 4, descW = fullW - imgW - 4;
-                    const hdrH = 8, imgH = 75;
-                    if (Y + hdrH + imgH + 5 > pageH - 20) { doc.addPage(); Y = 15; }
-                    doc.setFillColor(240,240,240); doc.rect(M, Y, imgW, hdrH, 'F');
-                    doc.setDrawColor(180,180,180); doc.setLineWidth(0.2); doc.rect(M, Y, imgW, hdrH, 'S');
-                    doc.setFontSize(7); doc.setTextColor(50,50,50); doc.setFont(undefined,'bold');
-                    doc.text(`${idx+1}. ${img.nombre}`, M+3, Y + hdrH/2 + 1, {baseline:'middle'});
-                    doc.setFillColor(20,20,20); doc.rect(descX, Y, descW, hdrH, 'F');
-                    doc.setDrawColor(20,20,20); doc.setLineWidth(0.3); doc.rect(descX, Y, descW, hdrH, 'S');
-                    doc.setFontSize(8); doc.setTextColor(255,255,255); doc.setFont(undefined,'bold');
-                    doc.text('DESCRIPCIÓN', descX + descW/2, Y + hdrH/2 + 1, {align:'center', baseline:'middle'});
-                    Y += hdrH;
-                    doc.addImage(img.base64, 'JPEG', M, Y, imgW, imgH);
-                    doc.setFillColor(252,252,252); doc.setDrawColor(20,20,20); doc.setLineWidth(0.3);
-                    doc.rect(descX, Y, descW, imgH, 'FD');
+                    let descTextH = 0;
                     if (img.descripcion) {
-                        doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(0,0,0);
-                        const dLines = doc.splitTextToSize(img.descripcion, descW - 6);
-                        doc.text(dLines, descX+3, Y+5);
-                    } else {
-                        doc.setFontSize(8); doc.setFont(undefined,'italic'); doc.setTextColor(160,160,160);
-                        doc.text('N/A', descX + descW/2, Y + imgH/2, {align:'center', baseline:'middle'});
+                        const tempDoc = new jsPDFClass('l', 'mm', 'a4');
+                        const endY    = drawHtmlInPdf(
+                            tempDoc,
+                            normalizeToHtml(img.descripcion),
+                            descX + bodyPadX,
+                            30,
+                            descW - bodyPadX * 2,
+                            9999, 0,
+                            descX + bodyPadX
+                        );
+                        descTextH = endY - 30;
                     }
-                    Y += imgH + GAP;
+
+                    const descBoxH = Math.max(minDescH, bodyOffY + bodyPadTop + descTextH + 3);
+                    const rowH = Math.max(imgH, descBoxH);
+
+                    const spaceNeeded = (idx === 0 ? 14 : 0) + rowH + 5;
+
+                    if (Y + spaceNeeded > pageH - BOT_LIMIT) { doc.addPage(); Y = 15; }
+
+                    if (idx === 0) {
+                        doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 30, 30);
+                        doc.text('EVIDENCIAS DE PRUEBAS', M, Y + 6);
+                        doc.setDrawColor(190, 214, 47); doc.setLineWidth(0.8);
+                        doc.line(M, Y + 9, pageW - M, Y + 9);
+                        Y += 14;
+                    }
+
+                    const imgOffsetY = (rowH - imgH) / 2;
+                    doc.addImage(img.base64, 'JPEG', M, Y + imgOffsetY, imgW, imgH);
+
+                    doc.setFontSize(8); doc.setFont(undefined, 'bold'); doc.setTextColor(30, 30, 30);
+                    doc.text('DESCRIPCIÓN', descX, Y + titleOffY);
+
+                    doc.setFillColor(252, 252, 252);
+                    doc.setDrawColor(200, 200, 200); doc.setLineWidth(0.3);
+                    doc.roundedRect(descX, Y + bodyOffY, descW, descBoxH, 2, 2, 'FD');
+
+                    if (img.descripcion) {
+                        doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(0, 0, 0);
+                        drawHtmlInPdf(
+                            doc,
+                            normalizeToHtml(img.descripcion),
+                            descX + bodyPadX,
+                            Y + bodyOffY + bodyPadTop,
+                            descW - bodyPadX * 2,
+                            pageH, BOT_LIMIT,
+                            descX + bodyPadX
+                        );
+                    } else {
+                        doc.setFontSize(8); doc.setFont(undefined, 'italic'); doc.setTextColor(160, 160, 160);
+                        doc.text('N/A', descX + descW / 2, Y + bodyOffY + descBoxH / 2, { align: 'center', baseline: 'middle' });
+                    }
+
+                    Y += rowH + GAP;
                 } catch(e) { console.error('Error imagen:', e); }
             });
-            Y += 2;
-            Y += 8;
-        }
 
+            Y += 10;
+        }
 
         // BLOQUES FINALES
         Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN BASE DE DATOS',             htmlCambiosBD,  Y, pageW, M, pageH);
         Y = drawCompactBlock(doc, 'DESCRIPCIÓN DE CAMBIOS EN ARCHIVOS DE CONFIGURACIÓN', htmlCambiosCfg, Y, pageW, M, pageH);
         Y = drawCompactBlock(doc, 'OBSERVACIONES',                                        htmlObs,        Y, pageW, M, pageH);
-
-
 
         // FIRMAS
         const firmaNeededH = 22;
@@ -868,19 +1056,23 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
         const sigColW   = (fullW - sigColGap) / 2;
         const lineLen   = sigColW * 0.75;
         const firmas    = [
-            { label: 'Firma de quien aprueba', x: M + sigColW * 0.5 },
-            { label: 'Firma de quien recibe',  x: M + sigColW + sigColGap + sigColW * 0.5 }
+            { label: 'Firma de quien envía',   nombre: capFirmaNombreEnvia,   x: M + sigColW * 0.5 },
+            { label: 'Firma de quien aprueba', nombre: capFirmaNombreAprueba, x: M + sigColW + sigColGap + sigColW * 0.5 }
         ];
         firmas.forEach(f => {
             const lineX = f.x - lineLen / 2;
-            doc.setDrawColor(60, 60, 60); doc.setLineWidth(0.4);
+            doc.setDrawColor(100,100,100); doc.setLineWidth(0.4);
             doc.line(lineX, firmaY, lineX + lineLen, firmaY);
-            doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(60, 60, 60);
+            doc.setFontSize(8); doc.setFont(undefined,'normal'); doc.setTextColor(80,80,80);
             doc.text(f.label, f.x, firmaY + 5, { align: 'center' });
-            doc.setFontSize(7.5); doc.setFont(undefined, 'bold'); doc.setTextColor(40, 40, 40);
+            doc.setFontSize(8.5); doc.setFont(undefined,'bold'); doc.setTextColor(40,40,40);
             doc.text('Nombre:', lineX, firmaY + 11);
+            if (f.nombre) {
+                const nombreLabelW = doc.getTextWidth('Nombre: ');
+                doc.setFont(undefined,'normal'); doc.setTextColor(40,40,40);
+                doc.text(f.nombre, lineX + nombreLabelW, firmaY + 11);
+            }
         });
-
 
         // FOOTER EN TODAS LAS PÁGINAS
         const totalPages = doc.getNumberOfPages();
@@ -892,11 +1084,10 @@ function($scope, $http, $timeout, $sce, PdfStylesService) {
             doc.setFontSize(7.5); doc.setFont(undefined,'normal'); doc.setTextColor(60,60,60);
             doc.text(`F2X - ${tituloFooter}`, M, footerY);
             doc.setFontSize(7.5); doc.setFont(undefined,'italic'); doc.setTextColor(100,100,100);
-            doc.text('© 2026 Todos los derechos reservados', pageW / 2, footerY, { align: 'center' });
+            doc.text(`© ${new Date().getFullYear()} Todos los derechos reservados`, pageW / 2, footerY, { align: 'center' });
             doc.setFontSize(7.5); doc.setFont(undefined,'bold'); doc.setTextColor(60,60,60);
             doc.text(`Página ${p} de ${totalPages}`, pageW - M, footerY, { align: 'right' });
         }
-
 
         // GUARDAR
         const nombre = PdfStylesService.generateFileName($scope.directory1Name, $scope.directory2Name);

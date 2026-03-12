@@ -1702,3 +1702,13 @@ div {
         width: 100% !important;
     }
 }
+
+.cambios-section + .cambios-section {
+    margin-top: 20px;
+}
+
+.cambios-section > div > div[style*="FFFDF0"],
+.cambios-section > div > div[style*="background:#FFFDF0"] {
+    padding: 12px 20px 12px 24px !important;
+    margin-bottom: 0 !important;
+}
